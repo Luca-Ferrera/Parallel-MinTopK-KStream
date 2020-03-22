@@ -1,37 +1,39 @@
 package myapp;
 
-import org.apache.kafka.common.protocol.types.Field;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.*;
-import org.apache.kafka.streams.state.KeyValueStore;
+import serde.UserSerde;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Locale;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
-public class WordCount {
+public class UserStreams {
     public static void main(String[] args) throws Exception {
+
         Properties props = new Properties();
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "streams-wordcount");
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "streams-users");
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
-        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
+        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, UserSerde.class);
 
         final StreamsBuilder builder = new StreamsBuilder();
-        KStream<String, String> source = builder.stream("streams-input");
-        source.flatMapValues(value -> Arrays.asList(value.toLowerCase(Locale.getDefault()).split("\\W+")))
-                .groupBy((key, value) -> value)
-                .count(Materialized.<String, Long, KeyValueStore<Bytes, byte[]>>as("counts-store"))
-                .toStream()
-                .to("streams-wordcount-output", Produced.with(Serdes.String(), Serdes.Long()));
+
+        KStream<String, User> source = builder.stream("streams-users-input");
+        source.filter((__, user) -> user.getGender().equals("MALE"))
+                .mapValues(new ValueMapper<User, User>() {
+                    @Override
+                    public User apply(User u) {
+                        User user = new User(u.getRegistertime(), u.getUserid(), u.getRegionid(), u.getGender());
+                        user.setGender("FEMALE");
+                        return user;
+                    }
+                })
+                .to("streams-users-output", Produced.with(Serdes.String(), new UserSerde()));
 
         Topology topology = builder.build();
         System.out.println(topology.describe());
