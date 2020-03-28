@@ -1,0 +1,11 @@
+{
+  "namespace": "myapp.avro",
+  "type": "record",
+  "name": "AverageMovie",
+  "fields": [
+    {"name": "id", "type": "long"},
+    {"name": "title", "type": "string"},
+    {"name": "release_year", "type": "int"},
+    {"name": "average", "type": "double"}
+  ]
+}

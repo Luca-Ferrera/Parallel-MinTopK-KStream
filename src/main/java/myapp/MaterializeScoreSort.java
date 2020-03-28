@@ -1,28 +1,25 @@
 package myapp;
 
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
-import io.confluent.kafka.streams.serdes.avro.GenericAvroSerde;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
-import myapp.avro.RatedMovie;
+import myapp.avro.*;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.*;
-
-import myapp.avro.Movie;
-import myapp.avro.Rating;
 import org.apache.kafka.streams.kstream.*;
+import org.apache.kafka.streams.state.KeyValueStore;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
-public class JoinStreamToTable {
+public class MaterializeScoreSort {
     public Properties buildStreamsProperties(Properties envProps) {
         Properties props = new Properties();
 
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, envProps.getProperty("application.id"));
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, envProps.getProperty("mss.id"));
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, envProps.getProperty("bootstrap.servers"));
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
@@ -36,9 +33,10 @@ public class JoinStreamToTable {
         final String ratingTopic = envProps.getProperty("rating.topic.name");
         final String rekeyedMovieTopic = envProps.getProperty("rekeyed.movie.topic.name");
         final String ratedMovieTopic = envProps.getProperty("rated.movies.topic.name");
-        final String summedRatingTopic = envProps.getProperty("summed.rated.movies.topic.name");
-        final String averagedRatingTopic = envProps.getProperty("averaged.rated.movies.topic.name");
+        final String scoredMovieTopic = envProps.getProperty("scored.movies.topic.name");
+        final String averagedRatedMovieTopic = envProps.getProperty("averaged.rated.movies.topic.name");
         final MovieRatingJoiner joiner = new MovieRatingJoiner();
+        final MovieAverageJoiner averageJoiner = new MovieAverageJoiner();
 
         KStream<String, Movie> movieStream = builder.<String, Movie>stream(movieTopic)
                 .map((key, movie)-> new KeyValue<String,Movie>(movie.getId().toString(), movie));
@@ -52,14 +50,28 @@ public class JoinStreamToTable {
         KStream<String, RatedMovie> ratedMovie = ratings.join(movies, joiner);
         ratedMovie.to(ratedMovieTopic, Produced.with(Serdes.String(), ratedMovieAvroSerde(envProps)));
 
-        // Sum Ratings
-        ratedMovie.groupBy((key, movie) -> movie.getTitle().toString())
-                .reduce((aggValue, newValue) -> {
-                    aggValue.setRating(aggValue.getRating() + newValue.getRating());
-                    return aggValue;
-                })
-                .toStream()
-                .to(summedRatingTopic, Produced.with(Serdes.String(),ratedMovieAvroSerde(envProps)));
+        KGroupedStream<String ,Double> ratingsById = ratings
+                .map((key, value)-> new KeyValue<String, Double>(key, value.getRating()))
+                .groupByKey(Grouped.valueSerde(Serdes.Double()));
+        KTable<String, Long> ratingCount = ratingsById.count();//.mapValues((key, value) -> value.doubleValue());
+        KTable<String, Double> ratingSum = ratingsById.reduce((v1, v2) -> v1 + v2);
+        KTable<String, Double> ratingAverage = ratingSum
+                .join(ratingCount,
+                        (sum, count) -> sum/count.doubleValue(),
+                        Materialized.<String, Double, KeyValueStore<org.apache.kafka.common.utils.Bytes,byte[]>>as("average-ratings")
+                                .withValueSerde(Serdes.Double()));
+
+        ratingAverage.toStream().to(averagedRatedMovieTopic, Produced.with(Serdes.String(), Serdes.Double()));
+
+
+        //ScoredMovie
+        KStream<String, AverageMovie> averageMovie  = movies.join(ratingAverage, averageJoiner).toStream();
+
+        averageMovie.mapValues((key, movie)->{
+            double score = movie.getAverage()/10 * 0.8 + movie.getReleaseYear()/2020 * 0.2;
+            return new ScoredMovie(movie, score);
+        })
+        .to(scoredMovieTopic, Produced.with(Serdes.String(), scoredMovieAvroSerde(envProps)));
 
         return builder.build();
     }
@@ -75,16 +87,17 @@ public class JoinStreamToTable {
         return movieAvroSerde;
     }
 
-    private GenericAvroSerde genericAvroSerde(Properties envProps) {
-        GenericAvroSerde genericAvroSerde = new GenericAvroSerde();
+    private SpecificAvroSerde<ScoredMovie> scoredMovieAvroSerde(Properties envProps) {
+        SpecificAvroSerde<ScoredMovie> movieAvroSerde = new SpecificAvroSerde<>();
 
         final HashMap<String, String> serdeConfig = new HashMap<>();
         serdeConfig.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG,
                 envProps.getProperty("schema.registry.url"));
 
-        genericAvroSerde.configure(serdeConfig, false);
-        return genericAvroSerde;
+        movieAvroSerde.configure(serdeConfig, false);
+        return movieAvroSerde;
     }
+
 
     public void createTopics(Properties envProps) {
         Map<String, Object> config = new HashMap<>();
@@ -114,9 +127,9 @@ public class JoinStreamToTable {
                 Short.parseShort(envProps.getProperty("rated.movies.topic.replication.factor"))));
 
         topics.add(new NewTopic(
-                envProps.getProperty("summed.rated.movies.topic.name"),
-                Integer.parseInt(envProps.getProperty("summed.rated.movies.topic.partitions")),
-                Short.parseShort(envProps.getProperty("summed.rated.movies.topic.replication.factor"))));
+                envProps.getProperty("scored.movies.topic.name"),
+                Integer.parseInt(envProps.getProperty("scored.movies.topic.partitions")),
+                Short.parseShort(envProps.getProperty("scored.movies.topic.replication.factor"))));
 
         topics.add(new NewTopic(
                 envProps.getProperty("averaged.rated.movies.topic.name"),
@@ -142,13 +155,13 @@ public class JoinStreamToTable {
             throw new IllegalArgumentException("This program takes one argument: the path to an environment configuration file.");
         }
 
-        JoinStreamToTable ts = new JoinStreamToTable();
-        Properties envProps = ts.loadEnvProperties(args[0]);
-        Properties streamProps = ts.buildStreamsProperties(envProps);
-        Topology topology = ts.buildTopology(envProps);
+        MaterializeScoreSort mss = new MaterializeScoreSort();
+        Properties envProps = mss.loadEnvProperties(args[0]);
+        Properties streamProps = mss.buildStreamsProperties(envProps);
+        Topology topology = mss.buildTopology(envProps);
         System.out.println(topology.describe());
 
-        ts.createTopics(envProps);
+        mss.createTopics(envProps);
 
         final KafkaStreams streams = new KafkaStreams(topology, streamProps);
         final CountDownLatch latch = new CountDownLatch(1);

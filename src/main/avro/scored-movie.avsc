@@ -1,0 +1,12 @@
+{
+  "namespace": "myapp.avro",
+  "type": "record",
+  "name": "ScoredMovie",
+  "fields": [
+    {"name": "id", "type": "long"},
+    {"name": "title", "type": "string"},
+    {"name": "release_year", "type": "int"},
+    {"name": "rating", "type": "double"},
+    {"name": "score", "type": "double"}
+  ]
+}
