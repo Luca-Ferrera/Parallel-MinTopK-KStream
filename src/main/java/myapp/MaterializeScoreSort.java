@@ -6,6 +6,7 @@ import myapp.avro.*;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.state.KeyValueStore;
@@ -35,6 +36,7 @@ public class MaterializeScoreSort {
         final String ratedMovieTopic = envProps.getProperty("rated.movies.topic.name");
         final String scoredMovieTopic = envProps.getProperty("scored.movies.topic.name");
         final String averagedRatedMovieTopic = envProps.getProperty("averaged.rated.movies.topic.name");
+        final String sortedScoredMovieTopic = envProps.getProperty("sorted.rated.movies.topic.name");
         final MovieRatingJoiner joiner = new MovieRatingJoiner();
         final MovieAverageJoiner averageJoiner = new MovieAverageJoiner();
 
@@ -53,7 +55,7 @@ public class MaterializeScoreSort {
         KGroupedStream<String ,Double> ratingsById = ratings
                 .map((key, value)-> new KeyValue<String, Double>(key, value.getRating()))
                 .groupByKey(Grouped.valueSerde(Serdes.Double()));
-        KTable<String, Long> ratingCount = ratingsById.count();//.mapValues((key, value) -> value.doubleValue());
+        KTable<String, Long> ratingCount = ratingsById.count();
         KTable<String, Double> ratingSum = ratingsById.reduce((v1, v2) -> v1 + v2);
         KTable<String, Double> ratingAverage = ratingSum
                 .join(ratingCount,
@@ -63,7 +65,6 @@ public class MaterializeScoreSort {
 
         ratingAverage.toStream().to(averagedRatedMovieTopic, Produced.with(Serdes.String(), Serdes.Double()));
 
-
         //ScoredMovie
         KStream<String, AverageMovie> averageMovie  = movies.join(ratingAverage, averageJoiner).toStream();
 
@@ -71,7 +72,20 @@ public class MaterializeScoreSort {
             double score = movie.getAverage()/10 * 0.8 + movie.getReleaseYear()/2020 * 0.2;
             return new ScoredMovie(movie, score);
         })
-        .to(scoredMovieTopic, Produced.with(Serdes.String(), scoredMovieAvroSerde(envProps)));
+                .to(scoredMovieTopic, Produced.with(Serdes.String(), scoredMovieAvroSerde(envProps)));
+
+        // SortedMovie
+        builder.table(
+                scoredMovieTopic,
+                Materialized.<String, ScoredMovie, KeyValueStore<Bytes, byte[]>>as("scored-movies")
+        )
+                .toStream()
+                .transform(new TransformerSupplier() {
+                    public Transformer get() {
+                        return new MyTransformer();
+                    }
+                }, "scored-movies")
+                .to(sortedScoredMovieTopic, Produced.with(Serdes.String(), scoredMovieAvroSerde(envProps)));
 
         return builder.build();
     }
@@ -135,6 +149,11 @@ public class MaterializeScoreSort {
                 envProps.getProperty("averaged.rated.movies.topic.name"),
                 Integer.parseInt(envProps.getProperty("averaged.rated.movies.topic.partitions")),
                 Short.parseShort(envProps.getProperty("averaged.rated.movies.topic.replication.factor"))));
+
+        topics.add(new NewTopic(
+                envProps.getProperty("sorted.rated.movies.topic.name"),
+                Integer.parseInt(envProps.getProperty("sorted.rated.movies.topic.partitions")),
+                Short.parseShort(envProps.getProperty("sorted.rated.movies.topic.replication.factor"))));
 
         client.createTopics(topics);
         client.close();
