@@ -40,7 +40,7 @@ loggare tempi di esecuzione su ogni kstream
 
 TASKS:
 [ ] implementazione centralizzata di materialize score & sort
-[ ] implementazione distributia di materialize score & sort
+[ ] implementazione distribuita di materialize score & sort
 [ ] implementazione centralizzata di [1]
 [ ] progettazione di implementazione distribuita di [1]
 
