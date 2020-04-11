@@ -31,8 +31,6 @@ public class MyPunctuator implements Punctuator {
         Comparator<KeyValue<String, ScoredMovie>> compareByScore = Comparator.comparingDouble((KeyValue<String, ScoredMovie> o) -> o.value.getScore());
         Collections.sort(scoreList, compareByScore.reversed()
         );
-        scoreList.forEach(elem -> {
-            context.forward(elem.key, elem.value);
-        });
+        scoreList.forEach(elem -> context.forward(elem.key, elem.value));
     }
 }
