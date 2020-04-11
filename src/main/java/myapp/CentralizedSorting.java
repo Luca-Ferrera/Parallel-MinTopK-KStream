@@ -42,18 +42,12 @@ public class CentralizedSorting {
                 Materialized.<String, ScoredMovie, KeyValueStore<Bytes, byte[]>>as("scored-movies")
         )
                 .toStream()
-                .map((key, value)->{
-                    System.out.println("value");
-                    System.out.println(value.getClass().getName());
-                    return new KeyValue<>(key, value);
-                })
                 .transform(new TransformerSupplier<String,ScoredMovie,KeyValue<String , ScoredMovie>>() {
                     public Transformer get() {
                         return new MyTransformer();
                     }
                 }, "scored-movies")
                 .to(sortedScoredMovieTopic, Produced.with(Serdes.String(), scoredMovieAvroSerde(envProps)));
-
 
         return builder.build();
     }
