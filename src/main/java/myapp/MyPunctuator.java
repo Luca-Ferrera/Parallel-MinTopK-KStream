@@ -25,7 +25,7 @@ public class MyPunctuator implements Punctuator {
     public void punctuate(long l) {
         ArrayList<KeyValue<String, ScoredMovie>> scoreList = new ArrayList<>();
         this.state.all().forEachRemaining((elem)-> {
-            KeyValue<String,ScoredMovie> entry = new KeyValue<String, ScoredMovie>(elem.key, elem.value.value());
+            KeyValue<String,ScoredMovie> entry = new KeyValue<>(elem.key, elem.value.value());
             scoreList.add(entry);
         });
         Comparator<KeyValue<String, ScoredMovie>> compareByScore = Comparator.comparingDouble((KeyValue<String, ScoredMovie> o) -> o.value.getScore());
