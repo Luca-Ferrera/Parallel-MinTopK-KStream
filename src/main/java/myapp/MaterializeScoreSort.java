@@ -10,11 +10,15 @@ import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.state.KeyValueStore;
+import org.apache.kafka.streams.state.QueryableStoreTypes;
+import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 
 public class MaterializeScoreSort {
     public Properties buildStreamsProperties(Properties envProps) {
@@ -75,17 +79,11 @@ public class MaterializeScoreSort {
                 .to(scoredMovieTopic, Produced.with(Serdes.String(), scoredMovieAvroSerde(envProps)));
 
         // SortedMovie
-        builder.table(
+        KStream<String,ScoredMovie> scoredStream = builder.table(
                 scoredMovieTopic,
+                Consumed.with(Serdes.String(),scoredMovieAvroSerde(envProps)),
                 Materialized.<String, ScoredMovie, KeyValueStore<Bytes, byte[]>>as("scored-movies")
-        )
-                .toStream()
-                .transform(new TransformerSupplier() {
-                    public Transformer get() {
-                        return new MyTransformer();
-                    }
-                }, "scored-movies")
-                .to(sortedScoredMovieTopic, Produced.with(Serdes.String(), scoredMovieAvroSerde(envProps)));
+        ).toStream();
 
         return builder.build();
     }
@@ -183,23 +181,48 @@ public class MaterializeScoreSort {
         mss.createTopics(envProps);
 
         final KafkaStreams streams = new KafkaStreams(topology, streamProps);
-        final CountDownLatch latch = new CountDownLatch(1);
 
-        // Attach shutdown handler to catch Control-C.
-        Runtime.getRuntime().addShutdownHook(new Thread("streams-shutdown-hook") {
-            @Override
-            public void run() {
-                streams.close();
-                latch.countDown();
+        CompletableFuture<KafkaStreams.State> stateFuture = new CompletableFuture<>();
+        streams.setStateListener((newState, oldState) -> {
+            if(stateFuture.isDone()) {
+                return;
+            }
+
+            if(newState == KafkaStreams.State.RUNNING || newState == KafkaStreams.State.ERROR) {
+                stateFuture.complete(newState);
             }
         });
 
+        streams.cleanUp();
+        streams.start();
         try {
-            streams.start();
-            latch.await();
-        } catch (Throwable e) {
-            System.exit(1);
+            KafkaStreams.State finalState = stateFuture.get();
+            if(finalState == KafkaStreams.State.RUNNING) {
+                ReadOnlyKeyValueStore<String, ScoredMovie> localStore = streams.store("scored-movies", QueryableStoreTypes.<String, ScoredMovie>keyValueStore());
+                ArrayList<KeyValue<String, ScoredMovie>> scoreList = new ArrayList<>();
+                localStore.all().forEachRemaining((elem)-> {
+                    KeyValue<String,ScoredMovie> entry = new KeyValue<String, ScoredMovie>(elem.key, elem.value);
+                    scoreList.add(entry);
+                });
+                Comparator<KeyValue<String, ScoredMovie>> compareByScore = Comparator.comparingDouble((KeyValue<String, ScoredMovie> o) -> o.value.getScore());
+                Collections.sort(scoreList, compareByScore.reversed()
+                );
+                scoreList.forEach(elem -> System.out.println("key " + elem.key + " value " + elem.value));
+            }
+        } catch (InterruptedException ex) {
+            System.out.println(ex);
+        } catch(ExecutionException ex) {
+            System.out.println(ex);
         }
-        System.exit(0);
+
+
+        // Attach shutdown handler to catch Control-C.
+        Runtime.getRuntime().addShutdownHook(new Thread( () -> {
+            try{
+                streams.close();
+            } catch (final Exception e){
+                System.out.println(e);
+            }
+        }));
     }
 }
