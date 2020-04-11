@@ -13,13 +13,11 @@ public class MyTransformer implements Transformer<String, ScoredMovie, ScoredMov
     private KeyValueStore<String, ValueAndTimestamp<ScoredMovie>> state;
 
     public void init(ProcessorContext context) {
-        System.out.println(context.getStateStore("scored-movies").getClass().getName());
         this.state = (KeyValueStore<String, ValueAndTimestamp<ScoredMovie>>) context.getStateStore("scored-movies");
         // punctuate each 10 second, can access this.state
         context.schedule(Duration.ofSeconds(10), PunctuationType.WALL_CLOCK_TIME, new MyPunctuator(this.state, context));
     }
 
-    @Override
     public ScoredMovie transform(String key, ScoredMovie value) {
         // can access this.state
         return value;
