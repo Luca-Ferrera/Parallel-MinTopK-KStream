@@ -1,4 +1,4 @@
-package myapp.materializedScoreSort;
+package myapp.materializeScoreSort;
 
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
