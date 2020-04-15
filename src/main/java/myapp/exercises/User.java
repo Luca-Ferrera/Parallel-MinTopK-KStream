@@ -1,4 +1,4 @@
-package myapp;
+package myapp.exercises;
 
 public class User {
     private Long registertime;

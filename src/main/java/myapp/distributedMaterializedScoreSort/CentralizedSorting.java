@@ -1,9 +1,9 @@
-package myapp;
+package myapp.distributedMaterializedScoreSort;
 
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
+import myapp.MyTransformer;
 import myapp.avro.*;
-import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.serialization.Serdes;

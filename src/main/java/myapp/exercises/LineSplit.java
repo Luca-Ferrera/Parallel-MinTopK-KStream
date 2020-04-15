@@ -1,39 +1,27 @@
-package myapp;
+package myapp.exercises;
 
-import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
-import org.apache.kafka.streams.kstream.*;
-import serde.UserSerde;
+import org.apache.kafka.streams.kstream.KStream;
 
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
-public class UserStreams {
+public class LineSplit   {
     public static void main(String[] args) throws Exception {
-
         Properties props = new Properties();
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "streams-users");
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "streams-linesplit");
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
-        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, UserSerde.class);
+        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
 
         final StreamsBuilder builder = new StreamsBuilder();
-
-        KStream<String, User> source = builder.stream("streams-users-input");
-        source.filter((__, user) -> user.getGender().equals("MALE"))
-                .mapValues(new ValueMapper<User, User>() {
-                    @Override
-                    public User apply(User u) {
-                        User user = new User(u.getRegistertime(), u.getUserid(), u.getRegionid(), u.getGender());
-                        user.setGender("FEMALE");
-                        return user;
-                    }
-                })
-                .to("streams-users-output", Produced.with(Serdes.String(), new UserSerde()));
+        KStream<String, String> source = builder.stream("streams-linesplit-input");
+        source.flatMapValues(value -> Arrays.asList(value.split("\\W+"))).to("streams-linesplit-output");
 
         Topology topology = builder.build();
         System.out.println(topology.describe());

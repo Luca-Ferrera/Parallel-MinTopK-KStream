@@ -29,3 +29,18 @@
 {"id": 140, "rating": 4.5}
 {"id": 120, "rating": 8.9}
 ```
+## How to try it!
+
+run `docker-compose up -d` to build and run the images
+
+run the application to generate the topics (just do it the first time)
+
+run `docker exec -i schema-registry /usr/bin/kafka-avro-console-producer --topic movies --broker-list broker:9092 --property value.schema="$(< src/main/avro/movie.avsc)"
+` to open a console to input movies data
+
+run `docker exec -i schema-registry /usr/bin/kafka-avro-console-producer --topic ratings --broker-list broker:9092 --property value.schema="$(< src/main/avro/rating.avsc)"
+` to open a console to input ratings data
+
+run `docker exec -it schema-registry /usr/bin/kafka-avro-console-consumer --topic TOPIC_NAME --bootstrap-server broker:9092 --from-beginning` to read data from `TOPIC_NAME` topic
+
+Start the application again!

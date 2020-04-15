@@ -1,7 +1,7 @@
 package serde;
 
 import com.google.gson.Gson;
-import myapp.User;
+import myapp.exercises.User;
 import org.apache.kafka.common.serialization.Serializer;
 
 import java.io.Closeable;

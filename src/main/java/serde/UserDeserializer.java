@@ -3,8 +3,7 @@ package serde;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import myapp.User;
+import myapp.exercises.User;
 import org.apache.kafka.common.serialization.Deserializer;
 
 import java.io.Closeable;
