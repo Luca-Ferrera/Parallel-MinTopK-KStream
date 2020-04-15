@@ -45,13 +45,13 @@ score = rating/10 * 0.8 + release_year/2020 * 0.2
 loggare tempi di esecuzione su ogni kstream
 
 TASKS:
-[ ] implementazione centralizzata di materialize score & sort
-[ ] implementazione distribuita di materialize score & sort
-[ ] implementazione centralizzata di [1]
+[x] implementazione centralizzata di materialize score & sort
+[x] implementazione distribuita di materialize score & sort
+    - [ ] Ogni processo ordina e scrive su un topic i topK locali -> vado a prendere i valori da quel topic
+    - [ ] Special topic con key la posizione nella classica, inviare al topic solo i valori che cambiano posizione in classifica
+[ ] implementazione centralizzata di [1] non gestisce gli aggiornamenti (non arrivano 2 record uguali) assunzione che ogni record è diverso dall'altro
 [ ] progettazione di implementazione distribuita di [1]
 
 [1] D. Yang, A. Shastri, E.A. Rundensteiner and M.O. Ward,
 Anoptimal strategy for monitoring top-k queries in streaming windows,
 in:Proceedings of the 14th International Conference onExtending Database Technology, ACM, 2011, pp. 57–68.
-
-
