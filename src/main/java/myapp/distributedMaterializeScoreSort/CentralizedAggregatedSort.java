@@ -2,8 +2,8 @@ package myapp.distributedMaterializeScoreSort;
 
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
-import myapp.transormers.SortingTransformer;
 import myapp.avro.*;
+import myapp.transormers.TopKTransformer;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.serialization.Serdes;
@@ -17,11 +17,11 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
-public class CentralizedSorting {
+public class CentralizedAggregatedSort {
     public Properties buildStreamsProperties(Properties envProps) {
         Properties props = new Properties();
 
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, envProps.getProperty("cs.id"));
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, envProps.getProperty("cas.id"));
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, envProps.getProperty("bootstrap.servers"));
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
@@ -32,22 +32,22 @@ public class CentralizedSorting {
 
     public Topology buildTopology(Properties envProps) {
         final StreamsBuilder builder = new StreamsBuilder();
-        final String scoredMovieTopic = envProps.getProperty("scored.movies.topic.name");
-        final String sortedScoredMovieTopic = envProps.getProperty("sorted.rated.movies.topic.name");
+        final String sortedTopKMovieTopic = envProps.getProperty("sorted.topk.movies.topic.name");
+        final String topKTopic = envProps.getProperty("topk.movies.topic.name");
 
         // SortedMovie
         builder.table(
-                scoredMovieTopic,
+                sortedTopKMovieTopic,
                 Consumed.with(Serdes.String(), scoredMovieAvroSerde(envProps)),
-                Materialized.<String, ScoredMovie, KeyValueStore<Bytes, byte[]>>as("scored-movies")
+                Materialized.<String, ScoredMovie, KeyValueStore<Bytes, byte[]>>as("scored-topK-movies")
         )
                 .toStream()
                 .transform(new TransformerSupplier<String,ScoredMovie,KeyValue<String , ScoredMovie>>() {
                     public Transformer get() {
-                        return new SortingTransformer();
+                        return new TopKTransformer(2, "scored-topK-movies");
                     }
-                }, "scored-movies")
-                .to(sortedScoredMovieTopic, Produced.with(Serdes.String(), scoredMovieAvroSerde(envProps)));
+                }, "scored-topK-movies")
+                .to(topKTopic, Produced.with(Serdes.String(), scoredMovieAvroSerde(envProps)));
 
         return builder.build();
     }
@@ -69,15 +69,16 @@ public class CentralizedSorting {
         AdminClient client = AdminClient.create(config);
 
         List<NewTopic> topics = new ArrayList<>();
-        topics.add(new NewTopic(
-                envProps.getProperty("scored.movies.topic.name"),
-                Integer.parseInt(envProps.getProperty("scored.movies.topic.partitions")),
-                Short.parseShort(envProps.getProperty("scored.movies.topic.replication.factor"))));
 
         topics.add(new NewTopic(
-                envProps.getProperty("sorted.rated.movies.topic.name"),
-                Integer.parseInt(envProps.getProperty("sorted.rated.movies.topic.partitions")),
-                Short.parseShort(envProps.getProperty("sorted.rated.movies.topic.replication.factor"))));
+                envProps.getProperty("sorted.topk.movies.topic.name"),
+                Integer.parseInt(envProps.getProperty("sorted.topk.movies.topic.partitions")),
+                Short.parseShort(envProps.getProperty("sorted.topk.movies.topic.replication.factor"))));
+
+        topics.add(new NewTopic(
+                envProps.getProperty("topk.movies.topic.name"),
+                Integer.parseInt(envProps.getProperty("topk.movies.topic.partitions")),
+                Short.parseShort(envProps.getProperty("topk.movies.topic.replication.factor"))));
 
         client.createTopics(topics);
         client.close();
@@ -98,7 +99,7 @@ public class CentralizedSorting {
             throw new IllegalArgumentException("This program takes one argument: the path to an environment configuration file.");
         }
 
-        CentralizedSorting centralizedSorting = new CentralizedSorting();
+        CentralizedAggregatedSort centralizedSorting = new CentralizedAggregatedSort();
         Properties envProps = centralizedSorting.loadEnvProperties(args[0]);
         Properties streamProps = centralizedSorting.buildStreamsProperties(envProps);
         Topology topology = centralizedSorting.buildTopology(envProps);
