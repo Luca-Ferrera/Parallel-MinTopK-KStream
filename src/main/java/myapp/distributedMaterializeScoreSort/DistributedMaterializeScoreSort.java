@@ -13,6 +13,8 @@ import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.state.KeyValueStore;
+import org.apache.kafka.streams.state.StoreBuilder;
+import org.apache.kafka.streams.state.Stores;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -43,6 +45,14 @@ public class DistributedMaterializeScoreSort {
         final String sortedTopKMovieTopic = envProps.getProperty("sorted.topk.movies.topic.name");
         final MovieRatingJoiner joiner = new MovieRatingJoiner();
         final MovieAverageJoiner averageJoiner = new MovieAverageJoiner();
+
+        // create store
+        StoreBuilder storeBuilder = Stores.keyValueStoreBuilder(
+                Stores.persistentKeyValueStore("intermediate-topK-movies"),
+                Serdes.String(),
+                scoredMovieAvroSerde(envProps));
+        // register store
+        builder.addStateStore(storeBuilder);
 
         KStream<String, Movie> movieStream = builder.<String, Movie>stream(movieTopic)
                 .map((key, movie)-> new KeyValue<String,Movie>(movie.getId().toString(), movie));
@@ -77,8 +87,7 @@ public class DistributedMaterializeScoreSort {
             return new ScoredMovie(movie, score);
         })
                 .to(scoredMovieTopic, Produced.with(Serdes.String(), scoredMovieAvroSerde(envProps)));
-
-        // SortedMovie
+        // TopKMovies
         builder.table(
                 scoredMovieTopic,
                 Materialized.<String, ScoredMovie, KeyValueStore<Bytes, byte[]>>as("scored-movies")
@@ -86,9 +95,9 @@ public class DistributedMaterializeScoreSort {
                 .toStream()
                 .transform(new TransformerSupplier<String,ScoredMovie,KeyValue<String , ScoredMovie>>() {
                     public Transformer get() {
-                        return new TopKTransformer(2, "scored-movies" );
+                        return new TopKTransformer(2, "scored-movies", "intermediate-topK-movies" );
                     }
-                }, "scored-movies")
+                }, "scored-movies", "intermediate-topK-movies")
                 .to(sortedTopKMovieTopic, Produced.with(Serdes.String(), scoredMovieAvroSerde(envProps)));
 
         return builder.build();
