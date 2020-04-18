@@ -1,11 +1,11 @@
-package myapp.materializeScoreSort;
+package myapp.distributedMaterializeScoreSort;
 
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import myapp.MovieAverageJoiner;
 import myapp.MovieRatingJoiner;
-import myapp.transormers.SortingTransformer;
 import myapp.avro.*;
+import myapp.transormers.TopKTransformer;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.serialization.Serdes;
@@ -19,15 +19,16 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
-public class MaterializeScoreSort {
+public class DistributedMaterializeScoreSort {
     public Properties buildStreamsProperties(Properties envProps) {
         Properties props = new Properties();
 
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, envProps.getProperty("mss.id"));
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, envProps.getProperty("dtopk.id"));
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, envProps.getProperty("bootstrap.servers"));
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
         props.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, envProps.getProperty("schema.registry.url"));
+//        props.put(StreamsConfig.NUM_STREAM_THREADS_CONFIG, 3);
 
         return props;
     }
@@ -39,7 +40,7 @@ public class MaterializeScoreSort {
         final String ratedMovieTopic = envProps.getProperty("rated.movies.topic.name");
         final String scoredMovieTopic = envProps.getProperty("scored.movies.topic.name");
         final String averagedRatedMovieTopic = envProps.getProperty("averaged.rated.movies.topic.name");
-        final String sortedScoredMovieTopic = envProps.getProperty("sorted.rated.movies.topic.name");
+        final String sortedTopKMovieTopic = envProps.getProperty("sorted.topk.movies.topic.name");
         final MovieRatingJoiner joiner = new MovieRatingJoiner();
         final MovieAverageJoiner averageJoiner = new MovieAverageJoiner();
 
@@ -84,11 +85,11 @@ public class MaterializeScoreSort {
         )
                 .toStream()
                 .transform(new TransformerSupplier<String,ScoredMovie,KeyValue<String , ScoredMovie>>() {
-                        public Transformer get() {
-                            return new SortingTransformer();
-                        }
-                    }, "scored-movies")
-                .to(sortedScoredMovieTopic, Produced.with(Serdes.String(), scoredMovieAvroSerde(envProps)));
+                    public Transformer get() {
+                        return new TopKTransformer(2, "scored-movies" );
+                    }
+                }, "scored-movies")
+                .to(sortedTopKMovieTopic, Produced.with(Serdes.String(), scoredMovieAvroSerde(envProps)));
 
         return builder.build();
     }
@@ -154,9 +155,9 @@ public class MaterializeScoreSort {
                 Short.parseShort(envProps.getProperty("averaged.rated.movies.topic.replication.factor"))));
 
         topics.add(new NewTopic(
-                envProps.getProperty("sorted.rated.movies.topic.name"),
-                Integer.parseInt(envProps.getProperty("sorted.rated.movies.topic.partitions")),
-                Short.parseShort(envProps.getProperty("sorted.rated.movies.topic.replication.factor"))));
+                envProps.getProperty("sorted.topk.movies.topic.name"),
+                Integer.parseInt(envProps.getProperty("sorted.topk.movies.topic.partitions")),
+                Short.parseShort(envProps.getProperty("sorted.topk.movies.topic.replication.factor"))));
 
         client.createTopics(topics);
         client.close();
@@ -177,13 +178,13 @@ public class MaterializeScoreSort {
             throw new IllegalArgumentException("This program takes one argument: the path to an environment configuration file.");
         }
 
-        MaterializeScoreSort mss = new MaterializeScoreSort();
-        Properties envProps = mss.loadEnvProperties(args[0]);
-        Properties streamProps = mss.buildStreamsProperties(envProps);
-        Topology topology = mss.buildTopology(envProps);
+        DistributedMaterializeScoreSort dmss = new DistributedMaterializeScoreSort();
+        Properties envProps = dmss.loadEnvProperties(args[0]);
+        Properties streamProps = dmss.buildStreamsProperties(envProps);
+        Topology topology = dmss.buildTopology(envProps);
         System.out.println(topology.describe());
 
-        mss.createTopics(envProps);
+        dmss.createTopics(envProps);
 
         final KafkaStreams streams = new KafkaStreams(topology, streamProps);
         final CountDownLatch latch = new CountDownLatch(1);

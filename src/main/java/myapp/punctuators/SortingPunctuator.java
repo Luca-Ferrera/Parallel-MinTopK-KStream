@@ -1,4 +1,4 @@
-package myapp;
+package myapp.punctuators;
 
 import myapp.avro.ScoredMovie;
 import org.apache.kafka.streams.KeyValue;
@@ -11,12 +11,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-public class MyPunctuator implements Punctuator {
+public class SortingPunctuator implements Punctuator {
 
     private KeyValueStore<String, ValueAndTimestamp<ScoredMovie>> state;
     private ProcessorContext context;
 
-    public MyPunctuator(KeyValueStore state, ProcessorContext context) {
+    public SortingPunctuator(KeyValueStore state, ProcessorContext context) {
         this.state = state;
         this.context = context;
     }
