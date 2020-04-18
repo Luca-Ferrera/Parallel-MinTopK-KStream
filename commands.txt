@@ -47,8 +47,11 @@ loggare tempi di esecuzione su ogni kstream
 TASKS:
 [x] implementazione centralizzata di materialize score & sort
 [x] implementazione distribuita di materialize score & sort
-    - [ ] Ogni processo ordina e scrive su un topic i topK locali -> vado a prendere i valori da quel topic
-    - [ ] Special topic con key la posizione nella classica, inviare al topic solo i valori che cambiano posizione in classifica
+    - [x] Ogni processo ordina e scrive su un topic i topK locali -> vado a prendere i valori da quel topic
+    - [x] Special topic con key la posizione nella classica, inviare al topic solo i valori che cambiano posizione in classifica
+          1) salvarsi in uno store l'attuale lista ordinata
+          2) generare la nuova lista ordinata
+          3) confrontare gli elementi delle liste, in caso di elementi diversi -> forward(key=position,value=ScoredMovie)
 [ ] implementazione centralizzata di [1] non gestisce gli aggiornamenti (non arrivano 2 record uguali) assunzione che ogni record è diverso dall'altro
 [ ] progettazione di implementazione distribuita di [1]
 
