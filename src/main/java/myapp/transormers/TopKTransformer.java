@@ -2,6 +2,7 @@ package myapp.transormers;
 
 import myapp.avro.ScoredMovie;
 import myapp.punctuators.TopKPunctuator;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.Transformer;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.processor.PunctuationType;
@@ -10,7 +11,7 @@ import org.apache.kafka.streams.state.ValueAndTimestamp;
 
 import java.time.Duration;
 
-public class TopKTransformer implements Transformer<String, ScoredMovie, ScoredMovie> {
+public class TopKTransformer implements Transformer<String, ScoredMovie, KeyValue<String,ScoredMovie>> {
     private KeyValueStore<String, ValueAndTimestamp<ScoredMovie>> state1;
     private KeyValueStore<String, ValueAndTimestamp<ScoredMovie>> state2;
     private int k;
@@ -40,7 +41,7 @@ public class TopKTransformer implements Transformer<String, ScoredMovie, ScoredM
         }
     }
 
-    public ScoredMovie transform(String key, ScoredMovie value) {
+    public  KeyValue<String,ScoredMovie> transform(String key, ScoredMovie value) {
         // can access this.state
         return null;
     }

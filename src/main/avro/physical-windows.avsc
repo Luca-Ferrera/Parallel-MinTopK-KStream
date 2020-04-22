@@ -1,0 +1,11 @@
+{
+  "namespace": "myapp.avro",
+  "type": "record",
+  "name": "PhysicalWindow",
+  "fields": [
+    {"name": "id", "type": "double"},
+    {"name": "size", "type": "int"},
+    {"name": "hoppingSize", "type": "int"},
+    {"name": "actualRecords", "type": "int"}
+  ]
+}
