@@ -6,6 +6,8 @@
     {"name": "id", "type": "double"},
     {"name": "size", "type": "int"},
     {"name": "hoppingSize", "type": "int"},
-    {"name": "actualRecords", "type": "int"}
+    {"name": "actualRecords", "type": "int"},
+    {"name": "topKCounter", "type": "int"},
+    {"name": "lowerBoundPointer", "type": "MinTopKEntry"}
   ]
 }

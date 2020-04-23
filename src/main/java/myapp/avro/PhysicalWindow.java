@@ -14,8 +14,8 @@ import org.apache.avro.message.SchemaStore;
 
 @org.apache.avro.specific.AvroGenerated
 public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  private static final long serialVersionUID = 3328226248235732403L;
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"PhysicalWindow\",\"namespace\":\"myapp.avro\",\"fields\":[{\"name\":\"id\",\"type\":\"double\"},{\"name\":\"size\",\"type\":\"int\"},{\"name\":\"hoppingSize\",\"type\":\"int\"},{\"name\":\"actualRecords\",\"type\":\"int\"}]}");
+  private static final long serialVersionUID = -7234652937344836711L;
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"PhysicalWindow\",\"namespace\":\"myapp.avro\",\"fields\":[{\"name\":\"id\",\"type\":\"double\"},{\"name\":\"size\",\"type\":\"int\"},{\"name\":\"hoppingSize\",\"type\":\"int\"},{\"name\":\"actualRecords\",\"type\":\"int\"},{\"name\":\"topKCounter\",\"type\":\"int\"},{\"name\":\"lowerBoundPointer\",\"type\":{\"type\":\"record\",\"name\":\"MinTopKEntry\",\"fields\":[{\"name\":\"id\",\"type\":\"double\"},{\"name\":\"score\",\"type\":\"double\"},{\"name\":\"startingWindow\",\"type\":\"double\"},{\"name\":\"endingWindow\",\"type\":\"double\"}]}}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 
   private static SpecificData MODEL$ = new SpecificData();
@@ -75,6 +75,8 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
   @Deprecated public int size;
   @Deprecated public int hoppingSize;
   @Deprecated public int actualRecords;
+  @Deprecated public int topKCounter;
+  @Deprecated public myapp.avro.MinTopKEntry lowerBoundPointer;
 
   /**
    * Default constructor.  Note that this does not initialize fields
@@ -89,12 +91,16 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
    * @param size The new value for size
    * @param hoppingSize The new value for hoppingSize
    * @param actualRecords The new value for actualRecords
+   * @param topKCounter The new value for topKCounter
+   * @param lowerBoundPointer The new value for lowerBoundPointer
    */
-  public PhysicalWindow(java.lang.Double id, java.lang.Integer size, java.lang.Integer hoppingSize, java.lang.Integer actualRecords) {
+  public PhysicalWindow(java.lang.Double id, java.lang.Integer size, java.lang.Integer hoppingSize, java.lang.Integer actualRecords, java.lang.Integer topKCounter, myapp.avro.MinTopKEntry lowerBoundPointer) {
     this.id = id;
     this.size = size;
     this.hoppingSize = hoppingSize;
     this.actualRecords = actualRecords;
+    this.topKCounter = topKCounter;
+    this.lowerBoundPointer = lowerBoundPointer;
   }
 
   public org.apache.avro.specific.SpecificData getSpecificData() { return MODEL$; }
@@ -106,6 +112,8 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
     case 1: return size;
     case 2: return hoppingSize;
     case 3: return actualRecords;
+    case 4: return topKCounter;
+    case 5: return lowerBoundPointer;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -118,6 +126,8 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
     case 1: size = (java.lang.Integer)value$; break;
     case 2: hoppingSize = (java.lang.Integer)value$; break;
     case 3: actualRecords = (java.lang.Integer)value$; break;
+    case 4: topKCounter = (java.lang.Integer)value$; break;
+    case 5: lowerBoundPointer = (myapp.avro.MinTopKEntry)value$; break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -193,6 +203,42 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
   public void increaseActualRecords(int value){this.actualRecords += value;}
 
   /**
+   * Gets the value of the 'topKCounter' field.
+   * @return The value of the 'topKCounter' field.
+   */
+  public int getTopKCounter() {
+    return topKCounter;
+  }
+
+
+  /**
+   * Sets the value of the 'topKCounter' field.
+   * @param value the value to set.
+   */
+  public void setTopKCounter(int value) {
+    this.topKCounter = value;
+  }
+
+  public void increaseTopKCounter(int value){this.topKCounter += value;}
+
+  /**
+   * Gets the value of the 'lowerBoundPointer' field.
+   * @return The value of the 'lowerBoundPointer' field.
+   */
+  public myapp.avro.MinTopKEntry getLowerBoundPointer() {
+    return lowerBoundPointer;
+  }
+
+
+  /**
+   * Sets the value of the 'lowerBoundPointer' field.
+   * @param value the value to set.
+   */
+  public void setLowerBoundPointer(myapp.avro.MinTopKEntry value) {
+    this.lowerBoundPointer = value;
+  }
+
+  /**
    * Creates a new PhysicalWindow RecordBuilder.
    * @return A new PhysicalWindow RecordBuilder
    */
@@ -237,6 +283,9 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
     private int size;
     private int hoppingSize;
     private int actualRecords;
+    private int topKCounter;
+    private myapp.avro.MinTopKEntry lowerBoundPointer;
+    private myapp.avro.MinTopKEntry.Builder lowerBoundPointerBuilder;
 
     /** Creates a new Builder */
     private Builder() {
@@ -265,6 +314,17 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
         this.actualRecords = data().deepCopy(fields()[3].schema(), other.actualRecords);
         fieldSetFlags()[3] = other.fieldSetFlags()[3];
       }
+      if (isValidValue(fields()[4], other.topKCounter)) {
+        this.topKCounter = data().deepCopy(fields()[4].schema(), other.topKCounter);
+        fieldSetFlags()[4] = other.fieldSetFlags()[4];
+      }
+      if (isValidValue(fields()[5], other.lowerBoundPointer)) {
+        this.lowerBoundPointer = data().deepCopy(fields()[5].schema(), other.lowerBoundPointer);
+        fieldSetFlags()[5] = other.fieldSetFlags()[5];
+      }
+      if (other.hasLowerBoundPointerBuilder()) {
+        this.lowerBoundPointerBuilder = myapp.avro.MinTopKEntry.newBuilder(other.getLowerBoundPointerBuilder());
+      }
     }
 
     /**
@@ -289,6 +349,15 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
         this.actualRecords = data().deepCopy(fields()[3].schema(), other.actualRecords);
         fieldSetFlags()[3] = true;
       }
+      if (isValidValue(fields()[4], other.topKCounter)) {
+        this.topKCounter = data().deepCopy(fields()[4].schema(), other.topKCounter);
+        fieldSetFlags()[4] = true;
+      }
+      if (isValidValue(fields()[5], other.lowerBoundPointer)) {
+        this.lowerBoundPointer = data().deepCopy(fields()[5].schema(), other.lowerBoundPointer);
+        fieldSetFlags()[5] = true;
+      }
+      this.lowerBoundPointerBuilder = null;
     }
 
     /**
@@ -447,6 +516,120 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
       return this;
     }
 
+    /**
+      * Gets the value of the 'topKCounter' field.
+      * @return The value.
+      */
+    public int getTopKCounter() {
+      return topKCounter;
+    }
+
+
+    /**
+      * Sets the value of the 'topKCounter' field.
+      * @param value The value of 'topKCounter'.
+      * @return This builder.
+      */
+    public myapp.avro.PhysicalWindow.Builder setTopKCounter(int value) {
+      validate(fields()[4], value);
+      this.topKCounter = value;
+      fieldSetFlags()[4] = true;
+      return this;
+    }
+
+    /**
+      * Checks whether the 'topKCounter' field has been set.
+      * @return True if the 'topKCounter' field has been set, false otherwise.
+      */
+    public boolean hasTopKCounter() {
+      return fieldSetFlags()[4];
+    }
+
+
+    /**
+      * Clears the value of the 'topKCounter' field.
+      * @return This builder.
+      */
+    public myapp.avro.PhysicalWindow.Builder clearTopKCounter() {
+      fieldSetFlags()[4] = false;
+      return this;
+    }
+
+    /**
+      * Gets the value of the 'lowerBoundPointer' field.
+      * @return The value.
+      */
+    public myapp.avro.MinTopKEntry getLowerBoundPointer() {
+      return lowerBoundPointer;
+    }
+
+
+    /**
+      * Sets the value of the 'lowerBoundPointer' field.
+      * @param value The value of 'lowerBoundPointer'.
+      * @return This builder.
+      */
+    public myapp.avro.PhysicalWindow.Builder setLowerBoundPointer(myapp.avro.MinTopKEntry value) {
+      validate(fields()[5], value);
+      this.lowerBoundPointerBuilder = null;
+      this.lowerBoundPointer = value;
+      fieldSetFlags()[5] = true;
+      return this;
+    }
+
+    /**
+      * Checks whether the 'lowerBoundPointer' field has been set.
+      * @return True if the 'lowerBoundPointer' field has been set, false otherwise.
+      */
+    public boolean hasLowerBoundPointer() {
+      return fieldSetFlags()[5];
+    }
+
+    /**
+     * Gets the Builder instance for the 'lowerBoundPointer' field and creates one if it doesn't exist yet.
+     * @return This builder.
+     */
+    public myapp.avro.MinTopKEntry.Builder getLowerBoundPointerBuilder() {
+      if (lowerBoundPointerBuilder == null) {
+        if (hasLowerBoundPointer()) {
+          setLowerBoundPointerBuilder(myapp.avro.MinTopKEntry.newBuilder(lowerBoundPointer));
+        } else {
+          setLowerBoundPointerBuilder(myapp.avro.MinTopKEntry.newBuilder());
+        }
+      }
+      return lowerBoundPointerBuilder;
+    }
+
+    /**
+     * Sets the Builder instance for the 'lowerBoundPointer' field
+     * @param value The builder instance that must be set.
+     * @return This builder.
+     */
+    public myapp.avro.PhysicalWindow.Builder setLowerBoundPointerBuilder(myapp.avro.MinTopKEntry.Builder value) {
+      clearLowerBoundPointer();
+      lowerBoundPointerBuilder = value;
+      return this;
+    }
+
+    /**
+     * Checks whether the 'lowerBoundPointer' field has an active Builder instance
+     * @return True if the 'lowerBoundPointer' field has an active Builder instance
+     */
+    public boolean hasLowerBoundPointerBuilder() {
+      return lowerBoundPointerBuilder != null;
+    }
+
+    /**
+      * Clears the value of the 'lowerBoundPointer' field.
+      * @return This builder.
+      */
+    public myapp.avro.PhysicalWindow.Builder clearLowerBoundPointer() {
+      lowerBoundPointer = null;
+      lowerBoundPointerBuilder = null;
+      fieldSetFlags()[5] = false;
+      return this;
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public PhysicalWindow build() {
@@ -456,6 +639,17 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
         record.size = fieldSetFlags()[1] ? this.size : (java.lang.Integer) defaultValue(fields()[1]);
         record.hoppingSize = fieldSetFlags()[2] ? this.hoppingSize : (java.lang.Integer) defaultValue(fields()[2]);
         record.actualRecords = fieldSetFlags()[3] ? this.actualRecords : (java.lang.Integer) defaultValue(fields()[3]);
+        record.topKCounter = fieldSetFlags()[4] ? this.topKCounter : (java.lang.Integer) defaultValue(fields()[4]);
+        if (lowerBoundPointerBuilder != null) {
+          try {
+            record.lowerBoundPointer = this.lowerBoundPointerBuilder.build();
+          } catch (org.apache.avro.AvroMissingFieldException e) {
+            e.addParentField(record.getSchema().getField("lowerBoundPointer"));
+            throw e;
+          }
+        } else {
+          record.lowerBoundPointer = fieldSetFlags()[5] ? this.lowerBoundPointer : (myapp.avro.MinTopKEntry) defaultValue(fields()[5]);
+        }
         return record;
       } catch (org.apache.avro.AvroMissingFieldException e) {
         throw e;
@@ -496,6 +690,10 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
 
     out.writeInt(this.actualRecords);
 
+    out.writeInt(this.topKCounter);
+
+    this.lowerBoundPointer.customEncode(out);
+
   }
 
   @Override public void customDecode(org.apache.avro.io.ResolvingDecoder in)
@@ -511,8 +709,15 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
 
       this.actualRecords = in.readInt();
 
+      this.topKCounter = in.readInt();
+
+      if (this.lowerBoundPointer == null) {
+        this.lowerBoundPointer = new myapp.avro.MinTopKEntry();
+      }
+      this.lowerBoundPointer.customDecode(in);
+
     } else {
-      for (int i = 0; i < 4; i++) {
+      for (int i = 0; i < 6; i++) {
         switch (fieldOrder[i].pos()) {
         case 0:
           this.id = in.readDouble();
@@ -528,6 +733,17 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
 
         case 3:
           this.actualRecords = in.readInt();
+          break;
+
+        case 4:
+          this.topKCounter = in.readInt();
+          break;
+
+        case 5:
+          if (this.lowerBoundPointer == null) {
+            this.lowerBoundPointer = new myapp.avro.MinTopKEntry();
+          }
+          this.lowerBoundPointer.customDecode(in);
           break;
 
         default:
