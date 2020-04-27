@@ -3,9 +3,9 @@
   "type": "record",
   "name": "MinTopKEntry",
   "fields": [
-    {"name": "id", "type": "double"},
+    {"name": "id", "type": "long"},
     {"name": "score", "type": "double"},
-    {"name": "startingWindow", "type": "double"},
-    {"name": "endingWindow", "type": "double"}
+    {"name": "startingWindow", "type": "long"},
+    {"name": "endingWindow", "type": "long"}
   ]
 }

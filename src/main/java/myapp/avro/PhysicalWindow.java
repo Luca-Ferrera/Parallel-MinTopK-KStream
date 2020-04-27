@@ -14,8 +14,8 @@ import org.apache.avro.message.SchemaStore;
 
 @org.apache.avro.specific.AvroGenerated
 public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  private static final long serialVersionUID = -7234652937344836711L;
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"PhysicalWindow\",\"namespace\":\"myapp.avro\",\"fields\":[{\"name\":\"id\",\"type\":\"double\"},{\"name\":\"size\",\"type\":\"int\"},{\"name\":\"hoppingSize\",\"type\":\"int\"},{\"name\":\"actualRecords\",\"type\":\"int\"},{\"name\":\"topKCounter\",\"type\":\"int\"},{\"name\":\"lowerBoundPointer\",\"type\":{\"type\":\"record\",\"name\":\"MinTopKEntry\",\"fields\":[{\"name\":\"id\",\"type\":\"double\"},{\"name\":\"score\",\"type\":\"double\"},{\"name\":\"startingWindow\",\"type\":\"double\"},{\"name\":\"endingWindow\",\"type\":\"double\"}]}}]}");
+  private static final long serialVersionUID = -5114702305928756683L;
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"PhysicalWindow\",\"namespace\":\"myapp.avro\",\"fields\":[{\"name\":\"id\",\"type\":\"long\"},{\"name\":\"size\",\"type\":\"int\"},{\"name\":\"hoppingSize\",\"type\":\"int\"},{\"name\":\"actualRecords\",\"type\":\"int\"},{\"name\":\"topKCounter\",\"type\":\"int\"},{\"name\":\"lowerBoundPointer\",\"type\":{\"type\":\"record\",\"name\":\"MinTopKEntry\",\"fields\":[{\"name\":\"id\",\"type\":\"long\"},{\"name\":\"score\",\"type\":\"double\"},{\"name\":\"startingWindow\",\"type\":\"long\"},{\"name\":\"endingWindow\",\"type\":\"long\"}]}}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 
   private static SpecificData MODEL$ = new SpecificData();
@@ -71,7 +71,7 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
     return DECODER.decode(b);
   }
 
-  @Deprecated public double id;
+  @Deprecated public long id;
   @Deprecated public int size;
   @Deprecated public int hoppingSize;
   @Deprecated public int actualRecords;
@@ -94,7 +94,7 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
    * @param topKCounter The new value for topKCounter
    * @param lowerBoundPointer The new value for lowerBoundPointer
    */
-  public PhysicalWindow(java.lang.Double id, java.lang.Integer size, java.lang.Integer hoppingSize, java.lang.Integer actualRecords, java.lang.Integer topKCounter, myapp.avro.MinTopKEntry lowerBoundPointer) {
+  public PhysicalWindow(java.lang.Long id, java.lang.Integer size, java.lang.Integer hoppingSize, java.lang.Integer actualRecords, java.lang.Integer topKCounter, myapp.avro.MinTopKEntry lowerBoundPointer) {
     this.id = id;
     this.size = size;
     this.hoppingSize = hoppingSize;
@@ -122,7 +122,7 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value$) {
     switch (field$) {
-    case 0: id = (java.lang.Double)value$; break;
+    case 0: id = (java.lang.Long)value$; break;
     case 1: size = (java.lang.Integer)value$; break;
     case 2: hoppingSize = (java.lang.Integer)value$; break;
     case 3: actualRecords = (java.lang.Integer)value$; break;
@@ -136,7 +136,7 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
    * Gets the value of the 'id' field.
    * @return The value of the 'id' field.
    */
-  public double getId() {
+  public long getId() {
     return id;
   }
 
@@ -145,7 +145,7 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
    * Sets the value of the 'id' field.
    * @param value the value to set.
    */
-  public void setId(double value) {
+  public void setId(long value) {
     this.id = value;
   }
 
@@ -279,7 +279,7 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
   public static class Builder extends org.apache.avro.specific.SpecificRecordBuilderBase<PhysicalWindow>
     implements org.apache.avro.data.RecordBuilder<PhysicalWindow> {
 
-    private double id;
+    private long id;
     private int size;
     private int hoppingSize;
     private int actualRecords;
@@ -364,7 +364,7 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
       * Gets the value of the 'id' field.
       * @return The value.
       */
-    public double getId() {
+    public long getId() {
       return id;
     }
 
@@ -374,7 +374,7 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
       * @param value The value of 'id'.
       * @return This builder.
       */
-    public myapp.avro.PhysicalWindow.Builder setId(double value) {
+    public myapp.avro.PhysicalWindow.Builder setId(long value) {
       validate(fields()[0], value);
       this.id = value;
       fieldSetFlags()[0] = true;
@@ -635,7 +635,7 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
     public PhysicalWindow build() {
       try {
         PhysicalWindow record = new PhysicalWindow();
-        record.id = fieldSetFlags()[0] ? this.id : (java.lang.Double) defaultValue(fields()[0]);
+        record.id = fieldSetFlags()[0] ? this.id : (java.lang.Long) defaultValue(fields()[0]);
         record.size = fieldSetFlags()[1] ? this.size : (java.lang.Integer) defaultValue(fields()[1]);
         record.hoppingSize = fieldSetFlags()[2] ? this.hoppingSize : (java.lang.Integer) defaultValue(fields()[2]);
         record.actualRecords = fieldSetFlags()[3] ? this.actualRecords : (java.lang.Integer) defaultValue(fields()[3]);
@@ -682,7 +682,7 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
   @Override public void customEncode(org.apache.avro.io.Encoder out)
     throws java.io.IOException
   {
-    out.writeDouble(this.id);
+    out.writeLong(this.id);
 
     out.writeInt(this.size);
 
@@ -701,7 +701,7 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
   {
     org.apache.avro.Schema.Field[] fieldOrder = in.readFieldOrderIfDiff();
     if (fieldOrder == null) {
-      this.id = in.readDouble();
+      this.id = in.readLong();
 
       this.size = in.readInt();
 
@@ -720,7 +720,7 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
       for (int i = 0; i < 6; i++) {
         switch (fieldOrder[i].pos()) {
         case 0:
-          this.id = in.readDouble();
+          this.id = in.readLong();
           break;
 
         case 1:

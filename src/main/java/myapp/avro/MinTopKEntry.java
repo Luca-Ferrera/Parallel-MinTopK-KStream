@@ -14,8 +14,8 @@ import org.apache.avro.message.SchemaStore;
 
 @org.apache.avro.specific.AvroGenerated
 public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  private static final long serialVersionUID = 4048343645878257689L;
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"MinTopKEntry\",\"namespace\":\"myapp.avro\",\"fields\":[{\"name\":\"id\",\"type\":\"double\"},{\"name\":\"score\",\"type\":\"double\"},{\"name\":\"startingWindow\",\"type\":\"double\"},{\"name\":\"endingWindow\",\"type\":\"double\"}]}");
+  private static final long serialVersionUID = 1688514750498191424L;
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"MinTopKEntry\",\"namespace\":\"myapp.avro\",\"fields\":[{\"name\":\"id\",\"type\":\"long\"},{\"name\":\"score\",\"type\":\"double\"},{\"name\":\"startingWindow\",\"type\":\"long\"},{\"name\":\"endingWindow\",\"type\":\"long\"}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 
   private static SpecificData MODEL$ = new SpecificData();
@@ -71,10 +71,10 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
     return DECODER.decode(b);
   }
 
-  @Deprecated public double id;
+  @Deprecated public long id;
   @Deprecated public double score;
-  @Deprecated public double startingWindow;
-  @Deprecated public double endingWindow;
+  @Deprecated public long startingWindow;
+  @Deprecated public long endingWindow;
 
   /**
    * Default constructor.  Note that this does not initialize fields
@@ -90,7 +90,7 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
    * @param startingWindow The new value for startingWindow
    * @param endingWindow The new value for endingWindow
    */
-  public MinTopKEntry(java.lang.Double id, java.lang.Double score, java.lang.Double startingWindow, java.lang.Double endingWindow) {
+  public MinTopKEntry(java.lang.Long id, java.lang.Double score, java.lang.Long startingWindow, java.lang.Long endingWindow) {
     this.id = id;
     this.score = score;
     this.startingWindow = startingWindow;
@@ -114,10 +114,10 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value$) {
     switch (field$) {
-    case 0: id = (java.lang.Double)value$; break;
+    case 0: id = (java.lang.Long)value$; break;
     case 1: score = (java.lang.Double)value$; break;
-    case 2: startingWindow = (java.lang.Double)value$; break;
-    case 3: endingWindow = (java.lang.Double)value$; break;
+    case 2: startingWindow = (java.lang.Long)value$; break;
+    case 3: endingWindow = (java.lang.Long)value$; break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -126,7 +126,7 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
    * Gets the value of the 'id' field.
    * @return The value of the 'id' field.
    */
-  public double getId() {
+  public long getId() {
     return id;
   }
 
@@ -135,7 +135,7 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
    * Sets the value of the 'id' field.
    * @param value the value to set.
    */
-  public void setId(double value) {
+  public void setId(long value) {
     this.id = value;
   }
 
@@ -160,7 +160,7 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
    * Gets the value of the 'startingWindow' field.
    * @return The value of the 'startingWindow' field.
    */
-  public double getStartingWindow() {
+  public long getStartingWindow() {
     return startingWindow;
   }
 
@@ -169,15 +169,17 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
    * Sets the value of the 'startingWindow' field.
    * @param value the value to set.
    */
-  public void setStartingWindow(double value) {
+  public void setStartingWindow(long value) {
     this.startingWindow = value;
   }
+
+  public void increaseStartingWindow(long value) { this.startingWindow += value;}
 
   /**
    * Gets the value of the 'endingWindow' field.
    * @return The value of the 'endingWindow' field.
    */
-  public double getEndingWindow() {
+  public long getEndingWindow() {
     return endingWindow;
   }
 
@@ -186,7 +188,7 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
    * Sets the value of the 'endingWindow' field.
    * @param value the value to set.
    */
-  public void setEndingWindow(double value) {
+  public void setEndingWindow(long value) {
     this.endingWindow = value;
   }
 
@@ -224,9 +226,6 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
     }
   }
 
-  public void increaseStartingWindow(double value) { this.startingWindow += value;}
-
-
   /**
    * RecordBuilder for MinTopKEntry instances.
    */
@@ -234,10 +233,10 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
   public static class Builder extends org.apache.avro.specific.SpecificRecordBuilderBase<MinTopKEntry>
     implements org.apache.avro.data.RecordBuilder<MinTopKEntry> {
 
-    private double id;
+    private long id;
     private double score;
-    private double startingWindow;
-    private double endingWindow;
+    private long startingWindow;
+    private long endingWindow;
 
     /** Creates a new Builder */
     private Builder() {
@@ -296,7 +295,7 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
       * Gets the value of the 'id' field.
       * @return The value.
       */
-    public double getId() {
+    public long getId() {
       return id;
     }
 
@@ -306,7 +305,7 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
       * @param value The value of 'id'.
       * @return This builder.
       */
-    public myapp.avro.MinTopKEntry.Builder setId(double value) {
+    public myapp.avro.MinTopKEntry.Builder setId(long value) {
       validate(fields()[0], value);
       this.id = value;
       fieldSetFlags()[0] = true;
@@ -374,7 +373,7 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
       * Gets the value of the 'startingWindow' field.
       * @return The value.
       */
-    public double getStartingWindow() {
+    public long getStartingWindow() {
       return startingWindow;
     }
 
@@ -384,7 +383,7 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
       * @param value The value of 'startingWindow'.
       * @return This builder.
       */
-    public myapp.avro.MinTopKEntry.Builder setStartingWindow(double value) {
+    public myapp.avro.MinTopKEntry.Builder setStartingWindow(long value) {
       validate(fields()[2], value);
       this.startingWindow = value;
       fieldSetFlags()[2] = true;
@@ -413,7 +412,7 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
       * Gets the value of the 'endingWindow' field.
       * @return The value.
       */
-    public double getEndingWindow() {
+    public long getEndingWindow() {
       return endingWindow;
     }
 
@@ -423,7 +422,7 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
       * @param value The value of 'endingWindow'.
       * @return This builder.
       */
-    public myapp.avro.MinTopKEntry.Builder setEndingWindow(double value) {
+    public myapp.avro.MinTopKEntry.Builder setEndingWindow(long value) {
       validate(fields()[3], value);
       this.endingWindow = value;
       fieldSetFlags()[3] = true;
@@ -453,10 +452,10 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
     public MinTopKEntry build() {
       try {
         MinTopKEntry record = new MinTopKEntry();
-        record.id = fieldSetFlags()[0] ? this.id : (java.lang.Double) defaultValue(fields()[0]);
+        record.id = fieldSetFlags()[0] ? this.id : (java.lang.Long) defaultValue(fields()[0]);
         record.score = fieldSetFlags()[1] ? this.score : (java.lang.Double) defaultValue(fields()[1]);
-        record.startingWindow = fieldSetFlags()[2] ? this.startingWindow : (java.lang.Double) defaultValue(fields()[2]);
-        record.endingWindow = fieldSetFlags()[3] ? this.endingWindow : (java.lang.Double) defaultValue(fields()[3]);
+        record.startingWindow = fieldSetFlags()[2] ? this.startingWindow : (java.lang.Long) defaultValue(fields()[2]);
+        record.endingWindow = fieldSetFlags()[3] ? this.endingWindow : (java.lang.Long) defaultValue(fields()[3]);
         return record;
       } catch (org.apache.avro.AvroMissingFieldException e) {
         throw e;
@@ -489,13 +488,13 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
   @Override public void customEncode(org.apache.avro.io.Encoder out)
     throws java.io.IOException
   {
-    out.writeDouble(this.id);
+    out.writeLong(this.id);
 
     out.writeDouble(this.score);
 
-    out.writeDouble(this.startingWindow);
+    out.writeLong(this.startingWindow);
 
-    out.writeDouble(this.endingWindow);
+    out.writeLong(this.endingWindow);
 
   }
 
@@ -504,19 +503,19 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
   {
     org.apache.avro.Schema.Field[] fieldOrder = in.readFieldOrderIfDiff();
     if (fieldOrder == null) {
-      this.id = in.readDouble();
+      this.id = in.readLong();
 
       this.score = in.readDouble();
 
-      this.startingWindow = in.readDouble();
+      this.startingWindow = in.readLong();
 
-      this.endingWindow = in.readDouble();
+      this.endingWindow = in.readLong();
 
     } else {
       for (int i = 0; i < 4; i++) {
         switch (fieldOrder[i].pos()) {
         case 0:
-          this.id = in.readDouble();
+          this.id = in.readLong();
           break;
 
         case 1:
@@ -524,11 +523,11 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
           break;
 
         case 2:
-          this.startingWindow = in.readDouble();
+          this.startingWindow = in.readLong();
           break;
 
         case 3:
-          this.endingWindow = in.readDouble();
+          this.endingWindow = in.readLong();
           break;
 
         default:

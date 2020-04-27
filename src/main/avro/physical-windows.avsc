@@ -3,7 +3,7 @@
   "type": "record",
   "name": "PhysicalWindow",
   "fields": [
-    {"name": "id", "type": "double"},
+    {"name": "id", "type": "long"},
     {"name": "size", "type": "int"},
     {"name": "hoppingSize", "type": "int"},
     {"name": "actualRecords", "type": "int"},
