@@ -9,7 +9,6 @@ import myapp.transormers.MinTopKTransformer;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.state.KeyValueStore;
@@ -25,7 +24,7 @@ public class CentralizedMinTopK {
     public Properties buildStreamsProperties(Properties envProps) {
         Properties props = new Properties();
 
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, envProps.getProperty("dtopk.id"));
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, envProps.getProperty("minTopK.id"));
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, envProps.getProperty("bootstrap.servers"));
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
@@ -42,25 +41,33 @@ public class CentralizedMinTopK {
         final String ratedMovieTopic = envProps.getProperty("rated.movies.topic.name");
         final String scoredMovieTopic = envProps.getProperty("scored.movies.topic.name");
         final String averagedRatedMovieTopic = envProps.getProperty("averaged.rated.movies.topic.name");
-        final String sortedTopKMovieTopic = envProps.getProperty("sorted.topk.movies.topic.name");
+        final String minTopKRatedMovie = envProps.getProperty("mintopk.movies.topic.name");
         final MovieRatingJoiner joiner = new MovieRatingJoiner();
         final MovieAverageJoiner averageJoiner = new MovieAverageJoiner();
 
         // create intermediate-topK-movies store
         StoreBuilder storeBuilder = Stores.keyValueStoreBuilder(
-                Stores.persistentKeyValueStore("intermediate-topK-movies"),
-                Serdes.String(),
-                scoredMovieAvroSerde(envProps));
+                Stores.persistentKeyValueStore("super-topk-list-store"),
+                Serdes.Integer(),
+                minTopKEntryAvroSerde(envProps));
         // register store
         builder.addStateStore(storeBuilder);
 
         // create windows store
         StoreBuilder windowsStoreBuilder = Stores.keyValueStoreBuilder(
                 Stores.persistentKeyValueStore("windows-store"),
-                Serdes.Double(),
-                physicalWindowSpecificAvroSerde(envProps));
+                Serdes.Long(),
+                physicalWindowAvroSerde(envProps));
         // register store
         builder.addStateStore(windowsStoreBuilder);
+
+        // create lower-bound-pointer store
+        StoreBuilder lowerBoundPointerStoreBuilder = Stores.keyValueStoreBuilder(
+                Stores.persistentKeyValueStore("lower-bound-pointer-store"),
+                Serdes.Integer(),
+                physicalWindowAvroSerde(envProps));
+        // register store
+        builder.addStateStore(lowerBoundPointerStoreBuilder);
 
         KStream<String, Movie> movieStream = builder.<String, Movie>stream(movieTopic)
                 .map((key, movie)-> new KeyValue<String,Movie>(movie.getId().toString(), movie));
@@ -97,17 +104,23 @@ public class CentralizedMinTopK {
                 .to(scoredMovieTopic, Produced.with(Serdes.String(), scoredMovieAvroSerde(envProps)));
 
         // TopKMovies
-        builder.table(
-                scoredMovieTopic,
-                Materialized.<String, ScoredMovie, KeyValueStore<Bytes, byte[]>>as("scored-movies")
-        )
-                .toStream()
-                .transform(new TransformerSupplier<String,ScoredMovie,KeyValue<String , ScoredMovie>>() {
+        builder
+//                .table(
+//                scoredMovieTopic,
+//                Materialized.<String, ScoredMovie, KeyValueStore<Bytes, byte[]>>as("scored-movies")
+//        )
+//                .toStream()
+                .<String,ScoredMovie>stream(scoredMovieTopic)
+                .transform(new TransformerSupplier<String,ScoredMovie,KeyValue<String , Long>>() {
                     public Transformer get() {
-                        return new MinTopKTransformer(2, "scored-movies", "intermediate-topK-movies" );
+                        return new MinTopKTransformer(2);
                     }
-                }, "scored-movies", "intermediate-topK-movies", "windows-store")
-                .to(sortedTopKMovieTopic, Produced.with(Serdes.String(), scoredMovieAvroSerde(envProps)));
+                }, "windows-store", "super-topk-list-store", "lower-bound-pointer-store")
+                .map((key, value) ->{
+                    System.out.println("key: " + key + " value: " + value);
+                    return new KeyValue<>(key,value);
+                })
+                .to(minTopKRatedMovie, Produced.with(Serdes.String(),Serdes.Long()));
 
         return builder.build();
     }
@@ -133,7 +146,7 @@ public class CentralizedMinTopK {
         movieAvroSerde.configure(serdeConfig, false);
         return movieAvroSerde;
     }
-    private SpecificAvroSerde<PhysicalWindow> physicalWindowSpecificAvroSerde(Properties envProps) {
+    private SpecificAvroSerde<PhysicalWindow> physicalWindowAvroSerde(Properties envProps) {
         SpecificAvroSerde<PhysicalWindow> physicalWindowAvroSerde = new SpecificAvroSerde<>();
 
         final HashMap<String, String> serdeConfig = new HashMap<>();
@@ -142,6 +155,16 @@ public class CentralizedMinTopK {
 
         physicalWindowAvroSerde.configure(serdeConfig, false);
         return physicalWindowAvroSerde;
+    }
+    private SpecificAvroSerde<MinTopKEntry> minTopKEntryAvroSerde(Properties envProps) {
+        SpecificAvroSerde<MinTopKEntry> minTopKEntryAvroSerde = new SpecificAvroSerde<>();
+
+        final HashMap<String, String> serdeConfig = new HashMap<>();
+        serdeConfig.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG,
+                envProps.getProperty("schema.registry.url"));
+
+        minTopKEntryAvroSerde.configure(serdeConfig, false);
+        return minTopKEntryAvroSerde;
     }
 
 
@@ -183,9 +206,9 @@ public class CentralizedMinTopK {
                 Short.parseShort(envProps.getProperty("averaged.rated.movies.topic.replication.factor"))));
 
         topics.add(new NewTopic(
-                envProps.getProperty("sorted.topk.movies.topic.name"),
-                Integer.parseInt(envProps.getProperty("sorted.topk.movies.topic.partitions")),
-                Short.parseShort(envProps.getProperty("sorted.topk.movies.topic.replication.factor"))));
+                envProps.getProperty("mintopk.movies.topic.name"),
+                Integer.parseInt(envProps.getProperty("mintopk.movies.topic.partitions")),
+                Short.parseShort(envProps.getProperty("mintopk.movies.topic.replication.factor"))));
 
         client.createTopics(topics);
         client.close();
