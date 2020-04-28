@@ -14,6 +14,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import static java.lang.Integer.min;
+
 public class MinTopKTransformer implements Transformer<String, ScoredMovie, KeyValue<String,Long>> {
 //    private KeyValueStore<Integer,PhysicalWindow> lowerBoundPointerStore;
     private KeyValueStore<Integer, MinTopKEntry> superTopKListStore;
@@ -22,8 +24,8 @@ public class MinTopKTransformer implements Transformer<String, ScoredMovie, KeyV
 //    private String storeName1;
 //    private String storeName2;
     private ProcessorContext context;
-    private final int SIZE = 20;
-    private final int HOPPING_SIZE = 5;
+    private final int SIZE = 8;
+    private final int HOPPING_SIZE = 4;
     private List<MinTopKEntry> superTopKList;
     private List<PhysicalWindow> lowerBoundPointer;
     private MinTopKEntry lastEntry;
@@ -59,7 +61,7 @@ public class MinTopKTransformer implements Transformer<String, ScoredMovie, KeyV
         if(!windowsIterator.hasNext()) {
             System.out.println("EMPTY WINDOWS STORE");
             MinTopKEntry firstEntry = new MinTopKEntry(value.getId(), value.getScore(),
-                                            0L, + (long) SIZE/HOPPING_SIZE);
+                                            0L, + (long) SIZE/HOPPING_SIZE - 1L);
             this.superTopKList.add(firstEntry);
             PhysicalWindow  startingWindow = new PhysicalWindow(0L, SIZE, HOPPING_SIZE, 1, 1 ,firstEntry);
             physicalWindowsStore.put(startingWindow.getId(), startingWindow);
@@ -94,14 +96,14 @@ public class MinTopKTransformer implements Transformer<String, ScoredMovie, KeyV
 //                    lowerBoundPointerStore.delete(window.getId());
                     this.lowerBoundPointer.remove(window);
                     //TODO: check if need of deleting window from StateStore
-                    forwardTopK();
+                    forwardTopK(window.getId());
                 }
                 if(window.getId()==this.currentWindow.getId() && window.getActualRecords() == window.getHoppingSize() + 1) {
                     // last window, create new window
-                    //TODO: check what happen if new record should be on topKList and the use of lastEntry
+                    //TODO: [x] check what happen if new record should be on topKList and the use of lastEntry
                     System.out.println("Creating new window");
                     MinTopKEntry newEntry = new MinTopKEntry(value.getId(), value.getScore(),
-                            this.currentWindow.getId(), this.currentWindow.getId() + (long) SIZE/HOPPING_SIZE);
+                            this.currentWindow.getId(), this.currentWindow.getId() + (long) SIZE/HOPPING_SIZE - 1L);
 //                    this.createNewWindow(window, lastEntry);
                     this.createNewWindow(this.currentWindow, newEntry);
                 }
@@ -117,11 +119,15 @@ public class MinTopKTransformer implements Transformer<String, ScoredMovie, KeyV
 
     private void createNewWindow(PhysicalWindow window, MinTopKEntry entry) {
         PhysicalWindow newWindow;
+        // topKCounter = min(HOPPING_SIZE, this.k) and not = 0
+        // because here I'm using physical windows instead of logical windows as in the paper
         if(entry.getScore() < this.lastEntry.getScore() && everyWindowHasTopK()) {
-            //entry won't be added to superTopKList so it can't the LowerBoundPointer
-            newWindow = new PhysicalWindow(window.getId() + 1L, SIZE, HOPPING_SIZE, 1, 1, this.lastEntry);
+            //entry won't be added to superTopKList so it can't be the LowerBoundPointer
+            newWindow = new PhysicalWindow(window.getId() + 1L, SIZE, HOPPING_SIZE, 1, min(HOPPING_SIZE, this.k), this.lastEntry);
         } else {
-             newWindow = new PhysicalWindow(window.getId() + 1L, SIZE, HOPPING_SIZE, 1, 1, entry);
+            //if entry.Score <= lastEntry.Score ==> entry will be the new lastEntry in superTopKList
+            newWindow = new PhysicalWindow(window.getId() + 1L, SIZE, HOPPING_SIZE, 1, min(HOPPING_SIZE, this.k),
+                    entry.getScore() <= this.lastEntry.getScore() ? entry : this.lastEntry);
         }
         System.out.println("Inserting Window " + newWindow);
         physicalWindowsStore.put(newWindow.getId(), newWindow);
@@ -132,9 +138,9 @@ public class MinTopKTransformer implements Transformer<String, ScoredMovie, KeyV
     }
 
     private void handlingExpiration(){
-        //TODO: for first topK elements in superTopKList:
-        // [x] increase by 1 the startingWindow
-        // [x] if startingWindow > endingWindow remove the elem from superTopKList
+        // for first topK elements in superTopKList:
+        // - increase by 1 the startingWindow
+        // - if startingWindow > endingWindow remove the elem from superTopKList
         Iterator<MinTopKEntry> superTopKIterator = this.superTopKList.iterator();
         int i = 0;
         while(superTopKIterator.hasNext() && i < this.k) {
@@ -200,10 +206,11 @@ public class MinTopKTransformer implements Transformer<String, ScoredMovie, KeyV
                     System.out.println("SUPERTOPK "+ this.superTopKList);
                     System.out.println("INDEX " + index);
                     this.superTopKList.remove(index);
-                    System.out.println("New WINDOW " + window.getId() + " LowerBoundPointed: " + this.superTopKList.get(index + 1));
+                    System.out.println("New WINDOW " + window.getId() + " LowerBoundPointed: " + this.superTopKList.get(index - 1));
                     window.setLowerBoundPointer(this.superTopKList.get(index - 1));
-                    //update window in StateStore
+                    //update window in physicalWindowsStore and lowerBoundPointer
                     this.physicalWindowsStore.put(window.getId(), window);
+                    this.lowerBoundPointer.set(this.lowerBoundPointer.indexOf(window), window);
                 }
             }
         }
@@ -243,11 +250,11 @@ public class MinTopKTransformer implements Transformer<String, ScoredMovie, KeyV
     /*
      * forward records as (key:windowId, value:movie.id)
      */
-    private void forwardTopK(){
-       List<MinTopKEntry> topK = this.superTopKList.subList(0,this.k-1);
+    private void forwardTopK(long windowId){
+       List<MinTopKEntry> topK = this.superTopKList.subList(0,this.k);
        topK.forEach(elem -> {
-           System.out.println("FORWARDING KEY: " + elem.getEndingWindow() +" VALUE: " + elem.getId() );
-           this.context.forward(elem.getEndingWindow(),elem.getId());
+           System.out.println("FORWARDING KEY: " + windowId +" VALUE: " + elem.getId() );
+           this.context.forward(windowId ,elem.getId());
        });
     }
 
@@ -281,8 +288,10 @@ public class MinTopKTransformer implements Transformer<String, ScoredMovie, KeyV
 //                    System.out.println("1 ADDING " + keyValue.value + " TO " + this.lowerBoundPointer);
                     this.lowerBoundPointer.add(Math.toIntExact(keyValue.key), keyValue.value);
                 }
-                else
+                else {
+                    System.out.println("SETTING CURRENT WINDOW " + keyValue.value);
                     this.currentWindow = keyValue.value;
+                }
             }
             else {
 //                System.out.println("2 ADDING " + keyValue.value + " TO " + this.lowerBoundPointer);

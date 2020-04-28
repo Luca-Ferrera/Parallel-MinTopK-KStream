@@ -111,7 +111,7 @@ public class CentralizedMinTopK {
 //        )
 //                .toStream()
                 .<String,ScoredMovie>stream(scoredMovieTopic)
-                .transform(new TransformerSupplier<String,ScoredMovie,KeyValue<String , Long>>() {
+                .transform(new TransformerSupplier<String,ScoredMovie,KeyValue<Long , Long>>() {
                     public Transformer get() {
                         return new MinTopKTransformer(2);
                     }
@@ -120,7 +120,7 @@ public class CentralizedMinTopK {
                     System.out.println("key: " + key + " value: " + value);
                     return new KeyValue<>(key,value);
                 })
-                .to(minTopKRatedMovie, Produced.with(Serdes.String(),Serdes.Long()));
+                .to(minTopKRatedMovie, Produced.with(Serdes.Long(),Serdes.Long()));
 
         return builder.build();
     }
