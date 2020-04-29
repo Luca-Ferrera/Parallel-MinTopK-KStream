@@ -61,14 +61,6 @@ public class CentralizedMinTopK {
         // register store
         builder.addStateStore(windowsStoreBuilder);
 
-        // create lower-bound-pointer store
-        StoreBuilder lowerBoundPointerStoreBuilder = Stores.keyValueStoreBuilder(
-                Stores.persistentKeyValueStore("lower-bound-pointer-store"),
-                Serdes.Integer(),
-                physicalWindowAvroSerde(envProps));
-        // register store
-        builder.addStateStore(lowerBoundPointerStoreBuilder);
-
         KStream<String, Movie> movieStream = builder.<String, Movie>stream(movieTopic)
                 .map((key, movie)-> new KeyValue<String,Movie>(movie.getId().toString(), movie));
         movieStream.to(rekeyedMovieTopic);
@@ -104,18 +96,12 @@ public class CentralizedMinTopK {
                 .to(scoredMovieTopic, Produced.with(Serdes.String(), scoredMovieAvroSerde(envProps)));
 
         // TopKMovies
-        builder
-//                .table(
-//                scoredMovieTopic,
-//                Materialized.<String, ScoredMovie, KeyValueStore<Bytes, byte[]>>as("scored-movies")
-//        )
-//                .toStream()
-                .<String,ScoredMovie>stream(scoredMovieTopic)
+        builder.<String,ScoredMovie>stream(scoredMovieTopic)
                 .transform(new TransformerSupplier<String,ScoredMovie,KeyValue<Long , Long>>() {
                     public Transformer get() {
                         return new MinTopKTransformer(2);
                     }
-                }, "windows-store", "super-topk-list-store", "lower-bound-pointer-store")
+                }, "windows-store", "super-topk-list-store")
                 .map((key, value) ->{
                     System.out.println("key: " + key + " value: " + value);
                     return new KeyValue<>(key,value);
