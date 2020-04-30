@@ -29,6 +29,10 @@ docker exec -i schema-registry /usr/bin/kafka-avro-console-producer --topic movi
 {"id": 120, "title": "Pirates of The Caribbean", "release_year": 2003}
 {"id": 140, "title": "La Grande Bellezza", "release_year": 2013}
 
+// scored-movie producer
+docker exec -i schema-registry /usr/bin/kafka-avro-console-producer --topic mintopk-scored-rated-movies --broker-list broker:9092 --property value.schema="$(< src/main/avro/scored-movie.avsc)"
+// scored-movies: movie.getAverage()/10 * 0.8 + movie.getReleaseYear()/2020 * 0.2
+    see score-movies.txt
 1)  implementare un semplice topK in locale
 
 2)  calcolare i topk sulle singole partizioni
@@ -58,3 +62,8 @@ TASKS:
 [1] D. Yang, A. Shastri, E.A. Rundensteiner and M.O. Ward,
 Anoptimal strategy for monitoring top-k queries in streaming windows,
 in:Proceedings of the 14th International Conference onExtending Database Technology, ACM, 2011, pp. 57–68.
+
+
+Eventi a frequenza costante: un evento ogni tot secondi.
+Latenza: invio evento 9-13-17, fine evento risposta con i topk
+Throughput: massimo input throughput

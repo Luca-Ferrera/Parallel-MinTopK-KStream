@@ -61,39 +61,39 @@ public class CentralizedMinTopK {
         // register store
         builder.addStateStore(windowsStoreBuilder);
 
-        KStream<String, Movie> movieStream = builder.<String, Movie>stream(movieTopic)
-                .map((key, movie)-> new KeyValue<String,Movie>(movie.getId().toString(), movie));
-        movieStream.to(rekeyedMovieTopic);
-
-        KTable<String, Movie> movies = builder.table(rekeyedMovieTopic);
-
-        KStream<String, Rating> ratings = builder.<String, Rating>stream(ratingTopic)
-                .map((key, rating) -> new KeyValue<String, Rating>(rating.getId().toString(), rating));
-
-        KStream<String, RatedMovie> ratedMovie = ratings.join(movies, joiner);
-        ratedMovie.to(ratedMovieTopic, Produced.with(Serdes.String(), ratedMovieAvroSerde(envProps)));
-
-        KGroupedStream<String ,Double> ratingsById = ratings
-                .map((key, value)-> new KeyValue<String, Double>(key, value.getRating()))
-                .groupByKey(Grouped.valueSerde(Serdes.Double()));
-        KTable<String, Long> ratingCount = ratingsById.count();
-        KTable<String, Double> ratingSum = ratingsById.reduce(Double::sum);
-        KTable<String, Double> ratingAverage = ratingSum
-                .join(ratingCount,
-                        (sum, count) -> sum/count.doubleValue(),
-                        Materialized.<String, Double, KeyValueStore<org.apache.kafka.common.utils.Bytes,byte[]>>as("average-ratings")
-                                .withValueSerde(Serdes.Double()));
-
-        ratingAverage.toStream().to(averagedRatedMovieTopic, Produced.with(Serdes.String(), Serdes.Double()));
-
-        //ScoredMovie
-        KStream<String, AverageMovie> averageMovie  = movies.join(ratingAverage, averageJoiner).toStream();
-
-        averageMovie.mapValues((key, movie)->{
-            double score = movie.getAverage()/10 * 0.8 + movie.getReleaseYear()/2020 * 0.2;
-            return new ScoredMovie(movie, score);
-        })
-                .to(scoredMovieTopic, Produced.with(Serdes.String(), scoredMovieAvroSerde(envProps)));
+//        KStream<String, Movie> movieStream = builder.<String, Movie>stream(movieTopic)
+//                .map((key, movie)-> new KeyValue<String,Movie>(movie.getId().toString(), movie));
+//        movieStream.to(rekeyedMovieTopic);
+//
+//        KTable<String, Movie> movies = builder.table(rekeyedMovieTopic);
+//
+//        KStream<String, Rating> ratings = builder.<String, Rating>stream(ratingTopic)
+//                .map((key, rating) -> new KeyValue<String, Rating>(rating.getId().toString(), rating));
+//
+//        KStream<String, RatedMovie> ratedMovie = ratings.join(movies, joiner);
+//        ratedMovie.to(ratedMovieTopic, Produced.with(Serdes.String(), ratedMovieAvroSerde(envProps)));
+//
+//        KGroupedStream<String ,Double> ratingsById = ratings
+//                .map((key, value)-> new KeyValue<String, Double>(key, value.getRating()))
+//                .groupByKey(Grouped.valueSerde(Serdes.Double()));
+//        KTable<String, Long> ratingCount = ratingsById.count();
+//        KTable<String, Double> ratingSum = ratingsById.reduce(Double::sum);
+//        KTable<String, Double> ratingAverage = ratingSum
+//                .join(ratingCount,
+//                        (sum, count) -> sum/count.doubleValue(),
+//                        Materialized.<String, Double, KeyValueStore<org.apache.kafka.common.utils.Bytes,byte[]>>as("average-ratings")
+//                                .withValueSerde(Serdes.Double()));
+//
+//        ratingAverage.toStream().to(averagedRatedMovieTopic, Produced.with(Serdes.String(), Serdes.Double()));
+//
+//        //ScoredMovie
+//        KStream<String, AverageMovie> averageMovie  = movies.join(ratingAverage, averageJoiner).toStream();
+//
+//        averageMovie.mapValues((key, movie)->{
+//            double score = movie.getAverage()/10 * 0.8 + movie.getReleaseYear()/2020 * 0.2;
+//            return new ScoredMovie(movie, score);
+//        })
+//                .to(scoredMovieTopic, Produced.with(Serdes.String(), scoredMovieAvroSerde(envProps)));
 
         // TopKMovies
         builder.<String,ScoredMovie>stream(scoredMovieTopic)
