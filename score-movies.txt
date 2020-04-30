@@ -1,0 +1,100 @@
+{"id": 294, "title": "Die Hard", "release_year": 1988, "rating": 4.496183638158378, "score": 0.5565263742209872}
+{"id": 140, "title": "La Grande Bellezza", "release_year": 2013, "rating": 8.690559083505429, "score": 0.8945516573735037}
+{"id": 120, "title": "Pirates of The Caribbean", "release_year": 2003, "rating": 5.425328543418862, "score": 0.6323431151566774}
+{"id": 120, "title": "Pirates of The Caribbean", "release_year": 2003, "rating": 2.9688858852992484, "score": 0.43582770250710823}
+{"id": 128, "title": "The Big Lebowski", "release_year": 1998, "rating": 7.959872943281497, "score": 0.8346116176407377}
+{"id": 354, "title": "Tree of Life", "release_year": 2011, "rating": 7.093016859417103, "score": 0.7665502596444573}
+{"id": 140, "title": "La Grande Bellezza", "release_year": 2013, "rating": 1.250393833590051, "score": 0.29933843738027344}
+{"id": 140, "title": "La Grande Bellezza", "release_year": 2013, "rating": 1.3026088054390716, "score": 0.30351563512819507}
+{"id": 354, "title": "Tree of Life", "release_year": 2011, "rating": 4.647090600402714, "score": 0.5708761589233062}
+{"id": 140, "title": "La Grande Bellezza", "release_year": 2013, "rating": 4.481592013664656, "score": 0.5578342917862418}
+{"id": 100, "title": "Spiderman", "release_year": 2002, "rating": 4.977009725005614, "score": 0.5963785997826273}
+{"id": 120, "title": "Pirates of The Caribbean", "release_year": 2003, "rating": 8.313882616966733, "score": 0.863427441040507}
+{"id": 354, "title": "Tree of Life", "release_year": 2011, "rating": 6.975754461964392, "score": 0.7571692678482405}
+{"id": 782, "title": "A Walk in the Clouds", "release_year": 1995, "rating": 9.433210473780438, "score": 0.9521815903776827}
+{"id": 100, "title": "Spiderman", "release_year": 2002, "rating": 1.506173088913949, "score": 0.3187116688952942}
+{"id": 120, "title": "Pirates of The Caribbean", "release_year": 2003, "rating": 0.4960224115030287, "score": 0.23799862460341062}
+{"id": 294, "title": "Die Hard", "release_year": 1988, "rating": 2.764322806957539, "score": 0.41797750772491993}
+{"id": 782, "title": "A Walk in the Clouds", "release_year": 1995, "rating": 6.396893207241753, "score": 0.7092762090545879}
+{"id": 128, "title": "The Big Lebowski", "release_year": 1998, "rating": 4.902843013190101, "score": 0.590049223233426}
+{"id": 128, "title": "The Big Lebowski", "release_year": 1998, "rating": 2.692814550302578, "score": 0.4132469462024241}
+{"id": 128, "title": "The Big Lebowski", "release_year": 1998, "rating": 8.973581150288087, "score": 0.9157082742012648}
+{"id": 782, "title": "A Walk in the Clouds", "release_year": 1995, "rating": 7.096944613646064, "score": 0.7652803215669328}
+{"id": 100, "title": "Spiderman", "release_year": 2002, "rating": 5.090200688659411, "score": 0.6054338768749311}
+{"id": 120, "title": "Pirates of The Caribbean", "release_year": 2003, "rating": 6.865867897865869, "score": 0.747586263512438}
+{"id": 294, "title": "Die Hard", "release_year": 1988, "rating": 3.5477031529334457, "score": 0.4806479354029925}
+{"id": 128, "title": "The Big Lebowski", "release_year": 1998, "rating": 1.945674621681458, "score": 0.3534757519127345}
+{"id": 120, "title": "Pirates of The Caribbean", "release_year": 2003, "rating": 6.115999641087613, "score": 0.6875968029701773}
+{"id": 140, "title": "La Grande Bellezza", "release_year": 2013, "rating": 0.4376075141363689, "score": 0.23431553182397882}
+{"id": 128, "title": "The Big Lebowski", "release_year": 1998, "rating": 6.682103553280156, "score": 0.7323900664406302}
+{"id": 120, "title": "Pirates of The Caribbean", "release_year": 2003, "rating": 0.9238210307829497, "score": 0.27222251414580434}
+{"id": 294, "title": "Die Hard", "release_year": 1988, "rating": 9.403686122040392, "score": 0.9491265729315483}
+{"id": 128, "title": "The Big Lebowski", "release_year": 1998, "rating": 4.075613979140133, "score": 0.5238709005094284}
+{"id": 140, "title": "La Grande Bellezza", "release_year": 2013, "rating": 6.387481448040228, "score": 0.7103054465362877}
+{"id": 128, "title": "The Big Lebowski", "release_year": 1998, "rating": 8.800869011486235, "score": 0.9018913030971165}
+{"id": 140, "title": "La Grande Bellezza", "release_year": 2013, "rating": 9.538448337139311, "score": 0.9623827976642143}
+{"id": 100, "title": "Spiderman", "release_year": 2002, "rating": 1.0865001702648458, "score": 0.2851378354033659}
+{"id": 782, "title": "A Walk in the Clouds", "release_year": 1995, "rating": 6.014751430376126, "score": 0.6787048669053377}
+{"id": 294, "title": "Die Hard", "release_year": 1988, "rating": 7.644905056896012, "score": 0.8084240877199977}
+{"id": 354, "title": "Tree of Life", "release_year": 2011, "rating": 6.641868832188111, "score": 0.7304584174661382}
+{"id": 354, "title": "Tree of Life", "release_year": 2011, "rating": 1.910484886753352, "score": 0.35194770183135726}
+{"id": 354, "title": "Tree of Life", "release_year": 2011, "rating": 7.5598154924960905, "score": 0.8038941502907764}
+{"id": 294, "title": "Die Hard", "release_year": 1988, "rating": 6.538682709562331, "score": 0.7199262999333034}
+{"id": 782, "title": "A Walk in the Clouds", "release_year": 1995, "rating": 6.076777504321712, "score": 0.6836669528209844}
+{"id": 294, "title": "Die Hard", "release_year": 1988, "rating": 8.298016379960405, "score": 0.8606729935651491}
+{"id": 120, "title": "Pirates of The Caribbean", "release_year": 2003, "rating": 3.2688516254365894, "score": 0.4598249617180955}
+{"id": 354, "title": "Tree of Life", "release_year": 2011, "rating": 2.456501619948137, "score": 0.3956290404869401}
+{"id": 128, "title": "The Big Lebowski", "release_year": 1998, "rating": 8.307405752625838, "score": 0.862414242388285}
+{"id": 294, "title": "Die Hard", "release_year": 1988, "rating": 1.5901981871143445, "score": 0.3240475381374644}
+{"id": 120, "title": "Pirates of The Caribbean", "release_year": 2003, "rating": 7.5986758810214425, "score": 0.8062109021648838}
+{"id": 294, "title": "Die Hard", "release_year": 1988, "rating": 4.398163809632102, "score": 0.548684787938885}
+{"id": 140, "title": "La Grande Bellezza", "release_year": 2013, "rating": 4.146939607467504, "score": 0.5310620992904695}
+{"id": 782, "title": "A Walk in the Clouds", "release_year": 1995, "rating": 1.126214949949429, "score": 0.28762194847120187}
+{"id": 120, "title": "Pirates of The Caribbean", "release_year": 2003, "rating": 1.6566148474670273, "score": 0.3308460194805305}
+{"id": 782, "title": "A Walk in the Clouds", "release_year": 1995, "rating": 2.2991782788112456, "score": 0.3814590147801472}
+{"id": 140, "title": "La Grande Bellezza", "release_year": 2013, "rating": 3.524270888659151, "score": 0.4812486017858014}
+{"id": 120, "title": "Pirates of The Caribbean", "release_year": 2003, "rating": 3.534833813929459, "score": 0.48110353679752504}
+{"id": 294, "title": "Die Hard", "release_year": 1988, "rating": 7.939983770728748, "score": 0.8320303848266166}
+{"id": 140, "title": "La Grande Bellezza", "release_year": 2013, "rating": 3.0216209373198852, "score": 0.44103660567866015}
+{"id": 354, "title": "Tree of Life", "release_year": 2011, "rating": 5.644676137658791, "score": 0.6506830019037924}
+{"id": 140, "title": "La Grande Bellezza", "release_year": 2013, "rating": 9.236191604650905, "score": 0.9382022590651418}
+{"id": 354, "title": "Tree of Life", "release_year": 2011, "rating": 8.78802008643107, "score": 0.9021505178055746}
+{"id": 140, "title": "La Grande Bellezza", "release_year": 2013, "rating": 2.6350767680524356, "score": 0.41011307213726417}
+{"id": 100, "title": "Spiderman", "release_year": 2002, "rating": 6.952012795661343, "score": 0.7543788454350857}
+{"id": 140, "title": "La Grande Bellezza", "release_year": 2013, "rating": 0.9536457650086616, "score": 0.27559859189376223}
+{"id": 100, "title": "Spiderman", "release_year": 2002, "rating": 3.377199080655439, "score": 0.4683937482346133}
+{"id": 782, "title": "A Walk in the Clouds", "release_year": 1995, "rating": 3.3117724923643674, "score": 0.46246655186439695}
+{"id": 128, "title": "The Big Lebowski", "release_year": 1998, "rating": 2.205198946821544, "score": 0.37423769792394135}
+{"id": 120, "title": "Pirates of The Caribbean", "release_year": 2003, "rating": 2.5888349720019397, "score": 0.40542362944332355}
+{"id": 120, "title": "Pirates of The Caribbean", "release_year": 2003, "rating": 9.144117022700675, "score": 0.9298461934992224}
+{"id": 120, "title": "Pirates of The Caribbean", "release_year": 2003, "rating": 1.9854206699875143, "score": 0.35715048528216947}
+{"id": 128, "title": "The Big Lebowski", "release_year": 1998, "rating": 2.4527527982576425, "score": 0.3940420060388292}
+{"id": 294, "title": "Die Hard", "release_year": 1988, "rating": 2.7442744274313347, "score": 0.4163736373628236}
+{"id": 100, "title": "Spiderman", "release_year": 2002, "rating": 5.130764708615233, "score": 0.608678998471397}
+{"id": 100, "title": "Spiderman", "release_year": 2002, "rating": 4.207852961231925, "score": 0.5348460586807322}
+{"id": 782, "title": "A Walk in the Clouds", "release_year": 1995, "rating": 0.5027511211937885, "score": 0.23774484217075062}
+{"id": 354, "title": "Tree of Life", "release_year": 2011, "rating": 2.5189968534387153, "score": 0.40062865916618634}
+{"id": 354, "title": "Tree of Life", "release_year": 2011, "rating": 0.4857011182000237, "score": 0.237965000347091}
+{"id": 140, "title": "La Grande Bellezza", "release_year": 2013, "rating": 8.52496404697291, "score": 0.8813040544509021}
+{"id": 128, "title": "The Big Lebowski", "release_year": 1998, "rating": 1.7340667673133858, "score": 0.3365471235632887}
+{"id": 354, "title": "Tree of Life", "release_year": 2011, "rating": 9.818739326856397, "score": 0.984608057039601}
+{"id": 100, "title": "Spiderman", "release_year": 2002, "rating": 7.288847402576629, "score": 0.7813256139883087}
+{"id": 140, "title": "La Grande Bellezza", "release_year": 2013, "rating": 1.284136257183579, "score": 0.30203783126775563}
+{"id": 120, "title": "Pirates of The Caribbean", "release_year": 2003, "rating": 0.1671295387848981, "score": 0.21168719478596018}
+{"id": 100, "title": "Spiderman", "release_year": 2002, "rating": 1.8250542530240244, "score": 0.34422216202410016}
+{"id": 140, "title": "La Grande Bellezza", "release_year": 2013, "rating": 1.3439721541811067, "score": 0.3068247030275579}
+{"id": 140, "title": "La Grande Bellezza", "release_year": 2013, "rating": 1.898830707393917, "score": 0.3512133872845827}
+{"id": 128, "title": "The Big Lebowski", "release_year": 1998, "rating": 9.840300574727944, "score": 0.9850458281564534}
+{"id": 140, "title": "La Grande Bellezza", "release_year": 2013, "rating": 8.49487746101092, "score": 0.878897127573943}
+{"id": 294, "title": "Die Hard", "release_year": 1988, "rating": 9.471182010283114, "score": 0.9545262439909659}
+{"id": 294, "title": "Die Hard", "release_year": 1988, "rating": 0.15947767191030193, "score": 0.209589896921141}
+{"id": 100, "title": "Spiderman", "release_year": 2002, "rating": 5.660854317461716, "score": 0.6510861671791155}
+{"id": 120, "title": "Pirates of The Caribbean", "release_year": 2003, "rating": 0.32079214839221937, "score": 0.22398020355454587}
+{"id": 120, "title": "Pirates of The Caribbean", "release_year": 2003, "rating": 5.413131517790283, "score": 0.631367353106391}
+{"id": 782, "title": "A Walk in the Clouds", "release_year": 1995, "rating": 2.8650869723032715, "score": 0.42673171025950923}
+{"id": 100, "title": "Spiderman", "release_year": 2002, "rating": 4.974450920239551, "score": 0.5961738954013424}
+{"id": 128, "title": "The Big Lebowski", "release_year": 1998, "rating": 8.964584575714557, "score": 0.9149885482353823}
+{"id": 128, "title": "The Big Lebowski", "release_year": 1998, "rating": 6.1891263223046264, "score": 0.692951887962588}
+{"id": 354, "title": "Tree of Life", "release_year": 2011, "rating": 9.324679894124788, "score": 0.9450833024210721}
+{"id": 140, "title": "La Grande Bellezza", "release_year": 2013, "rating": 1.364289169426679, "score": 0.30845006424720367}
+{"id": 100, "title": "Spiderman", "release_year": 2002, "rating": 8.558429098792686, "score": 0.882892149685593}
