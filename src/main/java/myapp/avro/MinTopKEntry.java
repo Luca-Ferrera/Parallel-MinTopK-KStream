@@ -183,6 +183,13 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
         this.getEndingWindow() == value.getEndingWindow();
   }
 
+  public boolean sameButIncreasedStartingWindow(MinTopKEntry value){
+    return this.getId() == value.getId() &&
+            this.getScore() == value.getScore() &&
+            this.getStartingWindow() == value.getStartingWindow() + 1L &&
+            this.getEndingWindow() == value.getEndingWindow();
+  }
+
   /**
    * Gets the value of the 'endingWindow' field.
    * @return The value of the 'endingWindow' field.
