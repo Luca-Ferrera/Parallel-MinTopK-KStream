@@ -110,20 +110,6 @@ public class ScoredMovie extends org.apache.avro.specific.SpecificRecordBase imp
     this.score = score;
   }
 
-  public org.apache.avro.specific.SpecificData getSpecificData() { return MODEL$; }
-  public org.apache.avro.Schema getSchema() { return SCHEMA$; }
-  // Used by DatumWriter.  Applications should not call.
-  public java.lang.Object get(int field$) {
-    switch (field$) {
-      case 0: return id;
-      case 1: return title;
-      case 2: return release_year;
-      case 3: return rating;
-      case 4: return score;
-      default: throw new org.apache.avro.AvroRuntimeException("Bad index");
-    }
-  }
-
   /**
    * All-args constructor.
    * @param id The new value for id
@@ -138,6 +124,20 @@ public class ScoredMovie extends org.apache.avro.specific.SpecificRecordBase imp
     this.release_year = release_year;
     this.rating = rating;
     this.score = score;
+  }
+
+  public org.apache.avro.specific.SpecificData getSpecificData() { return MODEL$; }
+  public org.apache.avro.Schema getSchema() { return SCHEMA$; }
+  // Used by DatumWriter.  Applications should not call.
+  public java.lang.Object get(int field$) {
+    switch (field$) {
+    case 0: return id;
+    case 1: return title;
+    case 2: return release_year;
+    case 3: return rating;
+    case 4: return score;
+    default: throw new org.apache.avro.AvroRuntimeException("Bad index");
+    }
   }
 
   // Used by DatumReader.  Applications should not call.

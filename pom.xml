@@ -71,6 +71,9 @@
                             <goal>schema</goal>
                         </goals>
                         <configuration>
+                            <imports>
+                                <import>${project.basedir}/src/main/avro/min-topk-entry.avsc</import>
+                            </imports>
                             <sourceDirectory>${project.basedir}/src/main/avro/</sourceDirectory>
                             <outputDirectory>${project.basedir}/src/main/java/</outputDirectory>
                         </configuration>

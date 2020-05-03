@@ -2,7 +2,6 @@ package myapp;
 
 import myapp.avro.AverageMovie;
 import myapp.avro.Movie;
-import myapp.avro.Rating;
 import org.apache.kafka.streams.kstream.ValueJoiner;
 
 public class MovieAverageJoiner implements ValueJoiner<Movie, Double, AverageMovie> {

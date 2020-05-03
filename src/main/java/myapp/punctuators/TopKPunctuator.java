@@ -66,7 +66,7 @@ public class TopKPunctuator implements Punctuator {
                             context.forward(elem.key, elem.value);
                         }
                     });
-                    position[0]+=1;
+                    position[0]++;
                 });
             }
         } else {
