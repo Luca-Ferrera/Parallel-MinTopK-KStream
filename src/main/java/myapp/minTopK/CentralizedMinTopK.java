@@ -11,14 +11,15 @@ import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.*;
-import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.StoreBuilder;
 import org.apache.kafka.streams.state.Stores;
 
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class CentralizedMinTopK {
     public Properties buildStreamsProperties(Properties envProps) {
@@ -94,15 +95,32 @@ public class CentralizedMinTopK {
 //            return new ScoredMovie(movie, score);
 //        })
 //                .to(scoredMovieTopic, Produced.with(Serdes.String(), scoredMovieAvroSerde(envProps)));
-
+        AtomicReference<Instant> start = new AtomicReference<>();
+        AtomicReference<Instant> end = new AtomicReference<>();
         // TopKMovies
         builder.<String,ScoredMovie>stream(scoredMovieTopic)
+                .map((key, value) ->{
+                    start.set(Instant.now());
+//                    System.out.println("Starting time " + start);
+                    return new KeyValue<>(key,value);
+                })
                 .transform(new TransformerSupplier<String,ScoredMovie,KeyValue<Long , Long>>() {
                     public Transformer get() {
                         return new MinTopKTransformer(2);
                     }
                 }, "windows-store", "super-topk-list-store")
                 .map((key, value) ->{
+                    end.set(Instant.now());
+//                    System.out.println("Ending time " + end);
+//                    System.out.println("Latency " + Duration.between(start.get(), end.get()).toNanos());
+                    try(FileWriter fw = new FileWriter("latency.txt", true);
+                        BufferedWriter bw = new BufferedWriter(fw);
+                        PrintWriter out = new PrintWriter(bw))
+                    {
+                        out.println("Latency window " + key + ": " + Duration.between(start.get(), end.get()).toNanos());
+                    } catch (IOException e) {
+                        //exception handling left as an exercise for the reader
+                    }
                     System.out.println("key: " + key + " value: " + value);
                     return new KeyValue<>(key,value);
                 })

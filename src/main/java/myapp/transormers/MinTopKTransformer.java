@@ -48,6 +48,7 @@ public class MinTopKTransformer implements Transformer<String, ScoredMovie, KeyV
 //        physicalWindowsStore.all().forEachRemaining(elem -> physicalWindowsStore.delete(elem.key));
 //        superTopKListStore.all().forEachRemaining(elem -> superTopKListStore.delete(elem.key));
 //        return null;
+        System.out.println("ActualRecords " + physicalWindowsStore.get(-1L).getActualRecords());
         setUpDataStructures();
         KeyValueIterator<Long, PhysicalWindow> windowsIterator = physicalWindowsStore.all();
         if(!windowsIterator.hasNext()) {
