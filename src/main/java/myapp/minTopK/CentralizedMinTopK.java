@@ -113,7 +113,7 @@ public class CentralizedMinTopK {
                     end.set(Instant.now());
 //                    System.out.println("Ending time " + end);
 //                    System.out.println("Latency " + Duration.between(start.get(), end.get()).toNanos());
-                    try(FileWriter fw = new FileWriter("latency.txt", true);
+                    try(FileWriter fw = new FileWriter("latency_100ms.txt", true);
                         BufferedWriter bw = new BufferedWriter(fw);
                         PrintWriter out = new PrintWriter(bw))
                     {
