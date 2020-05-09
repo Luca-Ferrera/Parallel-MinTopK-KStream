@@ -17,6 +17,7 @@ Run `RatingsDriver`, it generates records like this one:
 ## Output
  
 output topic: `mintopk-movies`
+
 output format: 
 ```
 key = windowID (Long)
