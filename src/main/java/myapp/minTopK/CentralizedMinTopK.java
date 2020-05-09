@@ -11,14 +11,15 @@ import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.*;
-import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.StoreBuilder;
 import org.apache.kafka.streams.state.Stores;
 
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class CentralizedMinTopK {
     public Properties buildStreamsProperties(Properties envProps) {
@@ -29,11 +30,10 @@ public class CentralizedMinTopK {
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
         props.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, envProps.getProperty("schema.registry.url"));
-//        props.put(StreamsConfig.NUM_STREAM_THREADS_CONFIG, 3);
 
         return props;
     }
-    public Topology buildTopology(Properties envProps) {
+    public Topology buildTopology(Properties envProps, String cleanDataStructure) {
         final StreamsBuilder builder = new StreamsBuilder();
         final String movieTopic = envProps.getProperty("movie.topic.name");
         final String ratingTopic = envProps.getProperty("rating.topic.name");
@@ -94,19 +94,33 @@ public class CentralizedMinTopK {
 //            return new ScoredMovie(movie, score);
 //        })
 //                .to(scoredMovieTopic, Produced.with(Serdes.String(), scoredMovieAvroSerde(envProps)));
-
+        AtomicReference<Instant> start = new AtomicReference<>();
+        AtomicReference<Instant> end = new AtomicReference<>();
         // TopKMovies
         builder.<String,ScoredMovie>stream(scoredMovieTopic)
-                .transform(new TransformerSupplier<String,ScoredMovie,KeyValue<Long , Long>>() {
+                .map((key, value) ->{
+                    start.set(Instant.now());
+                    return new KeyValue<>(key,value);
+                })
+                .transform(new TransformerSupplier<String,ScoredMovie,KeyValue<Long , MinTopKEntry>>() {
                     public Transformer get() {
-                        return new MinTopKTransformer(2);
+                        return new MinTopKTransformer(2, cleanDataStructure);
                     }
                 }, "windows-store", "super-topk-list-store")
                 .map((key, value) ->{
+                    end.set(Instant.now());
+                    try(FileWriter fw = new FileWriter("latency_50ms.txt", true);
+                        BufferedWriter bw = new BufferedWriter(fw);
+                        PrintWriter out = new PrintWriter(bw))
+                    {
+                        out.println("Latency window " + key + ": " + Duration.between(start.get(), end.get()).toNanos());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     System.out.println("key: " + key + " value: " + value);
                     return new KeyValue<>(key,value);
                 })
-                .to(minTopKRatedMovie, Produced.with(Serdes.Long(),Serdes.Long()));
+                .to(minTopKRatedMovie, Produced.with(Serdes.Long(),minTopKEntryAvroSerde(envProps)));
 
         return builder.build();
     }
@@ -215,10 +229,14 @@ public class CentralizedMinTopK {
             throw new IllegalArgumentException("This program takes one argument: the path to an environment configuration file.");
         }
 
+        String cleanDataStructure = "";
+        if(args.length == 2)
+            cleanDataStructure = args[1];
+
         CentralizedMinTopK minTopK = new CentralizedMinTopK();
         Properties envProps = minTopK.loadEnvProperties(args[0]);
         Properties streamProps = minTopK.buildStreamsProperties(envProps);
-        Topology topology = minTopK.buildTopology(envProps);
+        Topology topology = minTopK.buildTopology(envProps, cleanDataStructure);
         System.out.println(topology.describe());
 
         minTopK.createTopics(envProps);
