@@ -1,11 +1,13 @@
 # Centralized MinTopK algorithm
 ## How to try it
 
-Run `CentralizedMinTopK` with `"minTopK.env"` as argument.
+Run `CentralizedMinTopK` with `"minTopK.env" topK` as argument.
+Where topK is the value of the topK parameter.
 
 ## Clean data structures
 
-Run `CentralizedMinTopK` with `"minTopK.env" "clean"` as arguments.
+Run `CentralizedMinTopK` with `"minTopK.env" topK "clean"` as arguments.
+Where topK is the value of the topK parameter.
 
 ## Generate input data
 
