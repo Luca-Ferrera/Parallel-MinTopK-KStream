@@ -44,7 +44,7 @@ public class CentralizedSorting {
                 .toStream()
                 .transform(new TransformerSupplier<String,ScoredMovie,KeyValue<String , ScoredMovie>>() {
                     public Transformer get() {
-                        return new SortingTransformer();
+                        return new SortingTransformer(cleanDataStructure);
                     }
                 }, "scored-movies")
                 .to(sortedScoredMovieTopic, Produced.with(Serdes.String(), scoredMovieAvroSerde(envProps)));

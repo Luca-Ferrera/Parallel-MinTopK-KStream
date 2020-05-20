@@ -20,8 +20,8 @@ import static java.lang.Integer.min;
 public class MinTopKTransformer implements Transformer<String, ScoredMovie, KeyValue<Long,MinTopKEntry>> {
     private KeyValueStore<Integer, MinTopKEntry> superTopKListStore;
     private KeyValueStore<Long, PhysicalWindow> physicalWindowsStore;
-    private int k;
-    private Boolean cleanDataStructure;
+    private final int k;
+    private final Boolean cleanDataStructure;
     private ProcessorContext context;
     private final int SIZE = 30;
     private final int HOPPING_SIZE = 6;

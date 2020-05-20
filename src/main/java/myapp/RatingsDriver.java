@@ -5,9 +5,7 @@ import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import myapp.avro.ScoredMovie;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.Serdes;
 
 import java.io.*;
@@ -15,7 +13,7 @@ import java.util.*;
 
 public class RatingsDriver {
     static String INPUT_TOPIC = "mintopk-scored-rated-movies";
-    static Long INPUT_THROUGHPUT = 50L;
+    static Long INPUT_THROUGHPUT = 5L;
     public static void main(final String [] args) throws Exception {
         final String bootstrapServers = args.length > 0 ? args[0] : "localhost:29092";
         final String schemaRegistryUrl = args.length > 1 ? args[1] : "http://localhost:8081";
@@ -48,13 +46,24 @@ public class RatingsDriver {
                 scoredMovieSerializer);
 
         //sending movies every INPUT_THROUGHPUT ms
+        final Integer[] i = {0};
         scoredMovies.forEach(movie -> {
-            scoredMovieProducer.send(new ProducerRecord<String, ScoredMovie>(INPUT_TOPIC, String.valueOf(movie.getId()), movie));
+            scoredMovieProducer.send(new ProducerRecord<String, ScoredMovie>(INPUT_TOPIC, String.valueOf(i[0]), movie),
+            new Callback() {
+                public void onCompletion(RecordMetadata metadata, Exception e) {
+                    if(e != null) {
+                        e.printStackTrace();
+                    } else {
+//                        System.out.println("The offset of the record " + i[0] + " we just sent is: " + metadata.offset());
+                    }
+                }
+            });
             try {
                 Thread.sleep(INPUT_THROUGHPUT);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            i[0]++;
         });
     }
 }

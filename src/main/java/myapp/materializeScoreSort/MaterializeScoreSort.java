@@ -13,11 +13,15 @@ import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.state.KeyValueStore;
+import org.apache.kafka.streams.state.StoreBuilder;
+import org.apache.kafka.streams.state.Stores;
 
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class MaterializeScoreSort {
     public Properties buildStreamsProperties(Properties envProps) {
@@ -27,11 +31,11 @@ public class MaterializeScoreSort {
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, envProps.getProperty("bootstrap.servers"));
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
+        props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 100);
         props.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, envProps.getProperty("schema.registry.url"));
-
         return props;
     }
-    public Topology buildTopology(Properties envProps) {
+    public Topology buildTopology(Properties envProps, String cleanDataStructure) {
         final StreamsBuilder builder = new StreamsBuilder();
         final String movieTopic = envProps.getProperty("movie.topic.name");
         final String ratingTopic = envProps.getProperty("rating.topic.name");
@@ -43,52 +47,79 @@ public class MaterializeScoreSort {
         final MovieRatingJoiner joiner = new MovieRatingJoiner();
         final MovieAverageJoiner averageJoiner = new MovieAverageJoiner();
 
-        KStream<String, Movie> movieStream = builder.<String, Movie>stream(movieTopic)
-                .map((key, movie)-> new KeyValue<String,Movie>(movie.getId().toString(), movie));
-        movieStream.to(rekeyedMovieTopic);
+        // create intermediate-topK-movies store
+        StoreBuilder storeBuilder = Stores.keyValueStoreBuilder(
+                Stores.persistentKeyValueStore("record-count-store"),
+                Serdes.Integer(),
+                Serdes.Integer());
+        // register store
+        builder.addStateStore(storeBuilder);
 
-        KTable<String, Movie> movies = builder.table(rekeyedMovieTopic);
-
-        KStream<String, Rating> ratings = builder.<String, Rating>stream(ratingTopic)
-                .map((key, rating) -> new KeyValue<String, Rating>(rating.getId().toString(), rating));
-
-        KStream<String, RatedMovie> ratedMovie = ratings.join(movies, joiner);
-        ratedMovie.to(ratedMovieTopic, Produced.with(Serdes.String(), ratedMovieAvroSerde(envProps)));
-
-        KGroupedStream<String ,Double> ratingsById = ratings
-                .map((key, value)-> new KeyValue<String, Double>(key, value.getRating()))
-                .groupByKey(Grouped.valueSerde(Serdes.Double()));
-        KTable<String, Long> ratingCount = ratingsById.count();
-        KTable<String, Double> ratingSum = ratingsById.reduce(Double::sum);
-        KTable<String, Double> ratingAverage = ratingSum
-                .join(ratingCount,
-                        (sum, count) -> sum/count.doubleValue(),
-                        Materialized.<String, Double, KeyValueStore<org.apache.kafka.common.utils.Bytes,byte[]>>as("average-ratings")
-                                .withValueSerde(Serdes.Double()));
-
-        ratingAverage.toStream().to(averagedRatedMovieTopic, Produced.with(Serdes.String(), Serdes.Double()));
-
-        //ScoredMovie
-        KStream<String, AverageMovie> averageMovie  = movies.join(ratingAverage, averageJoiner).toStream();
-
-        averageMovie.mapValues((key, movie)->{
-            double score = movie.getAverage()/10 * 0.8 + movie.getReleaseYear()/2020 * 0.2;
-            return new ScoredMovie(movie, score);
-        })
-                .to(scoredMovieTopic, Produced.with(Serdes.String(), scoredMovieAvroSerde(envProps)));
+//        KStream<String, Movie> movieStream = builder.<String, Movie>stream(movieTopic)
+//                .map((key, movie)-> new KeyValue<String,Movie>(movie.getId().toString(), movie));
+//        movieStream.to(rekeyedMovieTopic);
+//
+//        KTable<String, Movie> movies = builder.table(rekeyedMovieTopic);
+//
+//        KStream<String, Rating> ratings = builder.<String, Rating>stream(ratingTopic)
+//                .map((key, rating) -> new KeyValue<String, Rating>(rating.getId().toString(), rating));
+//
+//        KStream<String, RatedMovie> ratedMovie = ratings.join(movies, joiner);
+//        ratedMovie.to(ratedMovieTopic, Produced.with(Serdes.String(), ratedMovieAvroSerde(envProps)));
+//
+//        KGroupedStream<String ,Double> ratingsById = ratings
+//                .map((key, value)-> new KeyValue<String, Double>(key, value.getRating()))
+//                .groupByKey(Grouped.valueSerde(Serdes.Double()));
+//        KTable<String, Long> ratingCount = ratingsById.count();
+//        KTable<String, Double> ratingSum = ratingsById.reduce(Double::sum);
+//        KTable<String, Double> ratingAverage = ratingSum
+//                .join(ratingCount,
+//                        (sum, count) -> sum/count.doubleValue(),
+//                        Materialized.<String, Double, KeyValueStore<org.apache.kafka.common.utils.Bytes,byte[]>>as("average-ratings")
+//                                .withValueSerde(Serdes.Double()));
+//
+//        ratingAverage.toStream().to(averagedRatedMovieTopic, Produced.with(Serdes.String(), Serdes.Double()));
+//
+//        //ScoredMovie
+//        KStream<String, AverageMovie> averageMovie  = movies.join(ratingAverage, averageJoiner).toStream();
+//
+//        averageMovie.mapValues((key, movie)->{
+//            double score = movie.getAverage()/10 * 0.8 + movie.getReleaseYear()/2020 * 0.2;
+//            return new ScoredMovie(movie, score);
+//        })
+//                .to(scoredMovieTopic, Produced.with(Serdes.String(), scoredMovieAvroSerde(envProps)));
 
         // SortedMovie
+        AtomicReference<Instant> start = new AtomicReference<>();
+        AtomicReference<Instant> end = new AtomicReference<>();
         builder.table(
-                scoredMovieTopic,
-                Materialized.<String, ScoredMovie, KeyValueStore<Bytes, byte[]>>as("scored-movies")
-        )
+                    scoredMovieTopic,
+                    Materialized.<String, ScoredMovie, KeyValueStore<Bytes, byte[]>>as("scored-movies")
+                )
                 .toStream()
-                .transform(new TransformerSupplier<String,ScoredMovie,KeyValue<String , ScoredMovie>>() {
+                .map((key, value) ->{
+                    start.set(Instant.now());
+                    return new KeyValue<>(key,value);
+                })
+                .transform(new TransformerSupplier<String,ScoredMovie,KeyValue<Long , ScoredMovie>>() {
                         public Transformer get() {
-                            return new SortingTransformer();
+                            
+                            return new SortingTransformer(cleanDataStructure);
                         }
-                    }, "scored-movies")
-                .to(sortedScoredMovieTopic, Produced.with(Serdes.String(), scoredMovieAvroSerde(envProps)));
+                    }, "scored-movies", "record-count-store")
+                .map((key, value) ->{
+                    end.set(Instant.now());
+                    try(FileWriter fw = new FileWriter("MaterializeSort/latency_5ms.txt", true);
+                        BufferedWriter bw = new BufferedWriter(fw);
+                        PrintWriter out = new PrintWriter(bw))
+                    {
+                        out.println("Latency window " + key + " : " + Duration.between(start.get(), end.get()).toNanos());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    return new KeyValue<>(key,value);
+                })
+                .to(sortedScoredMovieTopic, Produced.with(Serdes.Long(), scoredMovieAvroSerde(envProps)));
 
         return builder.build();
     }
@@ -176,11 +207,15 @@ public class MaterializeScoreSort {
         if (args.length < 1) {
             throw new IllegalArgumentException("This program takes one argument: the path to an environment configuration file.");
         }
+        String cleanDataStructure = "";
+        if(args.length == 2){
+            cleanDataStructure = args[2];
+        }
 
         MaterializeScoreSort mss = new MaterializeScoreSort();
         Properties envProps = mss.loadEnvProperties(args[0]);
         Properties streamProps = mss.buildStreamsProperties(envProps);
-        Topology topology = mss.buildTopology(envProps);
+        Topology topology = mss.buildTopology(envProps, cleanDataStructure);
         System.out.println(topology.describe());
 
         mss.createTopics(envProps);

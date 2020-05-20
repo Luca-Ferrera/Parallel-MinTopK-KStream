@@ -33,7 +33,7 @@ public class CentralizedMinTopK {
 
         return props;
     }
-    public Topology buildTopology(Properties envProps, String cleanDataStructure) {
+    public Topology buildTopology(Properties envProps, String cleanDataStructure, int k) {
         final StreamsBuilder builder = new StreamsBuilder();
         final String movieTopic = envProps.getProperty("movie.topic.name");
         final String ratingTopic = envProps.getProperty("rating.topic.name");
@@ -104,20 +104,21 @@ public class CentralizedMinTopK {
                 })
                 .transform(new TransformerSupplier<String,ScoredMovie,KeyValue<Long , MinTopKEntry>>() {
                     public Transformer get() {
-                        return new MinTopKTransformer(2, cleanDataStructure);
+                        return new MinTopKTransformer(k, cleanDataStructure);
                     }
                 }, "windows-store", "super-topk-list-store")
                 .map((key, value) ->{
                     end.set(Instant.now());
-                    try(FileWriter fw = new FileWriter("latency_50ms.txt", true);
+                    try(FileWriter fw = new FileWriter("CentralizedMinTopK/" + k + "K_latency_5ms.txt", true);
                         BufferedWriter bw = new BufferedWriter(fw);
                         PrintWriter out = new PrintWriter(bw))
                     {
-                        out.println("Latency window " + key + ": " + Duration.between(start.get(), end.get()).toNanos());
+                        out.println("Latency window " + key + " : " + Duration.between(start.get(), end.get()).toNanos());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    System.out.println("key: " + key + " value: " + value);
+                    if(key == 1500)
+                        System.out.println("key: " + key + " value: " + value);
                     return new KeyValue<>(key,value);
                 })
                 .to(minTopKRatedMovie, Produced.with(Serdes.Long(),minTopKEntryAvroSerde(envProps)));
@@ -230,13 +231,18 @@ public class CentralizedMinTopK {
         }
 
         String cleanDataStructure = "";
-        if(args.length == 2)
-            cleanDataStructure = args[1];
+        int k = 0;
+        if(args.length == 2){
+            k = Integer.parseInt(args[1]);
+        } else if(args.length == 3){
+            cleanDataStructure = args[2];
+            k = Integer.parseInt(args[1]);
+        }
 
         CentralizedMinTopK minTopK = new CentralizedMinTopK();
         Properties envProps = minTopK.loadEnvProperties(args[0]);
         Properties streamProps = minTopK.buildStreamsProperties(envProps);
-        Topology topology = minTopK.buildTopology(envProps, cleanDataStructure);
+        Topology topology = minTopK.buildTopology(envProps, cleanDataStructure, k);
         System.out.println(topology.describe());
 
         minTopK.createTopics(envProps);
