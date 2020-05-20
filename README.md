@@ -42,3 +42,26 @@ Run `docker exec -i schema-registry /usr/bin/kafka-avro-console-producer --topic
 Run `docker exec -it schema-registry /usr/bin/kafka-avro-console-consumer --topic TOPIC_NAME --bootstrap-server broker:9092 --from-beginning` to read data from `TOPIC_NAME` topic
 
 Start the application again!
+
+## Measurements
+
+Run `MaterializeScoreSort`
+
+Run `RatingsDriver` setting the input topic to `scored-rated-movies`
+
+Check when reading offset << writing offset
+
+Run `cleanLatencyFile.py MaterializeSort/latency_5ms.txt -1`
+
+Run `averageLatency.py MaterializeSort/latency_5ms.txt`
+
+---
+
+Run `java -jar out/artifacts/minTopK_jar/kafka-stream-tutorial.jar "/home/lucaferrera/Documenti/Tesi/kstream/minTopK.env"  topK` where topK is an integer value
+
+Run `RatingsDriver` setting the input topic to `mintopk-scored-rated-movies`
+
+Run `cleanLatencyFile.py CentralizedMinTopK/topKK_latency_5ms.txt topK`
+
+Run `averageLatency.py CentralizedMinTopK/topKK_latency_5ms.txt`
+
