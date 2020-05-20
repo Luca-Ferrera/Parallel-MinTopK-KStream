@@ -12,7 +12,7 @@ movies= [(294, "Die Hard", 1988), (354, "Tree of Life", 2011), (782, "A Walk in 
 schema = avro.schema.Parse(open("src/main/avro/scored-movie.avsc", "rb").read())
 
 writer = DataFileWriter(open("scored-movie.avro", "wb"), DatumWriter(), schema)
-for i in range(1000):
+for i in range(10000):
     movie = choice(movies)
     rating = uniform(0,10)
     writer.append({"id": movie[0], "title": movie[1], "release_year": movie[2], "rating": rating, "score": score(rating, movie[2])})
