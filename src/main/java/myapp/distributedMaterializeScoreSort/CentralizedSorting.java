@@ -30,7 +30,7 @@ public class CentralizedSorting {
         return props;
     }
 
-    public Topology buildTopology(Properties envProps) {
+    public Topology buildTopology(Properties envProps, String cleanDataStructure) {
         final StreamsBuilder builder = new StreamsBuilder();
         final String scoredMovieTopic = envProps.getProperty("scored.movies.topic.name");
         final String sortedScoredMovieTopic = envProps.getProperty("sorted.rated.movies.topic.name");
@@ -97,11 +97,15 @@ public class CentralizedSorting {
         if (args.length < 1) {
             throw new IllegalArgumentException("This program takes one argument: the path to an environment configuration file.");
         }
+        String cleanDataStructure = "";
+        if(args.length == 2){
+            cleanDataStructure = args[1];
+        }
 
         CentralizedSorting centralizedSorting = new CentralizedSorting();
         Properties envProps = centralizedSorting.loadEnvProperties(args[0]);
         Properties streamProps = centralizedSorting.buildStreamsProperties(envProps);
-        Topology topology = centralizedSorting.buildTopology(envProps);
+        Topology topology = centralizedSorting.buildTopology(envProps, cleanDataStructure);
         System.out.println(topology.describe());
 
         centralizedSorting.createTopics(envProps);
