@@ -17,8 +17,8 @@ public class SortingTransformer implements Transformer<String, ScoredMovie,  Key
     private KeyValueStore<String, ValueAndTimestamp<ScoredMovie>> state;
     private KeyValueStore<Integer, Integer> countState;
     private ProcessorContext context;
-    private final int SIZE = 30;
-    private final int HOPPING_SIZE = 6;
+    private final int SIZE = 1000;
+    private final int HOPPING_SIZE = 200;
 
     public SortingTransformer(String cleanDataStructure) {
         this.cleanDataStructure = cleanDataStructure.equals("clean");
@@ -41,8 +41,11 @@ public class SortingTransformer implements Transformer<String, ScoredMovie,  Key
             System.out.println("CLEANED");
             return null;
         }
-//        System.out.println("The offset of the record " + key + " we just read is: " + this.context.offset());
+        System.out.println("The offset of the record " + key + " we just read is: " + this.context.offset());
         int recordCount = this.countState.all().hasNext() ? this.countState.get(-1) : 0;
+        if(recordCount > SIZE) {
+            this.state.delete(Integer.toString(recordCount-SIZE-1));
+        }
         if(recordCount >= SIZE && recordCount % HOPPING_SIZE == 1){
             ArrayList<KeyValue<String, ScoredMovie>> scoreList = new ArrayList<>();
             this.state.all().forEachRemaining((elem)-> {

@@ -109,15 +109,15 @@ public class CentralizedMinTopK {
                 }, "windows-store", "super-topk-list-store")
                 .map((key, value) ->{
                     end.set(Instant.now());
-                    try(FileWriter fw = new FileWriter("CentralizedMinTopK/" + k + "K_latency_5ms.txt", true);
+                    try(FileWriter fw = new FileWriter("CentralizedMinTopK/500Krecords_1000_200_" + k + "K_latency_5s.txt", true);
                         BufferedWriter bw = new BufferedWriter(fw);
                         PrintWriter out = new PrintWriter(bw))
                     {
                         out.println("Latency window " + key + " : " + Duration.between(start.get(), end.get()).toNanos());
                     } catch (IOException e) {
-                        e.printStackTrace();
+                       e.printStackTrace();
                     }
-                    if(key == 1500)
+                    if(key % 500 == 0)
                         System.out.println("key: " + key + " value: " + value);
                     return new KeyValue<>(key,value);
                 })

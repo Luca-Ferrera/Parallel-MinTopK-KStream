@@ -109,7 +109,7 @@ public class MaterializeScoreSort {
                     }, "scored-movies", "record-count-store")
                 .map((key, value) ->{
                     end.set(Instant.now());
-                    try(FileWriter fw = new FileWriter("MaterializeSort/latency_5ms.txt", true);
+                    try(FileWriter fw = new FileWriter("MaterializeSort/500Krecords_1000_200_latency_10ms.txt", true);
                         BufferedWriter bw = new BufferedWriter(fw);
                         PrintWriter out = new PrintWriter(bw))
                     {
@@ -209,7 +209,7 @@ public class MaterializeScoreSort {
         }
         String cleanDataStructure = "";
         if(args.length == 2){
-            cleanDataStructure = args[2];
+            cleanDataStructure = args[1];
         }
 
         MaterializeScoreSort mss = new MaterializeScoreSort();

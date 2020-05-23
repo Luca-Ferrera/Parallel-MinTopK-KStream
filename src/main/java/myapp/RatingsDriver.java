@@ -12,8 +12,8 @@ import java.io.*;
 import java.util.*;
 
 public class RatingsDriver {
-    static String INPUT_TOPIC = "mintopk-scored-rated-movies";
-    static Long INPUT_THROUGHPUT = 5L;
+    static String INPUT_TOPIC = "scored-rated-movies";
+    static Long INPUT_THROUGHPUT = 10L;
     public static void main(final String [] args) throws Exception {
         final String bootstrapServers = args.length > 0 ? args[0] : "localhost:29092";
         final String schemaRegistryUrl = args.length > 1 ? args[1] : "http://localhost:8081";
@@ -54,7 +54,7 @@ public class RatingsDriver {
                     if(e != null) {
                         e.printStackTrace();
                     } else {
-//                        System.out.println("The offset of the record " + i[0] + " we just sent is: " + metadata.offset());
+                        System.out.println("The offset of the record " + i[0] + " we just sent is: " + metadata.offset());
                     }
                 }
             });

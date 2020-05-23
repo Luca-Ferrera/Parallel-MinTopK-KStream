@@ -881,3 +881,15 @@ Latency window 879 : 2558000000
 Latency window 880 : 2416000000
 Latency window 881 : 3040000000
 Latency window 882 : 2684000000
+Latency window 883 : 3728772000
+Latency window 884 : 2657653000
+Latency window 885 : 2637838000
+Latency window 886 : 2588215000
+Latency window 887 : 2850514000
+Latency window 888 : 2726905000
+Latency window 889 : 2632560000
+Latency window 890 : 2695690000
+Latency window 891 : 2827195000
+Latency window 892 : 2963145000
+Latency window 893 : 2781757000
+Latency window 894 : 2382099000
