@@ -9,8 +9,11 @@ if sys.argv[2] == "-1":
     printingLines.append(lines[len(lines) - 1])
     with open(sys.argv[1], "w") as f:
         for line in printingLines:
-            f.write(line)
+            splittedLine = line.split()
+            f.write(splittedLine[2] + "," + str(int(splittedLine[4])*0.000001) + "\n")
 else:
-    with open(sys.argv[1], "w") as f:
+    with open(sys.argv[1][:-4] + "csv", "w") as f:
+        f.write("window,latency")
         for line in lines:
-            f.write(line)
+            splittedLine = line.split()
+            f.write(splittedLine[2] + "," + str(int(splittedLine[4])*0.000001) + "\n")
