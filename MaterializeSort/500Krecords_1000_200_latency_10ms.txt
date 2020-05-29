@@ -293,4 +293,4 @@ Latency window 291 : 2542000000
 Latency window 292 : 2631000000
 Latency window 293 : 2608000000
 Latency window 294 : 2537000000
-Latency window 295 : 2918000000
+Latency window 295 : 780508000000

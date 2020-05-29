@@ -53,8 +53,7 @@ public class SortingTransformer implements Transformer<String, ScoredMovie,  Key
                 scoreList.add(entry);
             });
             Comparator<KeyValue<String, ScoredMovie>> compareByScore = Comparator.comparingDouble((KeyValue<String, ScoredMovie> o) -> o.value.getScore());
-            Collections.sort(scoreList, compareByScore.reversed()
-            );
+            Collections.sort(scoreList, compareByScore.reversed());
             long newKey = recordCount/HOPPING_SIZE - SIZE/HOPPING_SIZE;
             scoreList.forEach(elem -> context.forward(newKey, elem.value));
         }
