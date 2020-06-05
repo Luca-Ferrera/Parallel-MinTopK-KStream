@@ -12,8 +12,8 @@ if sys.argv[2] == "-1":
             splittedLine = line.split()
             f.write(splittedLine[2] + "," + str(int(splittedLine[4])*0.000001) + "\n")
 else:
-    with open(sys.argv[1][:-4] + "csv", "w") as f:
-        f.write("window,latency")
+    with open(sys.argv[1][:-4] + ".csv", "w") as f:
+        f.write("window,latency\n")
         for line in lines:
             splittedLine = line.split()
             f.write(splittedLine[2] + "," + str(int(splittedLine[4])*0.000001) + "\n")
