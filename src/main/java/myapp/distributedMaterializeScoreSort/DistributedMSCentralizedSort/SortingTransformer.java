@@ -1,4 +1,4 @@
-package myapp.transormers;
+package myapp.distributedMaterializeScoreSort.DistributedMSCentralizedSort;
 
 import myapp.avro.ScoredMovie;
 import org.apache.kafka.streams.KeyValue;
@@ -44,6 +44,7 @@ public class SortingTransformer implements Transformer<String, ScoredMovie,  Key
         System.out.println("The offset of the record " + key + " we just read is: " + this.context.offset());
         int recordCount = this.countState.all().hasNext() ? this.countState.get(-1) : 0;
         if(recordCount > SIZE) {
+            //delete old record that are useless
             this.state.delete(Integer.toString(recordCount-SIZE-1));
         }
         if(recordCount >= SIZE && recordCount % HOPPING_SIZE == 1){

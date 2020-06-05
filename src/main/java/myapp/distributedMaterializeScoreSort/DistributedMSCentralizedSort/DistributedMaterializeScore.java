@@ -1,4 +1,4 @@
-package myapp.distributedMaterializeScoreSort;
+package myapp.distributedMaterializeScoreSort.DistributedMSCentralizedSort;
 
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;

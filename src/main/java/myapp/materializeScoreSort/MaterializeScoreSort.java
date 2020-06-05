@@ -4,7 +4,7 @@ import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import myapp.MovieAverageJoiner;
 import myapp.MovieRatingJoiner;
-import myapp.transormers.SortingTransformer;
+import myapp.distributedMaterializeScoreSort.DistributedMSCentralizedSort.SortingTransformer;
 import myapp.avro.*;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;

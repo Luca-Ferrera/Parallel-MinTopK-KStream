@@ -1,4 +1,4 @@
-package myapp.transormers;
+package myapp.distributedMaterializeScoreSort.DistributedMSSCentralizedTopK;
 
 import myapp.avro.ScoredMovie;
 import myapp.punctuators.TopKPunctuator;

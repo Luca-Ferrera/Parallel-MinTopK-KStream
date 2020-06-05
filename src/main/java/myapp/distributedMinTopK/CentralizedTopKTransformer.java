@@ -1,4 +1,4 @@
-package myapp.transormers;
+package myapp.distributedMinTopK;
 
 import myapp.avro.MinTopKEntry;
 import org.apache.kafka.streams.KeyValue;
@@ -29,7 +29,6 @@ public class CentralizedTopKTransformer implements Transformer<Long, MinTopKEntr
     }
 
     public KeyValue<Long,MinTopKEntry> transform(Long key, MinTopKEntry value) {
-        // can access this.state
         this.windowedTopKState = (KeyValueStore<Long, ArrayList<MinTopKEntry>>) context.getStateStore("windowed-topk-store");
         if(this.cleanDataStructure){
             this.windowedTopKState.all().forEachRemaining(elem -> windowedTopKState.delete(elem.key));

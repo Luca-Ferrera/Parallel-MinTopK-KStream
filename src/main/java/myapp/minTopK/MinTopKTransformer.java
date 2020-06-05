@@ -1,4 +1,4 @@
-package myapp.transormers;
+package myapp.minTopK;
 
 import myapp.avro.MinTopKEntry;
 import myapp.avro.PhysicalWindow;
@@ -17,23 +17,20 @@ import java.util.stream.Collectors;
 
 import static java.lang.Integer.min;
 
-public class DistributedMinTopKTransformer implements Transformer<String, ScoredMovie, KeyValue<Long,MinTopKEntry>> {
+public class MinTopKTransformer implements Transformer<String, ScoredMovie, KeyValue<Long,MinTopKEntry>> {
     private KeyValueStore<Integer, MinTopKEntry> superTopKListStore;
     private KeyValueStore<Long, PhysicalWindow> physicalWindowsStore;
     private final int k;
     private final Boolean cleanDataStructure;
     private ProcessorContext context;
-    private final int SIZE = 24;
-    private final int HOPPING_SIZE = 6;
-    private final int NUM_INSTANCES = 3;
-    private final int LOCAL_SIZE = SIZE/NUM_INSTANCES;
-    private final int LOCAL_HOPPING_SIZE = HOPPING_SIZE/NUM_INSTANCES;
+    private final int SIZE = 1000;
+    private final int HOPPING_SIZE = 200;
     private ArrayList<MinTopKEntry> superTopKList;
     private LinkedList<PhysicalWindow> lowerBoundPointer;
     private PhysicalWindow currentWindow;
     private PhysicalWindow lastWindow;
 
-    public DistributedMinTopKTransformer(int k, String cleanDataStructure) {
+    public MinTopKTransformer(int k, String cleanDataStructure) {
         this.k = k;
         this.cleanDataStructure = cleanDataStructure.equals("clean");
     }
@@ -57,7 +54,7 @@ public class DistributedMinTopKTransformer implements Transformer<String, Scored
             superTopKListStore.all().forEachRemaining(elem -> superTopKListStore.delete(elem.key));
             return null;
         }
-        System.out.println("TRANSFORM KEY: " + key + " VALUE: " + value + " FROM PARTITION " + this.context.partition());
+//        System.out.println("TRANSFORM KEY: " + key + " VALUE: " + value);
         setUpDataStructures();
         KeyValueIterator<Long, PhysicalWindow> windowsIterator = physicalWindowsStore.all();
         MinTopKEntry newEntry = null;
@@ -65,9 +62,9 @@ public class DistributedMinTopKTransformer implements Transformer<String, Scored
             //create first window
 //            System.out.println("EMPTY WINDOWS STORE");
             MinTopKEntry firstEntry = new MinTopKEntry(value.getId(), value.getScore(),
-                                            0L, + (long) LOCAL_SIZE / LOCAL_HOPPING_SIZE - 1L);
+                                            0L, + (long) SIZE / HOPPING_SIZE - 1L);
             this.superTopKList.add(firstEntry);
-            PhysicalWindow  startingWindow = new PhysicalWindow(0L, LOCAL_SIZE, LOCAL_HOPPING_SIZE, 1, 1 ,firstEntry);
+            PhysicalWindow  startingWindow = new PhysicalWindow(0L, SIZE, HOPPING_SIZE, 1, 1 ,firstEntry);
             physicalWindowsStore.put(startingWindow.getId(), startingWindow);
             physicalWindowsStore.put(-1L, startingWindow);
             physicalWindowsStore.put(-2L, startingWindow);
@@ -75,7 +72,7 @@ public class DistributedMinTopKTransformer implements Transformer<String, Scored
             this.currentWindow = startingWindow;
             this.lastWindow = startingWindow;
             if(startingWindow.getActualRecords() == startingWindow.getHoppingSize())
-                // case of LOCAL_HOPPING_SIZE == 1
+                // case of HOPPING_SIZE == 1
                 this.createNewWindow(firstEntry);
         } else {
             //Skip currentWindow (key=-1L) && lastWindow (key=-2L)
@@ -119,7 +116,7 @@ public class DistributedMinTopKTransformer implements Transformer<String, Scored
                     // last window, create new window
 //                    System.out.println("Creating new window");
                     newEntry = new MinTopKEntry(value.getId(), value.getScore(),
-                            this.currentWindow.getId(), this.currentWindow.getId() + (long) LOCAL_SIZE / LOCAL_HOPPING_SIZE);
+                            this.currentWindow.getId(), this.currentWindow.getId() + (long) SIZE / HOPPING_SIZE);
                     this.createNewWindow(newEntry);
                 }
             }
@@ -137,10 +134,10 @@ public class DistributedMinTopKTransformer implements Transformer<String, Scored
 //        PhysicalWindow lastWindow = physicalWindowsStore.get(-2L);
         if(entry.getScore() < this.superTopKList.get(this.superTopKList.size() -1).getScore() && everyWindowHasTopK())
             //entry won't be added to superTopKList so it can't be the LowerBoundPointer
-            newWindow = new PhysicalWindow(this.lastWindow.getId() + 1L, LOCAL_SIZE, LOCAL_HOPPING_SIZE, 1,1, this.superTopKList.get(this.superTopKList.size() -1));
+            newWindow = new PhysicalWindow(this.lastWindow.getId() + 1L, SIZE, HOPPING_SIZE, 1,1, this.superTopKList.get(this.superTopKList.size() -1));
         else
             //if entry.Score <= lastEntry.Score ==> entry will be the new lastEntry in superTopKList
-            newWindow = new PhysicalWindow(this.lastWindow.getId() + 1L, LOCAL_SIZE, LOCAL_HOPPING_SIZE, 1, 1,
+            newWindow = new PhysicalWindow(this.lastWindow.getId() + 1L, SIZE, HOPPING_SIZE, 1, 1,
                     entry.getScore() <= this.superTopKList.get(this.superTopKList.size() -1).getScore() ? entry : this.superTopKList.get(this.superTopKList.size() -1));
 //        System.out.println("Inserting Window " + newWindow);
         //save new window
@@ -174,16 +171,16 @@ public class DistributedMinTopKTransformer implements Transformer<String, Scored
         }
         //add new record to superTopKList
         MinTopKEntry newEntry;
-        //this handle the case of the first LOCAL_HOPPING_SIZE records in the application
-        //these records expires in LOCAL_SIZE / LOCAL_HOPPING_SIZE - 1 windows instead of LOCAL_SIZE / LOCAL_HOPPING_SIZE windows
+        //this handle the case of the first HOPPING_SIZE records in the application
+        //these records expires in SIZE / HOPPING_SIZE - 1 windows instead of SIZE / HOPPING_SIZE windows
         List<PhysicalWindow> physicalWindowList = this.lowerBoundPointer.stream().filter(window -> window.getId() == 0).collect(Collectors.toList());
-        if(this.currentWindow.getId() == 0 && !physicalWindowList.isEmpty() && physicalWindowList.get(0).getActualRecords() <= LOCAL_HOPPING_SIZE){
+        if(this.currentWindow.getId() == 0 && !physicalWindowList.isEmpty() && physicalWindowList.get(0).getActualRecords() <= HOPPING_SIZE){
             newEntry = new MinTopKEntry(movie.getId(), movie.getScore(), 0L,
-                    (long) LOCAL_SIZE / LOCAL_HOPPING_SIZE - 1L);
+                    (long) SIZE / HOPPING_SIZE - 1L);
         }else {
             //if newWindow is created I have already created the new entry for the superTopKList, otherwise create it
             newEntry = topKEntry == null ? new MinTopKEntry(movie.getId(), movie.getScore(), this.currentWindow.getId(),
-                this.currentWindow.getId() + (long) LOCAL_SIZE / LOCAL_HOPPING_SIZE) : topKEntry;
+                this.currentWindow.getId() + (long) SIZE / HOPPING_SIZE) : topKEntry;
         }
 //        System.out.println("NEWENTRY " + newEntry);
         //insert newEntry in superTopKList
@@ -274,7 +271,7 @@ public class DistributedMinTopKTransformer implements Transformer<String, Scored
     private void forwardTopK(long windowId){
        List<MinTopKEntry> topK = this.superTopKList.subList(0,min(this.superTopKList.size(),this.k));
        topK.forEach(elem -> {
-           System.out.println("FORWARDING KEY: " + windowId +" VALUE: " + elem);
+//           System.out.println("FORWARDING KEY: " + windowId +" VALUE: " + elem);
            this.context.forward(windowId ,elem);
        });
     }
