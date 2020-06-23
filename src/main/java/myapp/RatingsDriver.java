@@ -12,8 +12,8 @@ import java.io.*;
 import java.util.*;
 
 public class RatingsDriver {
-    static String INPUT_TOPIC = "scored-rated-movies";
-    static Long INPUT_THROUGHPUT = 10L;
+    static String INPUT_TOPIC = "centralized-mintopk-scored-rated-movies";
+    static Long INPUT_THROUGHPUT = 5L;
     public static void main(final String [] args) throws Exception {
         final String bootstrapServers = args.length > 0 ? args[0] : "localhost:29092";
         final String schemaRegistryUrl = args.length > 1 ? args[1] : "http://localhost:8081";
@@ -22,7 +22,7 @@ public class RatingsDriver {
 
         // Read comma-delimited file of songs into Array
         final List<ScoredMovie> scoredMovies = new ArrayList<>();
-        File initialFile = new File("score-movies.txt");
+        File initialFile = new File("dataset/score-movies4.txt");
         InputStream targetStream = new FileInputStream(initialFile);
         final InputStreamReader streamReader = new InputStreamReader(targetStream, UTF_8);
         try (final BufferedReader br = new BufferedReader(streamReader)) {

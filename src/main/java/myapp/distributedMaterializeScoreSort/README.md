@@ -2,7 +2,7 @@
 
 ## How to try it
 
-### Local sorting
+### Distributed scoring, centralized sorting
 Run as many instance of `DistributedMaterializeScore` as you want.
 
 Run `CentralizedSorting`  with `"dmss.env"` as argument.
