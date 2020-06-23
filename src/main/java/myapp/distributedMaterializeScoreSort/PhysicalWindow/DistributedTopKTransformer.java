@@ -8,6 +8,8 @@ import org.apache.kafka.streams.state.KeyValueStore;
 
 import java.util.*;
 
+import static java.lang.Math.min;
+
 public class DistributedTopKTransformer implements Transformer<String, ScoredMovie, KeyValue<Long,ScoredMovie>> {
     private KeyValueStore<Long, ArrayList<ScoredMovie>> windowedMoviesState;
     private KeyValueStore<Integer, Integer> countState;
@@ -20,12 +22,14 @@ public class DistributedTopKTransformer implements Transformer<String, ScoredMov
     private final int LOCAL_SIZE = SIZE/NUM_INSTANCES;
     private final int LOCAL_HOPPING_SIZE = HOPPING_SIZE/NUM_INSTANCES;
     private final Boolean cleanDataStructure;
+    private final int k;
 
 
-    public DistributedTopKTransformer(String storeName1, String storeName2, String cleanDataStructure) {
+    public DistributedTopKTransformer(String storeName1, String storeName2, int k, String cleanDataStructure) {
         this.cleanDataStructure = cleanDataStructure.equals("clean");
         this.storeName1 = storeName1;
         this.storeName2 = storeName2;
+        this.k = k;
     }
 
     public void init(ProcessorContext context) {
@@ -58,7 +62,8 @@ public class DistributedTopKTransformer implements Transformer<String, ScoredMov
         if(recordCount >= LOCAL_SIZE && recordCount % LOCAL_HOPPING_SIZE == 1) {
             Comparator<ScoredMovie> compareByScore = Comparator.comparingDouble(ScoredMovie::getScore);
             Collections.sort(windowArray, compareByScore.reversed());
-            windowArray.forEach(elem -> {
+            List< ScoredMovie> topKList = windowArray.subList(0, min(this.k, windowArray.size()));
+            topKList.forEach(elem -> {
                 context.forward(newKey, elem);
             });
         }

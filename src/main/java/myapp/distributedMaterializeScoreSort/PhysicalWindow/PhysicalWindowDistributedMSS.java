@@ -29,7 +29,7 @@ public class PhysicalWindowDistributedMSS {
 
         return props;
     }
-    public Topology buildTopology(Properties envProps, String cleanDataStructure) {
+    public Topology buildTopology(Properties envProps, String cleanDataStructure, int k) {
         final StreamsBuilder builder = new StreamsBuilder();
         final String scoredMovieTopic = envProps.getProperty("scored.movies.topic.name");
         final String sortedTopKMovieTopic = envProps.getProperty("sorted.movies.topic.name");
@@ -62,7 +62,7 @@ public class PhysicalWindowDistributedMSS {
                 .transform(new TransformerSupplier<String,ScoredMovie,KeyValue<Long , ScoredMovie>>() {
                     public Transformer get() {
                         return new DistributedTopKTransformer( "windowed-movies-store",
-                                 "record-count-store", cleanDataStructure );
+                                 "record-count-store", k, cleanDataStructure );
                     }
                 }, "windowed-movies-store", "record-count-store")
                 .to(sortedTopKMovieTopic, Produced.with(Serdes.Long(), scoredMovieAvroSerde(envProps)));
@@ -119,14 +119,18 @@ public class PhysicalWindowDistributedMSS {
             throw new IllegalArgumentException("This program takes one argument: the path to an environment configuration file.");
         }
         String cleanDataStructure = "";
+        int k = 0;
         if(args.length == 2){
-            cleanDataStructure = args[1];
+            k = Integer.parseInt(args[1]);
+        }else if(args.length == 3){
+            cleanDataStructure = args[2];
+            k = Integer.parseInt(args[1]);
         }
         System.out.println(cleanDataStructure);
         PhysicalWindowDistributedMSS dmss = new PhysicalWindowDistributedMSS();
         Properties envProps = dmss.loadEnvProperties(args[0]);
         Properties streamProps = dmss.buildStreamsProperties(envProps);
-        Topology topology = dmss.buildTopology(envProps, cleanDataStructure);
+        Topology topology = dmss.buildTopology(envProps, cleanDataStructure, k);
         System.out.println(topology.describe());
 
         dmss.createTopics(envProps);

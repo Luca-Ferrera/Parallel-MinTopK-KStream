@@ -30,7 +30,7 @@ public class PhysicalWindowCentralizedAggregatedSort {
         return props;
     }
 
-    public Topology buildTopology(Properties envProps, String cleanDataStructure) {
+    public Topology buildTopology(Properties envProps, String cleanDataStructure, int k) {
         final StreamsBuilder builder = new StreamsBuilder();
         final String sortedTopKMovieTopic = envProps.getProperty("sorted.movies.topic.name");
         final String topKTopic = envProps.getProperty("final.sorted.movies.topic.name");
@@ -47,7 +47,7 @@ public class PhysicalWindowCentralizedAggregatedSort {
         builder.<Long, ScoredMovie>stream(sortedTopKMovieTopic)
                 .transform(new TransformerSupplier<Long,ScoredMovie,KeyValue<Long , ScoredMovie>>() {
                     public Transformer get() {
-                        return new CentralizedAggregatedSortTransformer(cleanDataStructure);
+                        return new CentralizedAggregatedSortTransformer(cleanDataStructure, k);
                     }
                 }, "windowed-movies-store")
                 .to(topKTopic, Produced.with(Serdes.Long(), scoredMovieAvroSerde(envProps)));
@@ -103,14 +103,18 @@ public class PhysicalWindowCentralizedAggregatedSort {
         }
 
         String cleanDataStructure = "";
+        int k = 0;
         if(args.length == 2){
-            cleanDataStructure = args[1];
+            k = Integer.parseInt(args[1]);
+        }else if(args.length == 3){
+            cleanDataStructure = args[2];
+            k = Integer.parseInt(args[1]);
         }
 
         PhysicalWindowCentralizedAggregatedSort centralizedSorting = new PhysicalWindowCentralizedAggregatedSort();
         Properties envProps = centralizedSorting.loadEnvProperties(args[0]);
         Properties streamProps = centralizedSorting.buildStreamsProperties(envProps);
-        Topology topology = centralizedSorting.buildTopology(envProps, cleanDataStructure);
+        Topology topology = centralizedSorting.buildTopology(envProps, cleanDataStructure, k);
         System.out.println(topology.describe());
 
         centralizedSorting.createTopics(envProps);

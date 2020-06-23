@@ -9,16 +9,21 @@ import org.apache.kafka.streams.state.KeyValueStore;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
+
+import static java.lang.Math.min;
 
 public class CentralizedAggregatedSortTransformer implements Transformer<Long, ScoredMovie,  KeyValue<Long, ScoredMovie>> {
 
     private final Boolean cleanDataStructure;
     private KeyValueStore<Long, ArrayList<ScoredMovie>> windowedMoviesState;
     private ProcessorContext context;
-    private int INSTANCE_NUMBER = 3;
+    private final int INSTANCE_NUMBER = 3;
+    private final int k;
 
-    public CentralizedAggregatedSortTransformer(String cleanDataStructure) {
+    public CentralizedAggregatedSortTransformer(String cleanDataStructure, int k) {
         this.cleanDataStructure = cleanDataStructure.equals("clean");
+        this.k = k;
     }
 
     public void init(ProcessorContext context) {
@@ -46,7 +51,8 @@ public class CentralizedAggregatedSortTransformer implements Transformer<Long, S
             // remove the list associated to windowID=key-1 because from now on it'll be useless
             this.windowedMoviesState.delete(key - 1);
             // forward topK records for the windowID=key-1
-            oldList.forEach(elem -> {
+            List< ScoredMovie> topKList = oldList.subList(0, min(this.k, oldList.size()));
+            topKList.forEach(elem -> {
                 this.context.forward(key, elem);
             });
         }
