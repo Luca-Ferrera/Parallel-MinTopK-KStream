@@ -12,10 +12,12 @@ import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.state.StoreBuilder;
 import org.apache.kafka.streams.state.Stores;
 
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class PhysicalWindowCentralizedAggregatedSort {
     public Properties buildStreamsProperties(Properties envProps) {
@@ -44,12 +46,30 @@ public class PhysicalWindowCentralizedAggregatedSort {
         builder.addStateStore(storeBuilder);
 
         // SortedMovie
+        AtomicReference<Instant> start = new AtomicReference<>();
+        AtomicReference<Instant> end = new AtomicReference<>();
         builder.<Long, ScoredMovie>stream(sortedTopKMovieTopic)
+                .map((key, value) ->{
+                    start.set(Instant.now());
+                    return new KeyValue<>(key,value);
+                })
                 .transform(new TransformerSupplier<Long,ScoredMovie,KeyValue<Long , ScoredMovie>>() {
                     public Transformer get() {
                         return new CentralizedAggregatedSortTransformer(cleanDataStructure);
                     }
                 }, "windowed-movies-store")
+                .map((key, value) ->{
+                    end.set(Instant.now());
+                    try(FileWriter fw = new FileWriter("DisMaterializeSort/500Krecords_1000_200_latency_10ms.txt", true);
+                        BufferedWriter bw = new BufferedWriter(fw);
+                        PrintWriter out = new PrintWriter(bw))
+                    {
+                        out.println("Latency window " + key + " : " + Duration.between(start.get(), end.get()).toNanos());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    return new KeyValue<>(key,value);
+                })
                 .to(topKTopic, Produced.with(Serdes.Long(), scoredMovieAvroSerde(envProps)));
 
         return builder.build();

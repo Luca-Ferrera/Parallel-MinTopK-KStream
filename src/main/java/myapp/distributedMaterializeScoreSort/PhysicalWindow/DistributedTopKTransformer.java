@@ -14,8 +14,8 @@ public class DistributedTopKTransformer implements Transformer<String, ScoredMov
     private String storeName1;
     private String storeName2;
     private ProcessorContext context;
-    private final int SIZE = 24;
-    private final int HOPPING_SIZE = 6;
+    private final int SIZE = 1200;
+    private final int HOPPING_SIZE = 300;
     private final int NUM_INSTANCES = 3;
     private final int LOCAL_SIZE = SIZE/NUM_INSTANCES;
     private final int LOCAL_HOPPING_SIZE = HOPPING_SIZE/NUM_INSTANCES;
@@ -41,6 +41,7 @@ public class DistributedTopKTransformer implements Transformer<String, ScoredMov
             System.out.println("CLEANED");
             return null;
         }
+        System.out.println("The offset of the record " + key + " we just read is: " + this.context.offset());
         int recordCount = this.countState.all().hasNext() ? this.countState.get(-1) : 1;
         long windowID = (recordCount - 1) / LOCAL_HOPPING_SIZE;
         this.windowedMoviesState.putIfAbsent(windowID, new ArrayList<ScoredMovie>());
