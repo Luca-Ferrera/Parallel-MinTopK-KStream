@@ -12,17 +12,18 @@ import java.io.*;
 import java.util.*;
 
 public class RatingsDriver {
-    static String INPUT_TOPIC = "centralized-mintopk-scored-rated-movies";
-    static Long INPUT_THROUGHPUT = 5L;
     public static void main(final String [] args) throws Exception {
-        final String bootstrapServers = args.length > 0 ? args[0] : "localhost:29092";
-        final String schemaRegistryUrl = args.length > 1 ? args[1] : "http://localhost:8081";
+        final String bootstrapServers = "localhost:29092";
+        final String schemaRegistryUrl = "http://localhost:8081";
+        final String INPUT_TOPIC = args.length > 0 ? args[0] : "centralized-mintopk-scored-rated-movies";
+        final Long INPUT_THROUGHPUT = args.length > 1 ? Long.parseLong(args[1]) : 5L;
+        final int dataset = args.length > 2 ? Integer.parseInt(args[2]) : 0;
         System.out.println("Connecting to Kafka cluster via bootstrap servers " + bootstrapServers);
         System.out.println("Connecting to Confluent schema registry at " + schemaRegistryUrl);
 
         // Read comma-delimited file of songs into Array
         final List<ScoredMovie> scoredMovies = new ArrayList<>();
-        File initialFile = new File("dataset/score-movies0.txt");
+        File initialFile = new File("dataset/score-movies" + dataset +".txt");
         InputStream targetStream = new FileInputStream(initialFile);
         final InputStreamReader streamReader = new InputStreamReader(targetStream, UTF_8);
         try (final BufferedReader br = new BufferedReader(streamReader)) {

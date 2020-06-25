@@ -72,3 +72,7 @@ in:Proceedings of the 14th International Conference onExtending Database Technol
 Eventi a frequenza costante: un evento ogni tot secondi.
 Latenza: invio evento 9-13-17, fine evento risposta con i topk
 Throughput: massimo input throughput
+
+How to run on aws:
+- copy jar file using `scp -i *.pem jar-file.jar ubuntu@DNS:~/kstream`
+- connect using SSH `ssh -i *.pem ubuntu@DNS`
