@@ -66,7 +66,7 @@ public class CentralizedMinTopK {
                 }, "windows-store", "super-topk-list-store")
                 .map((key, value) ->{
                     end.set(Instant.now());
-                    try(FileWriter fw = new FileWriter("CentralizedMinTopK/dataset4/500Krecords_1000_200_" + k + "K_latency_5s.txt", true);
+                    try(FileWriter fw = new FileWriter("CentralizedMinTopK/dataset0/500Krecords_1200_300_" + k + "K_latency_5s.txt", true);
                         BufferedWriter bw = new BufferedWriter(fw);
                         PrintWriter out = new PrintWriter(bw))
                     {

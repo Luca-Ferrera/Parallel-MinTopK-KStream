@@ -23,8 +23,8 @@ public class MinTopKTransformer implements Transformer<String, ScoredMovie, KeyV
     private final int k;
     private final Boolean cleanDataStructure;
     private ProcessorContext context;
-    private final int SIZE = 1000;
-    private final int HOPPING_SIZE = 200;
+    private final int SIZE = 1200;
+    private final int HOPPING_SIZE = 300;
     private ArrayList<MinTopKEntry> superTopKList;
     private LinkedList<PhysicalWindow> lowerBoundPointer;
     private PhysicalWindow currentWindow;

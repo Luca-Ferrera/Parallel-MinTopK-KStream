@@ -22,7 +22,7 @@ public class RatingsDriver {
 
         // Read comma-delimited file of songs into Array
         final List<ScoredMovie> scoredMovies = new ArrayList<>();
-        File initialFile = new File("dataset/score-movies4.txt");
+        File initialFile = new File("dataset/score-movies0.txt");
         InputStream targetStream = new FileInputStream(initialFile);
         final InputStreamReader streamReader = new InputStreamReader(targetStream, UTF_8);
         try (final BufferedReader br = new BufferedReader(streamReader)) {
@@ -35,6 +35,7 @@ public class RatingsDriver {
 
         final Properties props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(ProducerConfig.PARTITIONER_CLASS_CONFIG, RoundRobinPartitioner.class);
 
         final Map<String, String> serdeConfig = Collections.singletonMap(
                 AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
@@ -48,7 +49,7 @@ public class RatingsDriver {
         //sending movies every INPUT_THROUGHPUT ms
         final Integer[] i = {0};
         scoredMovies.forEach(movie -> {
-            scoredMovieProducer.send(new ProducerRecord<String, ScoredMovie>(INPUT_TOPIC, String.valueOf(i[0]), movie),
+            scoredMovieProducer.send(new ProducerRecord<String, ScoredMovie>(INPUT_TOPIC, null, movie),
             new Callback() {
                 public void onCompletion(RecordMetadata metadata, Exception e) {
                     if(e != null) {

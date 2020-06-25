@@ -13,7 +13,7 @@ import java.util.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class RatingsDriverTest {
-    static String INPUT_TOPIC = "pdmss-scored-rated-movies";
+    static String INPUT_TOPIC = "dis-mintopk-scored-rated-movies";
     static Long INPUT_THROUGHPUT = 500L;
     public static void main(final String [] args) throws Exception {
         final String bootstrapServers = args.length > 0 ? args[0] : "localhost:29092";

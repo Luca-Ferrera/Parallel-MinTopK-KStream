@@ -41,7 +41,6 @@ public class DistributedTopKTransformer implements Transformer<String, ScoredMov
             System.out.println("CLEANED");
             return null;
         }
-        System.out.println("The offset of the record " + key + " we just read is: " + this.context.offset());
         int recordCount = this.countState.all().hasNext() ? this.countState.get(-1) : 1;
         long windowID = (recordCount - 1) / LOCAL_HOPPING_SIZE;
         this.windowedMoviesState.putIfAbsent(windowID, new ArrayList<ScoredMovie>());

@@ -60,7 +60,7 @@ public class PhysicalWindowCentralizedAggregatedSort {
                 }, "windowed-movies-store")
                 .map((key, value) ->{
                     end.set(Instant.now());
-                    try(FileWriter fw = new FileWriter("DisMaterializeSort/500Krecords_1000_200_latency_10ms.txt", true);
+                    try(FileWriter fw = new FileWriter("DisMaterializeSort/500Krecords_1200_300_latency_10ms.txt", true);
                         BufferedWriter bw = new BufferedWriter(fw);
                         PrintWriter out = new PrintWriter(bw))
                     {

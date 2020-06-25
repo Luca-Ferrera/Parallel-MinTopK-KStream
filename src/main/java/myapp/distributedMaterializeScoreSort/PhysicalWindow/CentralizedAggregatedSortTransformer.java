@@ -32,7 +32,7 @@ public class CentralizedAggregatedSortTransformer implements Transformer<Long, S
             System.out.println("CLEANED");
             return null;
         }
-        System.out.println("TRANSFORM KEY: " + key + " VALUE: " + value );
+        System.out.println("The offset of the record " + key + " we just read is: " + this.context.offset());
         // insert new record in the store based on its key (windowID)
         this.windowedMoviesState.putIfAbsent(key, new ArrayList<ScoredMovie>());
         ArrayList<ScoredMovie> windowArray = this.windowedMoviesState.get(key);
