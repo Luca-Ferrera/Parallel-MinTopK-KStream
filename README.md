@@ -33,35 +33,64 @@
 
 Run `docker-compose up -d` to build and run the images
 
-Run the application to generate the topics (just do it the first time)
+Run the application using its jar file in `out/artifacts/APP_NAME/`
 
-Run `docker exec -i schema-registry /usr/bin/kafka-avro-console-producer --topic movies --broker-list broker:9092 --property value.schema="$(< src/main/avro/movie.avsc)"` to open a console to input movies data
-
-Run `docker exec -i schema-registry /usr/bin/kafka-avro-console-producer --topic ratings --broker-list broker:9092 --property value.schema="$(< src/main/avro/rating.avsc)"` to open a console to input ratings data
-
-Run `docker exec -it schema-registry /usr/bin/kafka-avro-console-consumer --topic TOPIC_NAME --bootstrap-server broker:9092 --from-beginning` to read data from `TOPIC_NAME` topic
-
-Start the application again!
+Run `src/main/java/myapp/RatingsDriverTest.java`, change the `INPUT_TOPIC` in the file based on the app you're testing.
 
 ## Measurements
 
+### Centralized Benchmark
 Run `MaterializeScoreSort`
 
-Run `RatingsDriver` setting the input topic to `scored-rated-movies`
+Run `RatingsDriver` with `scored-rated-movies`, `INPUT_THROUGHPUT` and `DATASET_NUMBER` as arguments.
 
 Check when reading offset << writing offset
 
-Run `cleanLatencyFile.py MaterializeSort/latency_5ms.txt -1`
+Run `cleanLatencyFile.py MaterializeSort/latency_5ms.txt -1` to get the final `MaterializeSort/latency_5ms.csv`
 
-Run `averageLatency.py MaterializeSort/latency_5ms.txt`
+Run `averageLatency.py MaterializeSort/latency_5ms.txt` to get average Latency of the experiment.
 
 ---
 
-Run `java -jar out/artifacts/minTopK_jar/kafka-stream-tutorial.jar "/home/lucaferrera/Documenti/Tesi/kstream/minTopK.env"  topK` where topK is an integer value
+### Centralized MinTopK
 
-Run `RatingsDriver` setting the input topic to `mintopk-scored-rated-movies`
+Run the experiment using the 5 datasets that you can find in `dataset/`
 
-Run `cleanLatencyFile.py CentralizedMinTopK/topKK_latency_5ms.txt topK`
+Run `java -jar out/artifacts/minTopK_jar/kafka-stream-tutorial.jar "src/main/java/myapp/minTopK/minTopK.env"  topK dataset` where topK and dataset are integer values.
 
-Run `averageLatency.py CentralizedMinTopK/topKK_latency_5ms.txt`
+Run `RatingsDriver` with `centralized-mintopk-scored-rated-movies`, `INPUT_THROUGHPUT` and `DATASET_NUMBER` as arguments.
+
+Run `cleanLatencyFile.py CentralizedMinTopK/topKK_latency_5ms.txt topK` to get the final `CentralizedMinTopK/topKK_latency_5ms.csv`
+
+Run `averageLatency.py CentralizedMinTopK/topKK_latency_5ms.txt` to get average Latency of the experiment.
+
+---
+
+### Distributed Benchmark
+Run 3 instances of `src/main/java/myapp/distributedMaterializeScoreSort/PhysicalWindow/PhysicalWindowDistributedMSS`.
+
+Run `src/main/java/myapp/distributedMaterializeScoreSort/PhysicalWindow/PhysicalWindowCentralizedAggregatedSort`.
+
+Run both files with `src/main/java/myapp/distributedMaterializeScoreSort/PhysicalWindow/physicalWindowDisMSS.env` as argument.
+
+Run `RatingsDriver` with `pdmss-scored-rated-movies`, `INPUT_THROUGHPUT` and `DATASET_NUMBER` as arguments.
+
+Check when reading offset << writing offset
+
+Run `cleanLatencyFile.py DisMaterializeSort/latency_5ms.txt -1` to get the final `DisMaterializeSort/latency_5ms.csv`
+
+Run `averageLatency.py DisMaterializeSort/latency_5ms.txt` to get average Latency of the experiment.
+
+### Distributed MinTopK
+Run 3 instances of `src/main/java/myapp/distributedMinTopK/DistributedMinTopK.java`.
+
+Run `src/main/java/myapp/distributedMinTopK/CentralizedTopK.java`.
+
+Run both files with `src/main/java/myapp/distributedMinTopK/disMinTopK.env` as argument.
+
+Run `RatingsDriver` with `dis-mintopk-scored-rated-movies`, `INPUT_THROUGHPUT` and `DATASET_NUMBER` as arguments.
+
+Run `cleanLatencyFile.py DisMinTopK/topKK_latency_5ms.txt topK` to get the final `DisMinTopK/topKK_latency_5ms.csv`
+
+Run `averageLatency.py DisMinTopK/topKK_latency_5ms.txt` to get average Latency of the experiment.
 
