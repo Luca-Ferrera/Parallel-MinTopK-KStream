@@ -16,6 +16,7 @@ import org.apache.kafka.streams.state.StoreBuilder;
 import org.apache.kafka.streams.state.Stores;
 
 import java.io.*;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -33,7 +34,7 @@ public class DistributedMinTopK {
 
         return props;
     }
-    public Topology buildTopology(Properties envProps, String cleanDataStructure, int k) {
+    public Topology buildTopology(Properties envProps, String cleanDataStructure, int k, int dataset) {
         final StreamsBuilder builder = new StreamsBuilder();
         final String scoredMovieTopic = envProps.getProperty("scored.movies.topic.name");
         final String minTopKRatedMovie = envProps.getProperty("mintopk.movies.topic.name");
@@ -59,11 +60,29 @@ public class DistributedMinTopK {
         AtomicReference<Instant> end = new AtomicReference<>();
         // TopKMovies
         builder.<String,ScoredMovie>stream(scoredMovieTopic)
+                .map((key, value) ->{
+                    start.set(Instant.now());
+                    return new KeyValue<>(key,value);
+                })
                 .transform(new TransformerSupplier<String,ScoredMovie,KeyValue<Long , MinTopKEntry>>() {
                     public Transformer get() {
                         return new DistributedMinTopKTransformer(k, cleanDataStructure);
                     }
                 }, "windows-store", "super-topk-list-store")
+                .map((key, value) ->{
+                    end.set(Instant.now());
+                    try(FileWriter fw = new FileWriter("DisMinTopK/dataset" + dataset + "/500Krecords_1200_300_" + k + "K_latency_5s.txt", true);
+                        BufferedWriter bw = new BufferedWriter(fw);
+                        PrintWriter out = new PrintWriter(bw))
+                    {
+                        out.println("Latency window " + key + " : " + Duration.between(start.get(), end.get()).toNanos());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    if(key % 500 == 0)
+                        System.out.println("key: " + key + " value: " + value);
+                    return new KeyValue<>(key,value);
+                })
                 .to(minTopKRatedMovie, Produced.with(Serdes.Long(),minTopKEntryAvroSerde(envProps)));
 
         return builder.build();
@@ -129,17 +148,20 @@ public class DistributedMinTopK {
 
         String cleanDataStructure = "";
         int k = 0;
-        if(args.length == 2){
+        int dataset = 0;
+        if(args.length == 3){
             k = Integer.parseInt(args[1]);
-        } else if(args.length == 3){
-            cleanDataStructure = args[2];
+            dataset = Integer.parseInt(args[2]);
+        } else if(args.length == 4){
+            cleanDataStructure = args[3];
+            dataset = Integer.parseInt(args[2]);
             k = Integer.parseInt(args[1]);
         }
 
         DistributedMinTopK minTopK = new DistributedMinTopK();
         Properties envProps = minTopK.loadEnvProperties(args[0]);
         Properties streamProps = minTopK.buildStreamsProperties(envProps);
-        Topology topology = minTopK.buildTopology(envProps, cleanDataStructure, k);
+        Topology topology = minTopK.buildTopology(envProps, cleanDataStructure, k, dataset);
         System.out.println(topology.describe());
 
         minTopK.createTopics(envProps);

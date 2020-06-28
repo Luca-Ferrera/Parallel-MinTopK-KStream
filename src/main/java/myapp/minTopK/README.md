@@ -11,7 +11,7 @@ Where topK is the value of the topK parameter.
 
 ## Generate input data
 
-Run `RatingsDriver` with `mintopk-scored-rated-movies`, `INPUT_THROUGHPUT` and `DATASET_NUMBER` as arguments, it generates records like  this one:
+Run `RatingsDriver` with `centralized-mintopk-scored-rated-movies`, `INPUT_THROUGHPUT` and `DATASET_NUMBER` as arguments, it generates records like  this one:
 ```
 {"id": 294, "title": "Die Hard", "release_year": 1988, "rating": 4.496183638158378, "score": 0.5565263742209872}
 ```
