@@ -90,7 +90,8 @@ Run both files with `src/main/java/myapp/distributedMinTopK/disMinTopK.env` as a
 
 Run `RatingsDriver` with `dis-mintopk-scored-rated-movies`, `INPUT_THROUGHPUT` and `DATASET_NUMBER` as arguments.
 
-Run `cleanLatencyFile.py DisMinTopK/topKK_latency_5ms.txt topK` to get the final `DisMinTopK/topKK_latency_5ms.csv`
+Run `cleanEndTimeFile DisMinTopK/500Krecords_1200_300_topKK_end_time_5ms.txt topK` to get`DisMinTopK/500Krecords_1200_300_topKK_end_time_5ms.csv`
 
-Run `averageLatency.py DisMinTopK/topKK_latency_5ms.txt` to get average Latency of the experiment.
+Run `cleanStartTimeFile DisMinTopK/dataset0/instance0_500Krecords_1200_300_2K_start_time_5ms.txt LocalWindowSize LocalWindowHoppingSize` for each instance's file
 
+Run `distributedLatency.py instance0.csv instance1.csv instance2.csv endTime.csv` to get the final latency for each windows

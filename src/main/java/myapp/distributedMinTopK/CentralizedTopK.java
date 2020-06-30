@@ -15,6 +15,7 @@ import org.apache.kafka.streams.state.StoreBuilder;
 import org.apache.kafka.streams.state.Stores;
 
 import java.io.*;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -32,7 +33,7 @@ public class CentralizedTopK {
 
         return props;
     }
-    public Topology buildTopology(Properties envProps, String cleanDataStructure, int k) {
+    public Topology buildTopology(Properties envProps, String cleanDataStructure, int k, int dataset) {
         final StreamsBuilder builder = new StreamsBuilder();
         final String minTopKRatedMovie = envProps.getProperty("mintopk.movies.topic.name");
         final String windowedTopKTopic = envProps.getProperty("windowed.mintopk.topic.name");
@@ -47,7 +48,6 @@ public class CentralizedTopK {
 
 
 
-        AtomicReference<Instant> start = new AtomicReference<>();
         AtomicReference<Instant> end = new AtomicReference<>();
         // TopKMovies
         builder.<Long,MinTopKEntry>stream(minTopKRatedMovie)
@@ -56,6 +56,18 @@ public class CentralizedTopK {
                         return new CentralizedTopKTransformer(k, cleanDataStructure);
                     }
                 }, "windowed-topk-store")
+                .map((key, value) ->{
+                    end.set(Instant.now());
+                    try(FileWriter fw = new FileWriter("DisMinTopK/dataset" + dataset + "/500Krecords_1200_300_" + k + "K_end_time_5ms.txt", true);
+                        BufferedWriter bw = new BufferedWriter(fw);
+                        PrintWriter out = new PrintWriter(bw))
+                    {
+                        out.println("Latency window " + key + " : " + end.get());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    return new KeyValue<>(key,value);
+                })
                 .to(windowedTopKTopic, Produced.with(Serdes.Long(),minTopKEntryAvroSerde(envProps)));
 
         return builder.build();
@@ -112,17 +124,20 @@ public class CentralizedTopK {
 
         String cleanDataStructure = "";
         int k = 0;
-        if(args.length == 2){
+        int dataset = 0;
+        if(args.length == 3){
             k = Integer.parseInt(args[1]);
-        } else if(args.length == 3){
-            cleanDataStructure = args[2];
+            dataset = Integer.parseInt(args[2]);
+        } else if(args.length == 4){
+            cleanDataStructure = args[3];
+            dataset = Integer.parseInt(args[2]);
             k = Integer.parseInt(args[1]);
         }
 
         CentralizedTopK centralizedTopK = new CentralizedTopK();
         Properties envProps = centralizedTopK.loadEnvProperties(args[0]);
         Properties streamProps = centralizedTopK.buildStreamsProperties(envProps);
-        Topology topology = centralizedTopK.buildTopology(envProps, cleanDataStructure, k);
+        Topology topology = centralizedTopK.buildTopology(envProps, cleanDataStructure, k, dataset);
         System.out.println(topology.describe());
 
         centralizedTopK.createTopics(envProps);
