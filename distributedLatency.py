@@ -16,4 +16,5 @@ with open(sys.argv[4][:-16] + "5ms.csv", "w") as f:
         splittedLine3 = l3.split(",")
         splittedLine4 = l4.split(",")
         startTime = max(splittedLine1[1][:-1], splittedLine2[1][:-1], splittedLine3[1][:-1])
-        f.write(splittedLine4[0] + "," + str(datetime.datetime.strptime(splittedLine4[1][:-1], '%Y-%m-%d %H:%M:%S.%f') - datetime.datetime.strptime(startTime, '%Y-%m-%d %H:%M:%S.%f')) + "\n")
+        latency = datetime.datetime.strptime(splittedLine4[1][:-1], '%Y-%m-%d %H:%M:%S.%f') - datetime.datetime.strptime(startTime, '%Y-%m-%d %H:%M:%S.%f')
+        f.write(splittedLine4[0] + "," + str(latency.total_seconds()*1000) + "\n")
