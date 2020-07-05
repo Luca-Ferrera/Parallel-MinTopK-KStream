@@ -42,7 +42,7 @@ Run `src/main/java/myapp/RatingsDriverTest.java`, change the `INPUT_TOPIC` in th
 ### Centralized Benchmark
 Run `MaterializeScoreSort`
 
-Run `RatingsDriver` with `scored-rated-movies`, `INPUT_THROUGHPUT` and `DATASET_NUMBER` as arguments.
+Run `RatingsDriver` with `scored-rated-movies`, `INPUT_THROUGHPUT` and `DATASET` as arguments.
 
 Check when reading offset << writing offset
 
@@ -58,7 +58,7 @@ Run the experiment using the 5 datasets that you can find in `dataset/`
 
 Run `java -jar out/artifacts/minTopK_jar/kafka-stream-tutorial.jar "src/main/java/myapp/minTopK/minTopK.env"  topK dataset` where topK and dataset are integer values.
 
-Run `RatingsDriver` with `centralized-mintopk-scored-rated-movies`, `INPUT_THROUGHPUT` and `DATASET_NUMBER` as arguments.
+Run `RatingsDriver` with `centralized-mintopk-scored-rated-movies`, `INPUT_THROUGHPUT` and `DATASET` as arguments.
 
 Run `cleanLatencyFile.py CentralizedMinTopK/topKK_latency_5ms.txt topK` to get the final `CentralizedMinTopK/topKK_latency_5ms.csv`
 
@@ -73,7 +73,7 @@ Run `src/main/java/myapp/distributedMaterializeScoreSort/PhysicalWindow/Physical
 
 Run both files with `src/main/java/myapp/distributedMaterializeScoreSort/PhysicalWindow/physicalWindowDisMSS.env` as argument.
 
-Run `RatingsDriver` with `pdmss-scored-rated-movies`, `INPUT_THROUGHPUT` and `DATASET_NUMBER` as arguments.
+Run `RatingsDriver` with `pdmss-scored-rated-movies`, `INPUT_THROUGHPUT` and `DATASET` as arguments.
 
 Check when reading offset << writing offset
 
@@ -82,15 +82,16 @@ Run `cleanLatencyFile.py DisMaterializeSort/latency_5ms.txt -1` to get the final
 Run `averageLatency.py DisMaterializeSort/latency_5ms.txt` to get average Latency of the experiment.
 
 ### Distributed MinTopK
-Run 3 instances of `src/main/java/myapp/distributedMinTopK/DistributedMinTopK.java`.
+Run 3 instances of `src/main/java/myapp/distributedMinTopK/DistributedMinTopK.java ENV_FILE TOPK DATASET #INSTANCE`.
 
-Run `src/main/java/myapp/distributedMinTopK/CentralizedTopK.java`.
+Run `src/main/java/myapp/distributedMinTopK/CentralizedTopK.java ENV_FILE TOPK DATASET`.
 
-Run both files with `src/main/java/myapp/distributedMinTopK/disMinTopK.env` as argument.
+Run both files with `src/main/java/myapp/distributedMinTopK/disMinTopK.env` as first argument.
 
-Run `RatingsDriver` with `dis-mintopk-scored-rated-movies`, `INPUT_THROUGHPUT` and `DATASET_NUMBER` as arguments.
+Run `RatingsDriver` with `dis-mintopk-scored-rated-movies`, `INPUT_THROUGHPUT` and `DATASET` as arguments.
 
-Run `cleanLatencyFile.py DisMinTopK/topKK_latency_5ms.txt topK` to get the final `DisMinTopK/topKK_latency_5ms.csv`
+Run `cleanEndTimeFile.py DisMinTopK/500Krecords_1200_300_topKK_end_time_5ms.txt topK` to get`DisMinTopK/500Krecords_1200_300_topKK_end_time_5ms.csv`
 
-Run `averageLatency.py DisMinTopK/topKK_latency_5ms.txt` to get average Latency of the experiment.
+Run `cleanStartTimeFile.py DisMinTopK/dataset0/instance0_500Krecords_1200_300_2K_start_time_5ms.txt LocalWindowSize LocalWindowHoppingSize` for each instance's file
 
+Run `distributedLatency.py instance0.csv instance1.csv instance2.csv endTime.csv` to get the final latency for each windows

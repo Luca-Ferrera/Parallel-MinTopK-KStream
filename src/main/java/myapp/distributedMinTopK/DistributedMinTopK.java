@@ -34,7 +34,7 @@ public class DistributedMinTopK {
 
         return props;
     }
-    public Topology buildTopology(Properties envProps, String cleanDataStructure, int k, int dataset) {
+    public Topology buildTopology(Properties envProps, String cleanDataStructure, int k, int dataset, int instance_number) {
         final StreamsBuilder builder = new StreamsBuilder();
         final String scoredMovieTopic = envProps.getProperty("scored.movies.topic.name");
         final String minTopKRatedMovie = envProps.getProperty("mintopk.movies.topic.name");
@@ -62,6 +62,15 @@ public class DistributedMinTopK {
         builder.<String,ScoredMovie>stream(scoredMovieTopic)
                 .map((key, value) ->{
                     start.set(Instant.now());
+                    try(FileWriter fw = new FileWriter("DisMinTopK/dataset" + dataset + "/instance" +
+                            instance_number + "_500Krecords_1200_300_" + k + "K_start_time_5ms.txt", true);
+                        BufferedWriter bw = new BufferedWriter(fw);
+                        PrintWriter out = new PrintWriter(bw))
+                    {
+                        out.println("Latency window " + key + " : " + start.get());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     return new KeyValue<>(key,value);
                 })
                 .transform(new TransformerSupplier<String,ScoredMovie,KeyValue<Long , MinTopKEntry>>() {
@@ -70,15 +79,6 @@ public class DistributedMinTopK {
                     }
                 }, "windows-store", "super-topk-list-store")
                 .map((key, value) ->{
-                    end.set(Instant.now());
-                    try(FileWriter fw = new FileWriter("DisMinTopK/dataset" + dataset + "/500Krecords_1200_300_" + k + "K_latency_5s.txt", true);
-                        BufferedWriter bw = new BufferedWriter(fw);
-                        PrintWriter out = new PrintWriter(bw))
-                    {
-                        out.println("Latency window " + key + " : " + Duration.between(start.get(), end.get()).toNanos());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
                     if(key % 500 == 0)
                         System.out.println("key: " + key + " value: " + value);
                     return new KeyValue<>(key,value);
@@ -149,11 +149,14 @@ public class DistributedMinTopK {
         String cleanDataStructure = "";
         int k = 0;
         int dataset = 0;
-        if(args.length == 3){
+        int instance_number = 0;
+        if(args.length == 4){
             k = Integer.parseInt(args[1]);
             dataset = Integer.parseInt(args[2]);
-        } else if(args.length == 4){
-            cleanDataStructure = args[3];
+            instance_number = Integer.parseInt(args[3]);
+        } else if(args.length == 5){
+            cleanDataStructure = args[4];
+            instance_number = Integer.parseInt(args[3]);
             dataset = Integer.parseInt(args[2]);
             k = Integer.parseInt(args[1]);
         }
@@ -161,7 +164,7 @@ public class DistributedMinTopK {
         DistributedMinTopK minTopK = new DistributedMinTopK();
         Properties envProps = minTopK.loadEnvProperties(args[0]);
         Properties streamProps = minTopK.buildStreamsProperties(envProps);
-        Topology topology = minTopK.buildTopology(envProps, cleanDataStructure, k, dataset);
+        Topology topology = minTopK.buildTopology(envProps, cleanDataStructure, k, dataset, instance_number);
         System.out.println(topology.describe());
 
         minTopK.createTopics(envProps);
