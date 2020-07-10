@@ -62,7 +62,7 @@ public class CentralizedMinTopKN {
                 })
                 .transform(new TransformerSupplier<String,ScoredMovie,KeyValue<Long , MinTopKEntry>>() {
                     public Transformer get() {
-                        return new MinTopKTransformer(k, cleanDataStructure);
+                        return new MinTopKNTransformer(k, n, cleanDataStructure);
                     }
                 }, "windows-store", "super-topk-list-store")
                 .map((key, value) ->{
