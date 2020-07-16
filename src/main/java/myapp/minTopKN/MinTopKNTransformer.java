@@ -63,7 +63,7 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
         MinTopKEntry newEntry = null;
         //TODO: CHECK THIS PART
         if(!windowsIterator.hasNext()) {
-            //TODO: initialize minScore as the score of the first record
+            //initialize minScore as the score of the first record
             minScore = value.getScore();
             //create first window
 //            System.out.println("EMPTY WINDOWS STORE");
@@ -81,6 +81,7 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
                 // case of HOPPING_SIZE == 1
                 this.createNewWindow();
         } else {
+            //maybe useless?
             windowsIterator = physicalWindowsStore.all();
             while (windowsIterator.hasNext()) {
                 KeyValue<Long, PhysicalWindow> keyValue = windowsIterator.next();
@@ -120,8 +121,10 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
     private void createNewWindow() {
         //lower bound set to null since topK is not reached for this window
         PhysicalWindow newWindow = new PhysicalWindow(this.currentWindow.getId() + 1, SIZE, HOPPING_SIZE, 1, 1, null);
+        this.physicalWindowsStore.put(newWindow.getId(), newWindow);
         this.physicalWindowsStore.put(-2L, newWindow);
         this.lastWindow = newWindow;
+        this.lowerBoundPointer.add(newWindow);
     }
 
     private void updateChangedObjects(LinkedList<MinTopKEntry> changedObjects){
@@ -145,13 +148,13 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
                 superTopKIterator.remove();
                 this.superTopKNListStore.delete(i);
                 //TODO implement
-                this.updateLBP(entry);
+                //this.updateLBP();
             }
         }
         //Remove w exp from W act ; Algo 2 line 16
         this.physicalWindowsStore.delete(window.getId());
         this.lowerBoundPointer.remove(Math.toIntExact(window.getId()));
-
+        //TODO: reset min.score? see annotation in PDF
     }
 
     private void updateLBP(MinTopKEntry entry){
@@ -162,7 +165,7 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
                 window.increaseTopKCounter(1);
                 if (window.getTopKCounter() == this.k + this.n) {
                     //TODO: implement
-                    MinTopKEntry newLowerBound = this.generateLBP();
+                    MinTopKEntry newLowerBound = this.generateLBP(window.getId());
                     window.setLowerBoundPointer(newLowerBound);
                 }
             }
@@ -187,12 +190,11 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
     private void updateMTK(MinTopKEntry entry){
         //update minScore
         this.minScore = Math.min(entry.getScore(), this.minScore);
-        //TODO: make sense to create one entry and then check if it is already in the superTopKNlist?
         MinTopKEntry oldEntry = this.superTopKNList.stream().filter(elem -> elem.getId() == entry.getId()).findFirst().orElse(null);
         if(oldEntry != null) {
             //remove old object from superTopKNList
             this.superTopKNList.remove(oldEntry);
-            //TODO: RefreshLBP(); Algo 3 line 7
+            //TODO: RefreshLBP(); Algo 3 line 7, see annotation in PDF
         }
         this.insertToMTK(entry);
     }
@@ -202,11 +204,21 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
             return;
         }
         //add O i to MTK+N list; Algo 3 line 25
+        this.insertNewEntry(entry);
         //TODO: implement
         this.updateLBP(entry);
     }
 
-    private MinTopKEntry generateLBP(){
+    private MinTopKEntry generateLBP(long id){
+        int i = 0;
+        for (MinTopKEntry entry : this.superTopKNList) {
+            if (entry.getEndingWindow() >= id) {
+                i++;
+            }
+            if (i == this.k + this.n) {
+                return entry;
+            }
+        }
         return null;
     }
 
