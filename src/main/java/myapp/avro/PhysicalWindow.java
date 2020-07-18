@@ -14,8 +14,8 @@ import org.apache.avro.message.SchemaStore;
 
 @org.apache.avro.specific.AvroGenerated
 public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  private static final long serialVersionUID = -5114702305928756683L;
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"PhysicalWindow\",\"namespace\":\"myapp.avro\",\"fields\":[{\"name\":\"id\",\"type\":\"long\"},{\"name\":\"size\",\"type\":\"int\"},{\"name\":\"hoppingSize\",\"type\":\"int\"},{\"name\":\"actualRecords\",\"type\":\"int\"},{\"name\":\"topKCounter\",\"type\":\"int\"},{\"name\":\"lowerBoundPointer\",\"type\":{\"type\":\"record\",\"name\":\"MinTopKEntry\",\"fields\":[{\"name\":\"id\",\"type\":\"long\"},{\"name\":\"score\",\"type\":\"double\"},{\"name\":\"startingWindow\",\"type\":\"long\"},{\"name\":\"endingWindow\",\"type\":\"long\"}]}}]}");
+  private static final long serialVersionUID = -1468205201906228741L;
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"PhysicalWindow\",\"namespace\":\"myapp.avro\",\"fields\":[{\"name\":\"id\",\"type\":\"long\"},{\"name\":\"size\",\"type\":\"int\"},{\"name\":\"hoppingSize\",\"type\":\"int\"},{\"name\":\"actualRecords\",\"type\":\"int\"},{\"name\":\"topKCounter\",\"type\":\"int\"},{\"name\":\"lowerBoundPointer\",\"type\":[\"null\",{\"type\":\"record\",\"name\":\"MinTopKEntry\",\"fields\":[{\"name\":\"id\",\"type\":\"long\"},{\"name\":\"score\",\"type\":\"double\"},{\"name\":\"startingWindow\",\"type\":\"long\"},{\"name\":\"endingWindow\",\"type\":\"long\"}]}]}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 
   private static SpecificData MODEL$ = new SpecificData();
@@ -692,7 +692,13 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
 
     out.writeInt(this.topKCounter);
 
-    this.lowerBoundPointer.customEncode(out);
+    if (this.lowerBoundPointer == null) {
+      out.writeIndex(0);
+      out.writeNull();
+    } else {
+      out.writeIndex(1);
+      this.lowerBoundPointer.customEncode(out);
+    }
 
   }
 
@@ -711,10 +717,15 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
 
       this.topKCounter = in.readInt();
 
-      if (this.lowerBoundPointer == null) {
-        this.lowerBoundPointer = new myapp.avro.MinTopKEntry();
+      if (in.readIndex() != 1) {
+        in.readNull();
+        this.lowerBoundPointer = null;
+      } else {
+        if (this.lowerBoundPointer == null) {
+          this.lowerBoundPointer = new myapp.avro.MinTopKEntry();
+        }
+        this.lowerBoundPointer.customDecode(in);
       }
-      this.lowerBoundPointer.customDecode(in);
 
     } else {
       for (int i = 0; i < 6; i++) {
@@ -740,10 +751,15 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
           break;
 
         case 5:
-          if (this.lowerBoundPointer == null) {
-            this.lowerBoundPointer = new myapp.avro.MinTopKEntry();
+          if (in.readIndex() != 1) {
+            in.readNull();
+            this.lowerBoundPointer = null;
+          } else {
+            if (this.lowerBoundPointer == null) {
+              this.lowerBoundPointer = new myapp.avro.MinTopKEntry();
+            }
+            this.lowerBoundPointer.customDecode(in);
           }
-          this.lowerBoundPointer.customDecode(in);
           break;
 
         default:

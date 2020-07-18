@@ -8,6 +8,6 @@
     {"name": "hoppingSize", "type": "int"},
     {"name": "actualRecords", "type": "int"},
     {"name": "topKCounter", "type": "int"},
-    {"name": "lowerBoundPointer", "type": "MinTopKEntry"}
+    {"name": "lowerBoundPointer", "type": ["null", "MinTopKEntry"]}
   ]
 }
