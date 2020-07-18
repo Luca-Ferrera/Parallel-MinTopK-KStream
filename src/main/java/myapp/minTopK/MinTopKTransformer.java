@@ -245,10 +245,10 @@ public class MinTopKTransformer implements Transformer<String, ScoredMovie, KeyV
         int size = this.superTopKList.size();
         for (int i = 0; i < size; i++) {
             MinTopKEntry elem = this.superTopKList.get(i);
-            // if the element score you are looking at is bigger than newEntry score, go to the next element
-            if (elem.getScore() >= newEntry.getScore()) continue;
             // if the element equals newEntry, return, because we don't add duplicates
             if (elem.equals(newEntry)) return;
+            // if the element score you are looking at is bigger than newEntry score, go to the next element
+            if (elem.getScore() >= newEntry.getScore()) continue;
             // otherwise, we have found the location to add newEntry
             this.superTopKList.add(i, newEntry);
             return;
