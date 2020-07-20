@@ -174,6 +174,7 @@ public class MinTopKTransformer implements Transformer<String, ScoredMovie, KeyV
         //this handle the case of the first HOPPING_SIZE records in the application
         //these records expires in SIZE / HOPPING_SIZE - 1 windows instead of SIZE / HOPPING_SIZE windows
         List<PhysicalWindow> physicalWindowList = this.lowerBoundPointer.stream().filter(window -> window.getId() == 0).collect(Collectors.toList());
+        //TODO: check MinTopKN for newEntry creation: endingWindow may be incorrect
         if(this.currentWindow.getId() == 0 && !physicalWindowList.isEmpty() && physicalWindowList.get(0).getActualRecords() <= HOPPING_SIZE){
             newEntry = new MinTopKEntry(movie.getId(), movie.getScore(), 0L,
                     (long) SIZE / HOPPING_SIZE - 1L);
