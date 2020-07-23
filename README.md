@@ -95,3 +95,25 @@ Run `cleanEndTimeFile.py DisMinTopK/500Krecords_1200_300_topKK_end_time_5ms.txt 
 Run `cleanStartTimeFile.py DisMinTopK/dataset0/instance0_500Krecords_1200_300_2K_start_time_5ms.txt LocalWindowSize LocalWindowHoppingSize` for each instance's file
 
 Run `distributedLatency.py instance0.csv instance1.csv instance2.csv endTime.csv` to get the final latency for each windows
+
+### Average latency
+
+Run `python3 averageLatency.py CentralizedMinTopK/dataset0/500Krecords_1200_300_50K_latency_5s.csv CentralizedMinTopK/dataset1/500Krecords_1200_300_50K_latency_5s.csv CentralizedMinTopK/dataset2/500Krecords_1200_300_50K_latency_5s.csv CentralizedMinTopK/dataset3/500Krecords_1200_300_50K_latency_5s.csv CentralizedMinTopK/dataset4/500Krecords_1200_300_50K_latency_5s.csv`
+
+### Mean and std
+
+Mean and std per dataset
+
+Run `python3 measurementsPerDataset.py CentralizedMinTopK/dataset0/500Krecords_1200_300_50K_latency_5s.csv CentralizedMinTopK/dataset1/500Krecords_1200_300_50K_latency_5s.csv CentralizedMinTopK/dataset2/500Krecords_1200_300_50K_latency_5s.csv CentralizedMinTopK/dataset3/500Krecords_1200_300_50K_latency_5s.csv CentralizedMinTopK/dataset4/500Krecords_1200_300_50K_latency_5s.csv`
+
+Mean and std per topK
+
+Run `python3 measurements.py CentralizedMinTopK/dataset0/500Krecords_1200_300_2K_average.csv CentralizedMinTopK/dataset0/500Krecords_1200_300_10K_average.csv CentralizedMinTopK/dataset0/500Krecords_1200_300_50K_average.csv`
+### Plot box plot 
+Box plot per dataset with same topK
+
+Run `python3 plotBoxPlotPerDataset.py CentralizedMinTopK/dataset0/500Krecords_1200_300_2K_latency_5s.csv CentralizedMinTopK/dataset1/500Krecords_1200_300_2K_latency_5s.csv CentralizedMinTopK/dataset2/500Krecords_1200_300_2K_latency_5s.csv CentralizedMinTopK/dataset3/500Krecords_1200_300_2K_latency_5s.csv CentralizedMinTopK/dataset4/500Krecords_1200_300_2K_latency_5s.csv`
+
+Box plot per topK
+
+Run `python3 plotBoxPlot.py CentralizedMinTopK/dataset0/500Krecords_1200_300_2K_average.csv CentralizedMinTopK/dataset0/500Krecords_1200_300_10K_average.csv CentralizedMinTopK/dataset0/500Krecords_1200_300_50K_average.csv`
