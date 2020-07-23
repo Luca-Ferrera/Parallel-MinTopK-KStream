@@ -89,6 +89,9 @@ public class CentralizedTopK {
         Map<String, Object> config = new HashMap<>();
         config.put("bootstrap.servers", envProps.getProperty("bootstrap.servers"));
         AdminClient client = AdminClient.create(config);
+        Map<String, String> topicConfig = new HashMap<>();
+//        topicConfig.put("retention.ms", envProps.getProperty("retention.ms"));
+        topicConfig.put("retention.bytes", envProps.getProperty("retention.bytes"));
 
         List<NewTopic> topics = new ArrayList<>();
 
@@ -96,12 +99,12 @@ public class CentralizedTopK {
         topics.add(new NewTopic(
                 envProps.getProperty("mintopk.movies.topic.name"),
                 Integer.parseInt(envProps.getProperty("mintopk.movies.topic.partitions")),
-                Short.parseShort(envProps.getProperty("mintopk.movies.topic.replication.factor"))));
+                Short.parseShort(envProps.getProperty("mintopk.movies.topic.replication.factor"))).configs(topicConfig));
 
         topics.add(new NewTopic(
                 envProps.getProperty("windowed.mintopk.topic.name"),
                 Integer.parseInt(envProps.getProperty("windowed.mintopk.topic.partitions")),
-                Short.parseShort(envProps.getProperty("windowed.mintopk.topic.replication.factor"))));
+                Short.parseShort(envProps.getProperty("windowed.mintopk.topic.replication.factor"))).configs(topicConfig));
 
         client.createTopics(topics);
         client.close();

@@ -114,18 +114,21 @@ public class DistributedMinTopK {
         Map<String, Object> config = new HashMap<>();
         config.put("bootstrap.servers", envProps.getProperty("bootstrap.servers"));
         AdminClient client = AdminClient.create(config);
+        Map<String, String> topicConfig = new HashMap<>();
+//        topicConfig.put("retention.ms", envProps.getProperty("retention.ms"));
+        topicConfig.put("retention.bytes", envProps.getProperty("retention.bytes"));
 
         List<NewTopic> topics = new ArrayList<>();
 
         topics.add(new NewTopic(
                 envProps.getProperty("scored.movies.topic.name"),
                 Integer.parseInt(envProps.getProperty("scored.movies.topic.partitions")),
-                Short.parseShort(envProps.getProperty("scored.movies.topic.replication.factor"))));
+                Short.parseShort(envProps.getProperty("scored.movies.topic.replication.factor"))).configs(topicConfig));
 
         topics.add(new NewTopic(
                 envProps.getProperty("mintopk.movies.topic.name"),
                 Integer.parseInt(envProps.getProperty("mintopk.movies.topic.partitions")),
-                Short.parseShort(envProps.getProperty("mintopk.movies.topic.replication.factor"))));
+                Short.parseShort(envProps.getProperty("mintopk.movies.topic.replication.factor"))).configs(topicConfig));
 
         client.createTopics(topics);
         client.close();
