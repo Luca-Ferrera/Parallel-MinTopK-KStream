@@ -37,7 +37,7 @@ stdev2 = statistics.stdev(latency2)
 stdev3 = statistics.stdev(latency3)
 stdev4 = statistics.stdev(latency4)
 
-with open(sys.argv[1][:-14] + "measurements.csv", "w") as f:
+with open(sys.argv[1][:-14] + "measurements_per_dataset.csv", "w") as f:
     f.write("dataset,mean,stdev\n")
     f.write("0, " + str(mean0) + ", " + str(stdev0) + "\n")
     f.write("1, " + str(mean1) + ", " + str(stdev1) + "\n")
