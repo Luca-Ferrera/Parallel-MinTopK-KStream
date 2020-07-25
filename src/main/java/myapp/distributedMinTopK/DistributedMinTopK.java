@@ -115,7 +115,7 @@ public class DistributedMinTopK {
         config.put("bootstrap.servers", envProps.getProperty("bootstrap.servers"));
         AdminClient client = AdminClient.create(config);
         Map<String, String> topicConfig = new HashMap<>();
-//        topicConfig.put("retention.ms", envProps.getProperty("retention.ms"));
+        topicConfig.put("retention.ms", envProps.getProperty("retention.ms"));
         topicConfig.put("retention.bytes", envProps.getProperty("retention.bytes"));
 
         List<NewTopic> topics = new ArrayList<>();
