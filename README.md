@@ -109,6 +109,7 @@ Run `python3 measurementsPerDataset.py CentralizedMinTopK/dataset0/500Krecords_1
 Mean and std per topK
 
 Run `python3 measurements.py CentralizedMinTopK/dataset0/500Krecords_1200_300_2K_average.csv CentralizedMinTopK/dataset0/500Krecords_1200_300_10K_average.csv CentralizedMinTopK/dataset0/500Krecords_1200_300_50K_average.csv`
+
 ### Plot box plot 
 Box plot per dataset with same topK
 
