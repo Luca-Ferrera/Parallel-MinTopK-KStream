@@ -76,3 +76,7 @@ Throughput: massimo input throughput
 How to run on aws:
 - copy jar file using `scp -i *.pem jar-file.jar ubuntu@DNS:~/kstream`
 - connect using SSH `ssh -i *.pem ubuntu@DNS`
+
+nohup java -jar DisMinTopK.jar src/main/java/myapp/distributedMinTopK/disMinTopK.env 10 1 0 &
+nohup java -jar CentralizedTopK.jar src/main/java/myapp/distributedMinTopK/disMinTopK.env 10 1 &
+nohup java -jar RatingDriver.jar dis-mintopk-scored-rated-movies 5 1 &
