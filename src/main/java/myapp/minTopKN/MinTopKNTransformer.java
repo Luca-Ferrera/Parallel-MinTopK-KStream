@@ -1,18 +1,20 @@
 package myapp.minTopKN;
 
+import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroDeserializer;
 import myapp.avro.MinTopKEntry;
 import myapp.avro.PhysicalWindow;
 import myapp.avro.ScoredMovie;
+import org.apache.kafka.clients.consumer.*;
+import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.Transformer;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.KeyValueStore;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.time.Duration;
+import java.util.*;
 
 import static java.lang.Integer.min;
 
@@ -100,8 +102,8 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
                 if(window.getId() == this.currentWindow.getId() && window.getActualRecords() - SIZE == 1) {
                     // current window ends
                     System.out.println("+++CURRENT WINDOW ENDS +++" + window);
-                    //TODO: receive changed objects
-                    LinkedList<MinTopKEntry> changedObjects = new LinkedList<>();
+                    LinkedList<MinTopKEntry> changedObjects = this.getUpdates();
+//                    System.out.println("UPDATED OBJECTS " + changedObjects);
                     this.updateChangedObjects(changedObjects);
                     this.forwardTopK(window.getId());
                     this.purgeExpiredWindow(window);
@@ -182,7 +184,7 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
     private void updateLBP(MinTopKEntry entry, long expiredWindowId){
         for(PhysicalWindow window : this.lowerBoundPointer) {
             System.out.println("ENTRY " + entry + " WINDOW " + window + " EXPIRED WINDOW ID " + expiredWindowId);
-            if(window.getId() != expiredWindowId && window.getLowerBoundPointer().equals(entry)) {
+            if(window.getId() != expiredWindowId && entry.equals(window.getLowerBoundPointer())) {
                 //update lowerBound -> set LB to null if window currentRecords < N+K
                 MinTopKEntry newLowerBound = this.generateLBP(window.getId());
                 window.setLowerBoundPointer(newLowerBound);
@@ -388,6 +390,48 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
         this.physicalWindowsStore.put(-2L, this.lastWindow);
     }
 
+    private LinkedList<MinTopKEntry> getUpdates() {
+        KafkaConsumer<String, ScoredMovie> consumer = setUpConsumer();
+        consumer.subscribe(Arrays.asList("movie-updates"));
+        LinkedList<MinTopKEntry> updates = new LinkedList<>();
+        int noRecordsCount = 0;
+        while (true) {
+            ConsumerRecords<String, ScoredMovie> records = consumer.poll(Duration.ofMillis(1000));
+            if (records.count() == 0) {
+                noRecordsCount++;
+                // assuming n as maximum number of updates in the distributed database
+                if (noRecordsCount > this.n) break;
+                else continue;
+            }
+            for (ConsumerRecord<String, ScoredMovie> record : records) {
+                MinTopKEntry updatedEntry = new MinTopKEntry(
+                        record.value().getId(),
+                        record.value().getScore(),
+                        this.currentWindow.getId(),
+                        this.currentWindow.getId() + (long) SIZE / HOPPING_SIZE);
+                updates.add(updatedEntry);
+            }
+            consumer.commitAsync();
+        }
+        consumer.close();
+        return updates;
+    }
+
+    private KafkaConsumer<String, ScoredMovie> setUpConsumer(){
+        //TODO: set up env properties retrieval
+        final String schemaRegistryUrl = "http://localhost:8081";
+        Properties props = new Properties();
+        props.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:29092");
+        props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "update-consumers");
+        props.setProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
+        props.setProperty(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
+        final SpecificAvroDeserializer<ScoredMovie> scoredMovieDeserializer = new SpecificAvroDeserializer<>();
+        final Map<String, String> serdeConfig = Collections.singletonMap(
+                AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
+        scoredMovieDeserializer.configure(serdeConfig, false);
+        KafkaConsumer<String, ScoredMovie> consumer = new KafkaConsumer<>(props, Serdes.String().deserializer(), scoredMovieDeserializer);
+        return consumer;
+    }
     public void close() {
         // can access this.state
     }
