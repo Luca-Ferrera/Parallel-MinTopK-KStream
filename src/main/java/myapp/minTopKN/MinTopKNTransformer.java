@@ -3,6 +3,7 @@ package myapp.minTopKN;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroDeserializer;
 import myapp.avro.MinTopKEntry;
+import myapp.avro.MovieIncome;
 import myapp.avro.PhysicalWindow;
 import myapp.avro.ScoredMovie;
 import org.apache.kafka.clients.consumer.*;
@@ -15,6 +16,7 @@ import org.apache.kafka.streams.state.KeyValueStore;
 
 import java.time.Duration;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.lang.Integer.min;
 
@@ -64,11 +66,10 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
         if(this.lowerBoundPointer.isEmpty()) {
             System.out.println("+++WINDOW ITERATOR EMPTY+++");
             //initialize minScore as the score of the first record
-            minScore = value.getScore();
+            this.minScore = value.getScore();
             //create first window
 //            System.out.println("EMPTY WINDOWS STORE");
             MinTopKEntry firstEntry = new MinTopKEntry(value.getId(), value.getScore(),
-//                    0L, + (long) SIZE / HOPPING_SIZE - 1L);
                     0L, 0L);
             this.superTopKNList.add(firstEntry);
             // new window with null as LBP since actualRecords < K+N
@@ -85,24 +86,24 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
         } else {
             PhysicalWindow lastWindow = this.lowerBoundPointer.getLast();
             // CheckNewActiveWindow (O i .t);  Algo 1 line 4
-            if(lastWindow.getActualRecords() - lastWindow.getHoppingSize() == 1) {
+            if(lastWindow.getActualRecords() - HOPPING_SIZE == 1) {
                 // time to create new window
                 System.out.println("+++CREATING NEW WINDOW+++");
                 this.createNewWindow();
             }
             for(Iterator<PhysicalWindow> iterator = this.lowerBoundPointer.iterator(); iterator.hasNext();) {
-                System.out.println("LBP: " + lowerBoundPointer);
+//                System.out.println("LBP: " + lowerBoundPointer);
                 PhysicalWindow window = iterator.next();
                 int index = this.lowerBoundPointer.indexOf(window);
-                System.out.println("+++WINDOW+++ " + window);
+//                System.out.println("+++WINDOW+++ " + window);
                 window.increaseActualRecords(1);
                 // update StateStore
                 physicalWindowsStore.put(window.getId(), window);
-                System.out.println("CURRENT WINDOW " + currentWindow);
+//                System.out.println("CURRENT WINDOW " + currentWindow);
                 if(window.getId() == this.currentWindow.getId() && window.getActualRecords() - SIZE == 1) {
                     // current window ends
                     System.out.println("+++CURRENT WINDOW ENDS +++" + window);
-                    LinkedList<MinTopKEntry> changedObjects = this.getUpdates();
+                    LinkedList<MovieIncome> changedObjects = this.getUpdates();
 //                    System.out.println("UPDATED OBJECTS " + changedObjects);
                     this.updateChangedObjects(changedObjects);
                     this.forwardTopK(window.getId());
@@ -112,6 +113,7 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
                 else {
                     //TODO: calculate the new score using minScore
                     MinTopKEntry entry;
+                    // first HOPPING_SIZE * (SIZE/HOPPING_SIZE) records are alive in less than SIZE/HOPPING_SIZE windows
                     if(this.currentWindow.getActualRecords() < HOPPING_SIZE * (SIZE/HOPPING_SIZE)) {
                         entry = new MinTopKEntry(
                                 value.getId(),
@@ -141,7 +143,7 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
 
     private void createNewWindow() {
         //lower bound set to null since topK is not reached for this window
-        //TODO: set topKCounter to 0
+        //TODO: set topKCounter to 0 ?
         PhysicalWindow newWindow = new PhysicalWindow(this.lastWindow.getId() + 1, SIZE, HOPPING_SIZE, 1, 1, null);
         this.physicalWindowsStore.put(newWindow.getId(), newWindow);
         this.physicalWindowsStore.put(-2L, newWindow);
@@ -149,7 +151,22 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
         this.lowerBoundPointer.add(newWindow);
     }
 
-    private void updateChangedObjects(LinkedList<MinTopKEntry> changedObjects){
+    private void updateChangedObjects(LinkedList<MovieIncome> updates){
+        LinkedList<MinTopKEntry> changedObjects = new LinkedList<>();
+        updates.forEach(update -> {
+            MinTopKEntry entry= this.superTopKNList
+                    .stream()
+                    .filter(e -> e.getId() == update.getId())
+                    .findFirst().orElse(null);
+            //update score
+            if(entry != null) {
+                System.out.println("*** ENTRY BEFORE SCORE UPDATE *** " + entry);
+                double newScore = entry.getScore() + 0.2 * update.getIncome();
+                entry.setScore(newScore);
+                System.out.println("*** ENTRY AFTER SCORE UPDATE *** " + entry);
+                changedObjects.add(entry);
+            }
+        });
         changedObjects.forEach(this::updateMTK);
     }
 
@@ -183,7 +200,7 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
 
     private void updateLBP(MinTopKEntry entry, long expiredWindowId){
         for(PhysicalWindow window : this.lowerBoundPointer) {
-            System.out.println("ENTRY " + entry + " WINDOW " + window + " EXPIRED WINDOW ID " + expiredWindowId);
+//            System.out.println("ENTRY " + entry + " WINDOW " + window + " EXPIRED WINDOW ID " + expiredWindowId);
             if(window.getId() != expiredWindowId && entry.equals(window.getLowerBoundPointer())) {
                 //update lowerBound -> set LB to null if window currentRecords < N+K
                 MinTopKEntry newLowerBound = this.generateLBP(window.getId());
@@ -355,7 +372,7 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
                     this.lastWindow = keyValue.value;
                 }
                 else {
-                    System.out.println("ADDING " + keyValue.value + " TO LBP");
+//                    System.out.println("ADDING " + keyValue.value + " TO LBP");
                     this.lowerBoundPointer.add(Math.toIntExact(keyValue.key), keyValue.value);
                 }
             }
@@ -380,7 +397,7 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
             i[0]++;
         });
         this.lowerBoundPointer.forEach(elem -> {
-            System.out.println("SAVING " + elem);
+//            System.out.println("SAVING " + elem);
             this.physicalWindowsStore.put(elem.getId(), elem);
         });
         //save current window
@@ -390,26 +407,27 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
         this.physicalWindowsStore.put(-2L, this.lastWindow);
     }
 
-    private LinkedList<MinTopKEntry> getUpdates() {
-        KafkaConsumer<String, ScoredMovie> consumer = setUpConsumer();
+    private LinkedList<MovieIncome> getUpdates() {
+        KafkaConsumer<String, MovieIncome> consumer = setUpConsumer();
         consumer.subscribe(Arrays.asList("movie-updates"));
-        LinkedList<MinTopKEntry> updates = new LinkedList<>();
+        LinkedList<MovieIncome> updates = new LinkedList<>();
         int noRecordsCount = 0;
         while (true) {
-            ConsumerRecords<String, ScoredMovie> records = consumer.poll(Duration.ofMillis(1000));
+            ConsumerRecords<String, MovieIncome> records = consumer.poll(Duration.ofMillis(1000));
             if (records.count() == 0) {
                 noRecordsCount++;
                 // assuming n as maximum number of updates in the distributed database
                 if (noRecordsCount > this.n) break;
                 else continue;
             }
-            for (ConsumerRecord<String, ScoredMovie> record : records) {
-                MinTopKEntry updatedEntry = new MinTopKEntry(
-                        record.value().getId(),
-                        record.value().getScore(),
-                        this.currentWindow.getId(),
-                        this.currentWindow.getId() + (long) SIZE / HOPPING_SIZE);
-                updates.add(updatedEntry);
+            for (ConsumerRecord<String, MovieIncome> record : records) {
+//                MinTopKEntry updatedEntry = new MinTopKEntry(
+//                        record.value().getId(),
+//                        record.value().getIncome(),
+//                        this.currentWindow.getId(),
+//                        this.currentWindow.getId() + (long) SIZE / HOPPING_SIZE);
+//                updates.add(updatedEntry);
+                updates.add(record.value());
             }
             consumer.commitAsync();
         }
@@ -417,7 +435,7 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
         return updates;
     }
 
-    private KafkaConsumer<String, ScoredMovie> setUpConsumer(){
+    private KafkaConsumer<String, MovieIncome> setUpConsumer(){
         //TODO: set up env properties retrieval
         final String schemaRegistryUrl = "http://localhost:8081";
         Properties props = new Properties();
@@ -425,11 +443,11 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
         props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "update-consumers");
         props.setProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
         props.setProperty(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
-        final SpecificAvroDeserializer<ScoredMovie> scoredMovieDeserializer = new SpecificAvroDeserializer<>();
+        final SpecificAvroDeserializer<MovieIncome> movieIncomeDeserializer = new SpecificAvroDeserializer<>();
         final Map<String, String> serdeConfig = Collections.singletonMap(
                 AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
-        scoredMovieDeserializer.configure(serdeConfig, false);
-        KafkaConsumer<String, ScoredMovie> consumer = new KafkaConsumer<>(props, Serdes.String().deserializer(), scoredMovieDeserializer);
+        movieIncomeDeserializer.configure(serdeConfig, false);
+        KafkaConsumer<String, MovieIncome> consumer = new KafkaConsumer<>(props, Serdes.String().deserializer(), movieIncomeDeserializer);
         return consumer;
     }
     public void close() {

@@ -6,7 +6,7 @@ Where K is the value of the topK parameter, N is the value of the updates in the
 
 Run `docker exec -i schema-registry /usr/bin/kafka-avro-console-producer --topic movie-updates --broker-list broker:9092 --property value.schema="$(< src/main/avro/scored-movie.avsc)"`
 in order to simulate updates in a distributed DB.
-Example of records to be sent can be found in `score-movies-test.txt`
+Example of records to be sent can be found in `score-movies-test.txt`.
 ## Clean data structures
 
 Run `CentralizedMinTopKN` with `"minTopK.env" K N dataset m"clean"` as arguments.
