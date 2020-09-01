@@ -23,8 +23,8 @@ public class DistributedMinTopKTransformer implements Transformer<String, Scored
     private final int k;
     private final Boolean cleanDataStructure;
     private ProcessorContext context;
-    private final int SIZE = 24;
-    private final int HOPPING_SIZE = 6;
+    private final int SIZE = 1200;
+    private final int HOPPING_SIZE = 300;
     private final int NUM_INSTANCES = 3;
     private final int LOCAL_SIZE = SIZE/NUM_INSTANCES;
     private final int LOCAL_HOPPING_SIZE = HOPPING_SIZE/NUM_INSTANCES;
@@ -57,7 +57,7 @@ public class DistributedMinTopKTransformer implements Transformer<String, Scored
             superTopKListStore.all().forEachRemaining(elem -> superTopKListStore.delete(elem.key));
             return null;
         }
-        System.out.println("TRANSFORM KEY: " + key + " VALUE: " + value + " FROM PARTITION " + this.context.partition());
+//        System.out.println("TRANSFORM KEY: " + key + " VALUE: " + value + " FROM PARTITION " + this.context.partition());
         setUpDataStructures();
         KeyValueIterator<Long, PhysicalWindow> windowsIterator = physicalWindowsStore.all();
         MinTopKEntry newEntry = null;
@@ -274,7 +274,7 @@ public class DistributedMinTopKTransformer implements Transformer<String, Scored
     private void forwardTopK(long windowId){
        List<MinTopKEntry> topK = this.superTopKList.subList(0,min(this.superTopKList.size(),this.k));
        topK.forEach(elem -> {
-           System.out.println("FORWARDING KEY: " + windowId +" VALUE: " + elem);
+//           System.out.println("FORWARDING KEY: " + windowId +" VALUE: " + elem);
            this.context.forward(windowId ,elem);
        });
     }
