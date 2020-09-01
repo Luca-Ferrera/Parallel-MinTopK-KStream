@@ -1,29 +1,31 @@
-package myapp.minTopKN;
+package myapp.distributedMinTopKN;
 
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
-import myapp.avro.*;
-import myapp.minTopK.MinTopKTransformer;
+import myapp.avro.MinTopKEntry;
+import myapp.avro.PhysicalWindow;
+import myapp.avro.ScoredMovie;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.*;
-import org.apache.kafka.streams.kstream.*;
+import org.apache.kafka.streams.kstream.Produced;
+import org.apache.kafka.streams.kstream.Transformer;
+import org.apache.kafka.streams.kstream.TransformerSupplier;
 import org.apache.kafka.streams.state.StoreBuilder;
 import org.apache.kafka.streams.state.Stores;
 
 import java.io.*;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class CentralizedMinTopKN {
+public class DistributedMinTopKN {
     public Properties buildStreamsProperties(Properties envProps) {
         Properties props = new Properties();
 
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, envProps.getProperty("minTopKN.id"));
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, envProps.getProperty("dis-minTopKN.id"));
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, envProps.getProperty("bootstrap.servers"));
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
@@ -31,7 +33,7 @@ public class CentralizedMinTopKN {
 
         return props;
     }
-    public Topology buildTopology(Properties envProps, String cleanDataStructure, int k, int n, int dataset) {
+    public Topology buildTopology(Properties envProps, String cleanDataStructure, int k, int n, int dataset, int instance_number) {
         final StreamsBuilder builder = new StreamsBuilder();
         final String scoredMovieTopic = envProps.getProperty("scored.movies.topic.name");
         final String minTopKRatedMovie = envProps.getProperty("mintopkn.movies.topic.name");
@@ -55,26 +57,26 @@ public class CentralizedMinTopKN {
         AtomicReference<Instant> start = new AtomicReference<>();
         AtomicReference<Instant> end = new AtomicReference<>();
         // TopKMovies
-        builder.<String,ScoredMovie>stream(scoredMovieTopic)
+        builder.<String, ScoredMovie>stream(scoredMovieTopic)
                 .map((key, value) ->{
                     start.set(Instant.now());
+                    try(FileWriter fw = new FileWriter("DisMinTopKN/dataset" + dataset + "/instance" +
+                            instance_number + "_500Krecords_1200_300_" + k + "K_" + n + "N_start_time_5ms.txt", true);
+                        BufferedWriter bw = new BufferedWriter(fw);
+                        PrintWriter out = new PrintWriter(bw))
+                    {
+                        out.println("Latency window " + key + " : " + start.get());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     return new KeyValue<>(key,value);
                 })
                 .transform(new TransformerSupplier<String,ScoredMovie,KeyValue<Long , MinTopKEntry>>() {
                     public Transformer get() {
-                        return new MinTopKNTransformer(k, n, cleanDataStructure);
+                        return new DistributedMinTopKNTransformer(k, n, cleanDataStructure);
                     }
                 }, "windows-store", "super-topk-list-store")
                 .map((key, value) ->{
-                    end.set(Instant.now());
-                    try(FileWriter fw = new FileWriter("CentralizedMinTopKN/dataset" + dataset + "/500Krecords_1200_300_" + k + "K_" + n + "N_latency_5s.txt", true);
-                        BufferedWriter bw = new BufferedWriter(fw);
-                        PrintWriter out = new PrintWriter(bw))
-                    {
-                        out.println("Latency window " + key + " : " + Duration.between(start.get(), end.get()).toNanos());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
                     if(key % 500 == 0)
                         System.out.println("key: " + key + " value: " + value);
                     return new KeyValue<>(key,value);
@@ -145,25 +147,27 @@ public class CentralizedMinTopKN {
         }
 
         String cleanDataStructure = "";
-        int k = 0, n = 0, dataset = 0;
-        if(args.length == 4){
+        int k = 0, n = 0, dataset = 0, instance_number = 0;
+        if(args.length == 5){
             k = Integer.parseInt(args[1]);
             n = Integer.parseInt(args[2]);
             dataset = Integer.parseInt(args[3]);
-        } else if(args.length == 5){
-            cleanDataStructure = args[4];
+            instance_number = Integer.parseInt(args[4]);
+        } else if(args.length == 6){
+            cleanDataStructure = args[5];
+            instance_number = Integer.parseInt(args[4]);
             dataset = Integer.parseInt(args[3]);
             n = Integer.parseInt(args[2]);
             k = Integer.parseInt(args[1]);
         }
 
-        CentralizedMinTopKN minTopKN = new CentralizedMinTopKN();
-        Properties envProps = minTopKN.loadEnvProperties(args[0]);
-        Properties streamProps = minTopKN.buildStreamsProperties(envProps);
-        Topology topology = minTopKN.buildTopology(envProps, cleanDataStructure, k, n, dataset);
+        DistributedMinTopKN disMinTopKN = new DistributedMinTopKN();
+        Properties envProps = disMinTopKN.loadEnvProperties(args[0]);
+        Properties streamProps = disMinTopKN.buildStreamsProperties(envProps);
+        Topology topology = disMinTopKN.buildTopology(envProps, cleanDataStructure, k, n, dataset, instance_number);
         System.out.println(topology.describe());
 
-        minTopKN.createTopics(envProps);
+        disMinTopKN.createTopics(envProps);
 
         final KafkaStreams streams = new KafkaStreams(topology, streamProps);
         final CountDownLatch latch = new CountDownLatch(1);
