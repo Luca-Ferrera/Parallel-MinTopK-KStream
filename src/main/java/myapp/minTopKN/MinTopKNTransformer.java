@@ -160,10 +160,8 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
                     .findFirst().orElse(null);
             //update score
             if(entry != null) {
-                System.out.println("*** ENTRY BEFORE SCORE UPDATE *** " + entry);
                 double newScore = entry.getScore() + 0.2 * update.getIncome();
                 entry.setScore(newScore);
-                System.out.println("*** ENTRY AFTER SCORE UPDATE *** " + entry);
                 changedObjects.add(entry);
             }
         });
@@ -181,6 +179,8 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
             MinTopKEntry entry = superTopKIterator.next();
             if(window.getId() == entry.getStartingWindow()) {
                 entry.increaseStartingWindow(1L);
+                //save entry update in stateStore
+                this.superTopKNListStore.put(i, entry);
                 i++;
             }
             if(entry.getStartingWindow() > entry.getEndingWindow()) {
@@ -234,6 +234,7 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
                     lowerBound = this.generateLBP(window.getId());
                     // set new LBP if needed or set it to null
                     window.setLowerBoundPointer(lowerBound);
+                    this.physicalWindowsStore.put(window.getId(), window);
                 }
                 else {
                     lowerBound.increaseStartingWindow(1);
@@ -414,6 +415,7 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
         int noRecordsCount = 0;
         while (true) {
             ConsumerRecords<String, MovieIncome> records = consumer.poll(Duration.ofMillis(1000));
+            //TODO: is it useful?
             if (records.count() == 0) {
                 noRecordsCount++;
                 // assuming n as maximum number of updates in the distributed database
@@ -421,12 +423,6 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
                 else continue;
             }
             for (ConsumerRecord<String, MovieIncome> record : records) {
-//                MinTopKEntry updatedEntry = new MinTopKEntry(
-//                        record.value().getId(),
-//                        record.value().getIncome(),
-//                        this.currentWindow.getId(),
-//                        this.currentWindow.getId() + (long) SIZE / HOPPING_SIZE);
-//                updates.add(updatedEntry);
                 updates.add(record.value());
             }
             consumer.commitAsync();
