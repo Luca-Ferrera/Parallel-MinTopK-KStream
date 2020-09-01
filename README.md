@@ -66,6 +66,20 @@ Run `averageLatency.py CentralizedMinTopK/topKK_latency_5ms.txt` to get average 
 
 ---
 
+### Centralized MinTopK+N
+
+Run the experiment using the 5 datasets that you can find in `dataset/`
+
+Run `java -jar out/artifacts/CentralizeMinTopKN_jar/CentralizeMinTopKN.jar "src/main/java/myapp/minTopKN/minTopKN.env"  topK topN dataset` where topK, topN and dataset are integer values.
+
+Run `RatingsDriver` with `centralized-mintopkn-scored-rated-movies`, `INPUT_THROUGHPUT` and `DATASET` as arguments.
+
+Run `cleanLatencyFile.py CentralizedMinTopKN/topKK_latency_5ms.txt topK` to get the final `CentralizedMinTopKN/topKK_latency_5ms.csv`
+
+Run `averageLatency.py CentralizedMinTopKN/topKK_latency_5ms.txt` to get average Latency of the experiment.
+
+---
+
 ### Distributed Benchmark
 Run 3 instances of `src/main/java/myapp/distributedMaterializeScoreSort/PhysicalWindow/PhysicalWindowDistributedMSS`.
 
@@ -81,10 +95,12 @@ Run `cleanLatencyFile.py DisMaterializeSort/latency_5ms.txt -1` to get the final
 
 Run `averageLatency.py DisMaterializeSort/latency_5ms.txt` to get average Latency of the experiment.
 
+---
+
 ### Distributed MinTopK
 Run 3 instances of `src/main/java/myapp/distributedMinTopK/DistributedMinTopK.java ENV_FILE TOPK DATASET #INSTANCE`.
 
-Run `src/main/java/myapp/distributedMinTopK/CentralizedTopK.java ENV_FILE TOPK DATASET`.
+Run `src/main/java/myapp/distributedMinTopK/CentralizedTopK.java ENV_FILE TOPK DATASET DisMinTopK`.
 
 Run both files with `src/main/java/myapp/distributedMinTopK/disMinTopK.env` as first argument.
 
@@ -96,25 +112,49 @@ Run `cleanStartTimeFile.py DisMinTopK/dataset0/instance0_500Krecords_1200_300_2K
 
 Run `distributedLatency.py instance0.csv instance1.csv instance2.csv endTime.csv` to get the final latency for each windows
 
+---
+
+### Distributed MinTopK+N
+
+Run 3 instances of `src/main/java/myapp/distributedMinTopKN/DistributedMinTopKN.java ENV_FILE TOPK TOPN DATASET #INSTANCE`.
+
+Run `src/main/java/myapp/distributedMinTopK/CentralizedTopK.java ENV_FILE TOPK DATASET DisMinTopKN`.
+
+Run both files with `src/main/java/myapp/distributedMinTopKN/disMinTopKN.env` as first argument.
+
+Run `RatingsDriver` with `dis-mintopkn-scored-rated-movies`, `INPUT_THROUGHPUT` and `DATASET` as arguments.
+
+Run `cleanEndTimeFile.py DisMinTopKN/500Krecords_1200_300_topKK_end_time_5ms.txt topK` to get`DisMinTopKN/500Krecords_1200_300_topKK_end_time_5ms.csv`
+
+Run `cleanStartTimeFile.py DisMinTopKN/dataset0/instance0_500Krecords_1200_300_2K_1N_start_time_5ms.txt LocalWindowSize LocalWindowHoppingSize` for each instance's file
+
+Run `distributedLatency.py instance0.csv instance1.csv instance2.csv endTime.csv` to get the final latency for each windows
+
+---
+
 ### Average latency
 
 Run `python3 averageLatency.py CentralizedMinTopK/dataset0/500Krecords_1200_300_50K_latency_5s.csv CentralizedMinTopK/dataset1/500Krecords_1200_300_50K_latency_5s.csv CentralizedMinTopK/dataset2/500Krecords_1200_300_50K_latency_5s.csv CentralizedMinTopK/dataset3/500Krecords_1200_300_50K_latency_5s.csv CentralizedMinTopK/dataset4/500Krecords_1200_300_50K_latency_5s.csv`
 
+---
+
 ### Mean and std
 
-Mean and std per dataset
+##### Mean and std per dataset
 
 Run `python3 measurementsPerDataset.py CentralizedMinTopK/dataset0/500Krecords_1200_300_50K_latency_5s.csv CentralizedMinTopK/dataset1/500Krecords_1200_300_50K_latency_5s.csv CentralizedMinTopK/dataset2/500Krecords_1200_300_50K_latency_5s.csv CentralizedMinTopK/dataset3/500Krecords_1200_300_50K_latency_5s.csv CentralizedMinTopK/dataset4/500Krecords_1200_300_50K_latency_5s.csv`
 
-Mean and std per topK
+##### Mean and std per topK
 
 Run `python3 measurements.py CentralizedMinTopK/dataset0/500Krecords_1200_300_2K_average.csv CentralizedMinTopK/dataset0/500Krecords_1200_300_10K_average.csv CentralizedMinTopK/dataset0/500Krecords_1200_300_50K_average.csv`
 
+---
+
 ### Plot box plot 
-Box plot per dataset with same topK
+##### Box plot per dataset with same topK
 
 Run `python3 plotBoxPlotPerDataset.py CentralizedMinTopK/dataset0/500Krecords_1200_300_2K_latency_5s.csv CentralizedMinTopK/dataset1/500Krecords_1200_300_2K_latency_5s.csv CentralizedMinTopK/dataset2/500Krecords_1200_300_2K_latency_5s.csv CentralizedMinTopK/dataset3/500Krecords_1200_300_2K_latency_5s.csv CentralizedMinTopK/dataset4/500Krecords_1200_300_2K_latency_5s.csv`
 
-Box plot per topK
+##### Box plot per topK
 
 Run `python3 plotBoxPlot.py CentralizedMinTopK/dataset0/500Krecords_1200_300_2K_average.csv CentralizedMinTopK/dataset0/500Krecords_1200_300_10K_average.csv CentralizedMinTopK/dataset0/500Krecords_1200_300_50K_average.csv`
