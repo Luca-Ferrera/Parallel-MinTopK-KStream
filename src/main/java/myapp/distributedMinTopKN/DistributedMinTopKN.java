@@ -36,7 +36,7 @@ public class DistributedMinTopKN {
     public Topology buildTopology(Properties envProps, String cleanDataStructure, int k, int n, int dataset, int instance_number) {
         final StreamsBuilder builder = new StreamsBuilder();
         final String scoredMovieTopic = envProps.getProperty("scored.movies.topic.name");
-        final String minTopKRatedMovie = envProps.getProperty("mintopkn.movies.topic.name");
+        final String minTopKRatedMovie = envProps.getProperty("mintopk.movies.topic.name");
 
         // create intermediate-topK-movies store
         StoreBuilder storeBuilder = Stores.keyValueStoreBuilder(
@@ -123,9 +123,9 @@ public class DistributedMinTopKN {
                 Short.parseShort(envProps.getProperty("scored.movies.topic.replication.factor"))));
 
         topics.add(new NewTopic(
-                envProps.getProperty("mintopkn.movies.topic.name"),
-                Integer.parseInt(envProps.getProperty("mintopkn.movies.topic.partitions")),
-                Short.parseShort(envProps.getProperty("mintopkn.movies.topic.replication.factor"))));
+                envProps.getProperty("mintopk.movies.topic.name"),
+                Integer.parseInt(envProps.getProperty("mintopk.movies.topic.partitions")),
+                Short.parseShort(envProps.getProperty("mintopk.movies.topic.replication.factor"))));
 
         client.createTopics(topics);
         client.close();
