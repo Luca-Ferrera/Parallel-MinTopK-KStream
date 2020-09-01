@@ -30,8 +30,8 @@ public class DistributedMinTopKNTransformer implements Transformer<String, Score
     private final int n;
     private final Boolean cleanDataStructure;
     private ProcessorContext context;
-    private final int SIZE = 10;
-    private final int HOPPING_SIZE = 4;
+    private final int SIZE = 12;
+    private final int HOPPING_SIZE = 3;
     private final int NUM_INSTANCES = 3;
     private final int LOCAL_SIZE = SIZE/NUM_INSTANCES;
     private final int LOCAL_HOPPING_SIZE = HOPPING_SIZE/NUM_INSTANCES;
@@ -274,13 +274,12 @@ public class DistributedMinTopKNTransformer implements Transformer<String, Score
                 .findFirst().orElse(null);
         if(oldEntry != null) {
             //remove old object from superTopKNList
-//            System.out.println("Removing " + oldEntry + "from " + superTopKNList);
             this.superTopKNList.remove(oldEntry);
             // decrease topkCounter of windows where oldEntry belongs
             this.decreaseTopK(oldEntry);
             //TODO: RefreshLBP(); Algo 3 line 7, see annotation in PDF, maybe no needed
         }
-        this.insertToMTK(entry);
+        this.insertToMTK(entry, oldEntry);
     }
 
     private void decreaseTopK(MinTopKEntry entry) {
@@ -296,13 +295,12 @@ public class DistributedMinTopKNTransformer implements Transformer<String, Score
         }
     }
 
-    private void insertToMTK(MinTopKEntry entry) {
-        if(entry.getScore() < this.superTopKNList.get(this.superTopKNList.size() -1).getScore() && everyWindowHasTopKPlusN()){
-            return;
+    private void insertToMTK(MinTopKEntry entry, MinTopKEntry oldentry) {
+        if(oldentry != null || entry.getScore() >= this.superTopKNList.get(this.superTopKNList.size() -1).getScore() || !everyWindowHasTopKPlusN()){
+            //add O i to MTK+N list; Algo 3 line 25
+            this.insertNewEntry(entry);
+            this.updateLBP(entry);
         }
-        //add O i to MTK+N list; Algo 3 line 25
-        this.insertNewEntry(entry);
-        this.updateLBP(entry);
     }
 
     private MinTopKEntry generateLBP(long id){
