@@ -76,3 +76,17 @@ Throughput: massimo input throughput
 How to run on aws:
 - copy jar file using `scp -i *.pem jar-file.jar ubuntu@DNS:~/kstream`
 - connect using SSH `ssh -i *.pem ubuntu@DNS`
+
+How to create kafka connector:
+`curl -X POST \
+      -H "Content-Type: application/json" \
+      --data '{ "name": "mintopkn-jdbc-source", "config": {
+        "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
+        "tasks.max": 3,
+        "connection.url": "jdbc:mysql://mysql:3306/mintopkn?user=luca&password=passwd",
+        "mode": "timestamp+incrementing",
+        "incrementing.column.name": "id",
+        "timestamp.column.name": "modified",
+        "topic.prefix": "mintopkn-jdbc-",
+        "poll.interval.ms": 1000 } }'
+      http://$CONNECT_HOST:28083/connectors`

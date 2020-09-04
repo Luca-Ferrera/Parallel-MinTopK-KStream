@@ -4,9 +4,10 @@ USE mintopkn;
 DROP TABLE IF EXISTS updates;
 
 CREATE TABLE IF NOT EXISTS updates (
-  id BIGINT NOT NULL PRIMARY KEY,
+  id serial NOT NULL PRIMARY KEY,
   title varchar(100),
-  income double
+  income double,
+  modified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 INSERT INTO updates (id, title, income) VALUES (100, "Spiderman", 0);

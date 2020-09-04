@@ -5,6 +5,7 @@
   "fields": [
     {"name": "id", "type": "long"},
     {"name": "title", "type": "string"},
-    {"name": "income", "type": "double"}
+    {"name": "income", "type": "double"},
+    {"name": "modified", "type":"int","logicalType":"timestamp-millis"}
   ]
 }

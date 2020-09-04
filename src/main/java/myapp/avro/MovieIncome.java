@@ -14,8 +14,8 @@ import org.apache.avro.message.SchemaStore;
 
 @org.apache.avro.specific.AvroGenerated
 public class MovieIncome extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  private static final long serialVersionUID = -7262085511604936716L;
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"MovieIncome\",\"namespace\":\"myapp.avro\",\"fields\":[{\"name\":\"id\",\"type\":\"long\"},{\"name\":\"title\",\"type\":\"string\"},{\"name\":\"income\",\"type\":\"double\"}]}");
+  private static final long serialVersionUID = -6143548228892278593L;
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"MovieIncome\",\"namespace\":\"myapp.avro\",\"fields\":[{\"name\":\"id\",\"type\":\"long\"},{\"name\":\"title\",\"type\":\"string\"},{\"name\":\"income\",\"type\":\"double\"},{\"name\":\"modified\",\"type\":\"int\",\"logicalType\":\"timestamp-millis\"}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 
   private static SpecificData MODEL$ = new SpecificData();
@@ -74,6 +74,7 @@ public class MovieIncome extends org.apache.avro.specific.SpecificRecordBase imp
   @Deprecated public long id;
   @Deprecated public java.lang.CharSequence title;
   @Deprecated public double income;
+  @Deprecated public int modified;
 
   /**
    * Default constructor.  Note that this does not initialize fields
@@ -87,11 +88,13 @@ public class MovieIncome extends org.apache.avro.specific.SpecificRecordBase imp
    * @param id The new value for id
    * @param title The new value for title
    * @param income The new value for income
+   * @param modified The new value for modified
    */
-  public MovieIncome(java.lang.Long id, java.lang.CharSequence title, java.lang.Double income) {
+  public MovieIncome(java.lang.Long id, java.lang.CharSequence title, java.lang.Double income, java.lang.Integer modified) {
     this.id = id;
     this.title = title;
     this.income = income;
+    this.modified = modified;
   }
 
   public org.apache.avro.specific.SpecificData getSpecificData() { return MODEL$; }
@@ -102,6 +105,7 @@ public class MovieIncome extends org.apache.avro.specific.SpecificRecordBase imp
     case 0: return id;
     case 1: return title;
     case 2: return income;
+    case 3: return modified;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -113,6 +117,7 @@ public class MovieIncome extends org.apache.avro.specific.SpecificRecordBase imp
     case 0: id = (java.lang.Long)value$; break;
     case 1: title = (java.lang.CharSequence)value$; break;
     case 2: income = (java.lang.Double)value$; break;
+    case 3: modified = (java.lang.Integer)value$; break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -169,6 +174,23 @@ public class MovieIncome extends org.apache.avro.specific.SpecificRecordBase imp
   }
 
   /**
+   * Gets the value of the 'modified' field.
+   * @return The value of the 'modified' field.
+   */
+  public int getModified() {
+    return modified;
+  }
+
+
+  /**
+   * Sets the value of the 'modified' field.
+   * @param value the value to set.
+   */
+  public void setModified(int value) {
+    this.modified = value;
+  }
+
+  /**
    * Creates a new MovieIncome RecordBuilder.
    * @return A new MovieIncome RecordBuilder
    */
@@ -212,6 +234,7 @@ public class MovieIncome extends org.apache.avro.specific.SpecificRecordBase imp
     private long id;
     private java.lang.CharSequence title;
     private double income;
+    private int modified;
 
     /** Creates a new Builder */
     private Builder() {
@@ -236,6 +259,10 @@ public class MovieIncome extends org.apache.avro.specific.SpecificRecordBase imp
         this.income = data().deepCopy(fields()[2].schema(), other.income);
         fieldSetFlags()[2] = other.fieldSetFlags()[2];
       }
+      if (isValidValue(fields()[3], other.modified)) {
+        this.modified = data().deepCopy(fields()[3].schema(), other.modified);
+        fieldSetFlags()[3] = other.fieldSetFlags()[3];
+      }
     }
 
     /**
@@ -255,6 +282,10 @@ public class MovieIncome extends org.apache.avro.specific.SpecificRecordBase imp
       if (isValidValue(fields()[2], other.income)) {
         this.income = data().deepCopy(fields()[2].schema(), other.income);
         fieldSetFlags()[2] = true;
+      }
+      if (isValidValue(fields()[3], other.modified)) {
+        this.modified = data().deepCopy(fields()[3].schema(), other.modified);
+        fieldSetFlags()[3] = true;
       }
     }
 
@@ -376,6 +407,45 @@ public class MovieIncome extends org.apache.avro.specific.SpecificRecordBase imp
       return this;
     }
 
+    /**
+      * Gets the value of the 'modified' field.
+      * @return The value.
+      */
+    public int getModified() {
+      return modified;
+    }
+
+
+    /**
+      * Sets the value of the 'modified' field.
+      * @param value The value of 'modified'.
+      * @return This builder.
+      */
+    public myapp.avro.MovieIncome.Builder setModified(int value) {
+      validate(fields()[3], value);
+      this.modified = value;
+      fieldSetFlags()[3] = true;
+      return this;
+    }
+
+    /**
+      * Checks whether the 'modified' field has been set.
+      * @return True if the 'modified' field has been set, false otherwise.
+      */
+    public boolean hasModified() {
+      return fieldSetFlags()[3];
+    }
+
+
+    /**
+      * Clears the value of the 'modified' field.
+      * @return This builder.
+      */
+    public myapp.avro.MovieIncome.Builder clearModified() {
+      fieldSetFlags()[3] = false;
+      return this;
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public MovieIncome build() {
@@ -384,6 +454,7 @@ public class MovieIncome extends org.apache.avro.specific.SpecificRecordBase imp
         record.id = fieldSetFlags()[0] ? this.id : (java.lang.Long) defaultValue(fields()[0]);
         record.title = fieldSetFlags()[1] ? this.title : (java.lang.CharSequence) defaultValue(fields()[1]);
         record.income = fieldSetFlags()[2] ? this.income : (java.lang.Double) defaultValue(fields()[2]);
+        record.modified = fieldSetFlags()[3] ? this.modified : (java.lang.Integer) defaultValue(fields()[3]);
         return record;
       } catch (org.apache.avro.AvroMissingFieldException e) {
         throw e;
@@ -422,6 +493,8 @@ public class MovieIncome extends org.apache.avro.specific.SpecificRecordBase imp
 
     out.writeDouble(this.income);
 
+    out.writeInt(this.modified);
+
   }
 
   @Override public void customDecode(org.apache.avro.io.ResolvingDecoder in)
@@ -435,8 +508,10 @@ public class MovieIncome extends org.apache.avro.specific.SpecificRecordBase imp
 
       this.income = in.readDouble();
 
+      this.modified = in.readInt();
+
     } else {
-      for (int i = 0; i < 3; i++) {
+      for (int i = 0; i < 4; i++) {
         switch (fieldOrder[i].pos()) {
         case 0:
           this.id = in.readLong();
@@ -448,6 +523,10 @@ public class MovieIncome extends org.apache.avro.specific.SpecificRecordBase imp
 
         case 2:
           this.income = in.readDouble();
+          break;
+
+        case 3:
+          this.modified = in.readInt();
           break;
 
         default:
