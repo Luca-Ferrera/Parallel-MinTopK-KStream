@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
 import myapp.avro.MovieIncome;
-import myapp.avro.ScoredMovie;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.Serdes;
 

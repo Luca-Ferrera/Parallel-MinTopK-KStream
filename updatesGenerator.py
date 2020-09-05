@@ -11,7 +11,7 @@ def score(av, year):
 
 movies= [(294, "Die Hard"), (354, "Tree of Life"), (782, "A Walk in the Clouds"), (128, "The Big Lebowski"),
          (100, "Spiderman"), (120, "Pirates of The Caribbean"), (140, "La Grande Bellezza")]
-schema = avro.schema.Parse(open("src/main/avro/movie-income.avsc", "rb").read())
+schema = avro.schema.Parse(open("src/main/avro/updates.avsc", "rb").read())
 
 random.seed(int(sys.argv[1]))
 writer = DataFileWriter(open("movie-income.avro", "wb"), DatumWriter(), schema)

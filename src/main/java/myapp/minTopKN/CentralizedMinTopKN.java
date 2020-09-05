@@ -35,6 +35,7 @@ public class CentralizedMinTopKN {
         final StreamsBuilder builder = new StreamsBuilder();
         final String scoredMovieTopic = envProps.getProperty("scored.movies.topic.name");
         final String minTopKRatedMovie = envProps.getProperty("mintopkn.movies.topic.name");
+        final String updatesTopic = envProps.getProperty("mintopkn.updates.topic.name");
 
         // create intermediate-topK-movies store
         StoreBuilder storeBuilder = Stores.keyValueStoreBuilder(
@@ -62,7 +63,7 @@ public class CentralizedMinTopKN {
                 })
                 .transform(new TransformerSupplier<String,ScoredMovie,KeyValue<Long , MinTopKEntry>>() {
                     public Transformer get() {
-                        return new MinTopKNTransformer(k, n, cleanDataStructure);
+                        return new MinTopKNTransformer(k, n, cleanDataStructure, updatesTopic);
                     }
                 }, "windows-store", "super-topk-list-store")
                 .map((key, value) ->{

@@ -16,7 +16,6 @@ import org.apache.kafka.streams.state.KeyValueStore;
 
 import java.time.Duration;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.lang.Integer.min;
 
@@ -34,11 +33,13 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
     private PhysicalWindow currentWindow;
     private PhysicalWindow lastWindow;
     private double minScore;
+    private String updatesTopic;
 
-    public MinTopKNTransformer(int k, int n, String cleanDataStructure) {
+    public MinTopKNTransformer(int k, int n, String cleanDataStructure, String updatesTopic) {
         this.k = k;
         this.n = n;
         this.cleanDataStructure = cleanDataStructure.equals("clean");
+        this.updatesTopic = updatesTopic;
     }
 
     public void init(ProcessorContext context) {
@@ -273,7 +274,7 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
             this.decreaseTopK(oldEntry);
             //TODO: RefreshLBP(); Algo 3 line 7, see annotation in PDF, maybe no needed
         }
-        this.insertToMTK(entry);
+        this.insertToMTK(entry, oldEntry);
     }
 
     private void decreaseTopK(MinTopKEntry entry) {
@@ -289,13 +290,13 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
         }
     }
 
-    private void insertToMTK(MinTopKEntry entry) {
-        if(entry.getScore() < this.superTopKNList.get(this.superTopKNList.size() -1).getScore() && everyWindowHasTopKPlusN()){
-            return;
+    private void insertToMTK(MinTopKEntry entry, MinTopKEntry oldentry) {
+
+        if(oldentry != null || entry.getScore() >= this.superTopKNList.get(this.superTopKNList.size() -1).getScore() || !everyWindowHasTopKPlusN()){
+            //add O i to MTK+N list; Algo 3 line 25
+            this.insertNewEntry(entry);
+            this.updateLBP(entry);
         }
-        //add O i to MTK+N list; Algo 3 line 25
-        this.insertNewEntry(entry);
-        this.updateLBP(entry);
     }
 
     private MinTopKEntry generateLBP(long id){
@@ -410,7 +411,7 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
 
     private LinkedList<MovieIncome> getUpdates() {
         KafkaConsumer<String, MovieIncome> consumer = setUpConsumer();
-        consumer.subscribe(Arrays.asList("movie-updates"));
+        consumer.subscribe(Arrays.asList(this.updatesTopic));
         LinkedList<MovieIncome> updates = new LinkedList<>();
         int noRecordsCount = 0;
         while (true) {

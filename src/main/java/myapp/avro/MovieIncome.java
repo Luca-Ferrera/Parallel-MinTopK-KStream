@@ -14,8 +14,8 @@ import org.apache.avro.message.SchemaStore;
 
 @org.apache.avro.specific.AvroGenerated
 public class MovieIncome extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  private static final long serialVersionUID = -6143548228892278593L;
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"MovieIncome\",\"namespace\":\"myapp.avro\",\"fields\":[{\"name\":\"id\",\"type\":\"long\"},{\"name\":\"title\",\"type\":\"string\"},{\"name\":\"income\",\"type\":\"double\"},{\"name\":\"modified\",\"type\":\"int\",\"logicalType\":\"timestamp-millis\"}]}");
+  private static final long serialVersionUID = -5297508671515776095L;
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"MovieIncome\",\"namespace\":\"myapp.avro\",\"fields\":[{\"name\":\"id\",\"type\":\"long\"},{\"name\":\"title\",\"type\":\"string\"},{\"name\":\"income\",\"type\":\"double\"},{\"name\":\"modified\",\"type\":\"long\",\"logicalType\":\"timestamp-millis\"}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 
   private static SpecificData MODEL$ = new SpecificData();
@@ -74,7 +74,7 @@ public class MovieIncome extends org.apache.avro.specific.SpecificRecordBase imp
   @Deprecated public long id;
   @Deprecated public java.lang.CharSequence title;
   @Deprecated public double income;
-  @Deprecated public int modified;
+  @Deprecated public long modified;
 
   /**
    * Default constructor.  Note that this does not initialize fields
@@ -90,7 +90,7 @@ public class MovieIncome extends org.apache.avro.specific.SpecificRecordBase imp
    * @param income The new value for income
    * @param modified The new value for modified
    */
-  public MovieIncome(java.lang.Long id, java.lang.CharSequence title, java.lang.Double income, java.lang.Integer modified) {
+  public MovieIncome(java.lang.Long id, java.lang.CharSequence title, java.lang.Double income, java.lang.Long modified) {
     this.id = id;
     this.title = title;
     this.income = income;
@@ -117,7 +117,7 @@ public class MovieIncome extends org.apache.avro.specific.SpecificRecordBase imp
     case 0: id = (java.lang.Long)value$; break;
     case 1: title = (java.lang.CharSequence)value$; break;
     case 2: income = (java.lang.Double)value$; break;
-    case 3: modified = (java.lang.Integer)value$; break;
+    case 3: modified = (java.lang.Long)value$; break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -177,7 +177,7 @@ public class MovieIncome extends org.apache.avro.specific.SpecificRecordBase imp
    * Gets the value of the 'modified' field.
    * @return The value of the 'modified' field.
    */
-  public int getModified() {
+  public long getModified() {
     return modified;
   }
 
@@ -186,7 +186,7 @@ public class MovieIncome extends org.apache.avro.specific.SpecificRecordBase imp
    * Sets the value of the 'modified' field.
    * @param value the value to set.
    */
-  public void setModified(int value) {
+  public void setModified(long value) {
     this.modified = value;
   }
 
@@ -234,7 +234,7 @@ public class MovieIncome extends org.apache.avro.specific.SpecificRecordBase imp
     private long id;
     private java.lang.CharSequence title;
     private double income;
-    private int modified;
+    private long modified;
 
     /** Creates a new Builder */
     private Builder() {
@@ -411,7 +411,7 @@ public class MovieIncome extends org.apache.avro.specific.SpecificRecordBase imp
       * Gets the value of the 'modified' field.
       * @return The value.
       */
-    public int getModified() {
+    public long getModified() {
       return modified;
     }
 
@@ -421,7 +421,7 @@ public class MovieIncome extends org.apache.avro.specific.SpecificRecordBase imp
       * @param value The value of 'modified'.
       * @return This builder.
       */
-    public myapp.avro.MovieIncome.Builder setModified(int value) {
+    public myapp.avro.MovieIncome.Builder setModified(long value) {
       validate(fields()[3], value);
       this.modified = value;
       fieldSetFlags()[3] = true;
@@ -454,7 +454,7 @@ public class MovieIncome extends org.apache.avro.specific.SpecificRecordBase imp
         record.id = fieldSetFlags()[0] ? this.id : (java.lang.Long) defaultValue(fields()[0]);
         record.title = fieldSetFlags()[1] ? this.title : (java.lang.CharSequence) defaultValue(fields()[1]);
         record.income = fieldSetFlags()[2] ? this.income : (java.lang.Double) defaultValue(fields()[2]);
-        record.modified = fieldSetFlags()[3] ? this.modified : (java.lang.Integer) defaultValue(fields()[3]);
+        record.modified = fieldSetFlags()[3] ? this.modified : (java.lang.Long) defaultValue(fields()[3]);
         return record;
       } catch (org.apache.avro.AvroMissingFieldException e) {
         throw e;
@@ -493,7 +493,7 @@ public class MovieIncome extends org.apache.avro.specific.SpecificRecordBase imp
 
     out.writeDouble(this.income);
 
-    out.writeInt(this.modified);
+    out.writeLong(this.modified);
 
   }
 
@@ -508,7 +508,7 @@ public class MovieIncome extends org.apache.avro.specific.SpecificRecordBase imp
 
       this.income = in.readDouble();
 
-      this.modified = in.readInt();
+      this.modified = in.readLong();
 
     } else {
       for (int i = 0; i < 4; i++) {
@@ -526,7 +526,7 @@ public class MovieIncome extends org.apache.avro.specific.SpecificRecordBase imp
           break;
 
         case 3:
-          this.modified = in.readInt();
+          this.modified = in.readLong();
           break;
 
         default:

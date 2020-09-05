@@ -12,7 +12,7 @@ def update_movie():
     )
 
     # prepare query and data
-    query = """ UPDATE updates
+    query = """ UPDATE MovieIncome
                 SET income = %s
                 WHERE id = %s """
 
