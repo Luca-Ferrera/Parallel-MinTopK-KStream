@@ -63,7 +63,6 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
         }
         System.out.println("TRANSFORM KEY: " + key + " VALUE: " + value);
         setUpDataStructures();
-        //TODO: CHECK THIS PART
         if(this.lowerBoundPointer.isEmpty()) {
             System.out.println("+++WINDOW ITERATOR EMPTY+++");
             //initialize minScore as the score of the first record
@@ -144,7 +143,6 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
 
     private void createNewWindow() {
         //lower bound set to null since topK is not reached for this window
-        //TODO: set topKCounter to 0 ?
         PhysicalWindow newWindow = new PhysicalWindow(this.lastWindow.getId() + 1, SIZE, HOPPING_SIZE, 1, 1, null);
         this.physicalWindowsStore.put(newWindow.getId(), newWindow);
         this.physicalWindowsStore.put(-2L, newWindow);
