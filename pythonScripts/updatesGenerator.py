@@ -22,7 +22,7 @@ for i in range(200):
 writer.close()
 
 reader = DataFileReader(open("movie-income.avro", "rb"), DatumReader())
-updates = open("updates-test.txt", "a")
+updates = open("../updates-test.txt", "a")
 for movie in reader:
     updates.write(json.dumps(movie)+"\n")
 reader.close()
