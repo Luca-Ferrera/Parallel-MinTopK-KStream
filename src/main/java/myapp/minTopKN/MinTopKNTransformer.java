@@ -26,8 +26,8 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
     private final int n;
     private final Boolean cleanDataStructure;
     private ProcessorContext context;
-    private final int SIZE = 10;
-    private final int HOPPING_SIZE = 4;
+    private final int SIZE = 1200;
+    private final int HOPPING_SIZE = 300;
     private ArrayList<MinTopKEntry> superTopKNList;
     private LinkedList<PhysicalWindow> lowerBoundPointer;
     private PhysicalWindow currentWindow;
@@ -61,10 +61,10 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
             superTopKNListStore.all().forEachRemaining(elem -> superTopKNListStore.delete(elem.key));
             return null;
         }
-        System.out.println("TRANSFORM KEY: " + key + " VALUE: " + value);
+//        System.out.println("TRANSFORM KEY: " + key + " VALUE: " + value);
         setUpDataStructures();
         if(this.lowerBoundPointer.isEmpty()) {
-            System.out.println("+++WINDOW ITERATOR EMPTY+++");
+//            System.out.println("+++WINDOW ITERATOR EMPTY+++");
             //initialize minScore as the score of the first record
             this.minScore = value.getScore();
             //create first window
@@ -88,7 +88,7 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
             // CheckNewActiveWindow (O i .t);  Algo 1 line 4
             if(lastWindow.getActualRecords() - HOPPING_SIZE == 1) {
                 // time to create new window
-                System.out.println("+++CREATING NEW WINDOW+++");
+//                System.out.println("+++CREATING NEW WINDOW+++");
                 this.createNewWindow();
             }
             for(Iterator<PhysicalWindow> iterator = this.lowerBoundPointer.iterator(); iterator.hasNext();) {
@@ -102,10 +102,20 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
 //                System.out.println("CURRENT WINDOW " + currentWindow);
                 if(window.getId() == this.currentWindow.getId() && window.getActualRecords() - SIZE == 1) {
                     // current window ends
-                    System.out.println("+++CURRENT WINDOW ENDS +++" + window);
+//                    System.out.println("+++CURRENT WINDOW ENDS +++" + window);
+                    long startTime = System.nanoTime();
                     LinkedList<MovieIncome> changedObjects = this.getUpdates();
+                    long endTime = System.nanoTime();
+
+                    long duration = (endTime - startTime)/1000000;
+                    System.out.println("GET UPDATES DURATION " + duration);
 //                    System.out.println("UPDATED OBJECTS " + changedObjects);
+                    startTime = System.nanoTime();
                     this.updateChangedObjects(changedObjects);
+                    endTime = System.nanoTime();
+
+                    duration = (endTime - startTime)/1000000;
+                    System.out.println("UPDATE CHANGED OBJECTS  DURATION " + duration);
                     this.forwardTopK(window.getId());
                     this.purgeExpiredWindow(window);
                     iterator.remove();
@@ -340,7 +350,7 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
     private void forwardTopK(long windowId){
         List<MinTopKEntry> topK = this.superTopKNList.subList(0,min(this.superTopKNList.size(),this.k));
         topK.forEach(elem -> {
-           System.out.println("FORWARDING KEY: " + windowId +" VALUE: " + elem);
+//           System.out.println("FORWARDING KEY: " + windowId +" VALUE: " + elem);
            this.context.forward(windowId ,elem);
         });
     }
@@ -413,7 +423,7 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
         LinkedList<MovieIncome> updates = new LinkedList<>();
         int noRecordsCount = 0;
         while (true) {
-            ConsumerRecords<String, MovieIncome> records = consumer.poll(Duration.ofMillis(1000));
+            ConsumerRecords<String, MovieIncome> records = consumer.poll(Duration.ofMillis(10));
             //TODO: is it useful?
             if (records.count() == 0) {
                 noRecordsCount++;

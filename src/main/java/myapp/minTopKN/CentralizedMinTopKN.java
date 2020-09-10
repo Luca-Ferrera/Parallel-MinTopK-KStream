@@ -3,7 +3,6 @@ package myapp.minTopKN;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import myapp.avro.*;
-import myapp.minTopK.MinTopKTransformer;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.serialization.Serdes;
@@ -157,7 +156,6 @@ public class CentralizedMinTopKN {
             n = Integer.parseInt(args[2]);
             k = Integer.parseInt(args[1]);
         }
-
         CentralizedMinTopKN minTopKN = new CentralizedMinTopKN();
         Properties envProps = minTopKN.loadEnvProperties(args[0]);
         Properties streamProps = minTopKN.buildStreamsProperties(envProps);

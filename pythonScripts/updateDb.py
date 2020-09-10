@@ -22,8 +22,8 @@ def update_movie():
 
         # update movie income
         cursor = mydb.cursor()
-        for i in range(500):
-            sleep_time = uniform(0,2)
+        for i in range(400000):
+            sleep_time = uniform(0,4)
             sleep(sleep_time)
             movie_id = choice(movies)
             income = uniform(0,10)

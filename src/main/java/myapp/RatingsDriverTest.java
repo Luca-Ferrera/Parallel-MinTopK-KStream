@@ -14,7 +14,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class RatingsDriverTest {
     static String INPUT_TOPIC = "centralized-mintopkn-scored-rated-movies";
-    static Long INPUT_THROUGHPUT = 2000L;
+    static long INPUT_THROUGHPUT = 2000L;
     public static void main(final String [] args) throws Exception {
         final String bootstrapServers = args.length > 0 ? args[0] : "localhost:29092";
         final String schemaRegistryUrl = args.length > 1 ? args[1] : "http://localhost:8081";
