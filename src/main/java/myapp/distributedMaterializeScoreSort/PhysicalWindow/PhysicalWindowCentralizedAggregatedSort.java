@@ -32,7 +32,7 @@ public class PhysicalWindowCentralizedAggregatedSort {
         return props;
     }
 
-    public Topology buildTopology(Properties envProps, String cleanDataStructure) {
+    public Topology buildTopology(Properties envProps, String cleanDataStructure, int dataset) {
         final StreamsBuilder builder = new StreamsBuilder();
         final String sortedTopKMovieTopic = envProps.getProperty("sorted.movies.topic.name");
         final String topKTopic = envProps.getProperty("final.sorted.movies.topic.name");
@@ -46,13 +46,8 @@ public class PhysicalWindowCentralizedAggregatedSort {
         builder.addStateStore(storeBuilder);
 
         // SortedMovie
-        AtomicReference<Instant> start = new AtomicReference<>();
         AtomicReference<Instant> end = new AtomicReference<>();
         builder.<Long, ScoredMovie>stream(sortedTopKMovieTopic)
-                .map((key, value) ->{
-                    start.set(Instant.now());
-                    return new KeyValue<>(key,value);
-                })
                 .transform(new TransformerSupplier<Long,ScoredMovie,KeyValue<Long , ScoredMovie>>() {
                     public Transformer get() {
                         return new CentralizedAggregatedSortTransformer(cleanDataStructure);
@@ -60,11 +55,11 @@ public class PhysicalWindowCentralizedAggregatedSort {
                 }, "windowed-movies-store")
                 .map((key, value) ->{
                     end.set(Instant.now());
-                    try(FileWriter fw = new FileWriter("DisMaterializeSort/500Krecords_1200_300_latency_10ms.txt", true);
+                    try(FileWriter fw = new FileWriter("PhysicalDisMaterializeSort/dataset" + dataset + "/500Krecords_1200_300_end_time_5ms.txt", true);
                         BufferedWriter bw = new BufferedWriter(fw);
                         PrintWriter out = new PrintWriter(bw))
                     {
-                        out.println("Latency window " + key + " : " + Duration.between(start.get(), end.get()).toNanos());
+                        out.println("Latency window " + key + " : " + end.get());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -123,14 +118,18 @@ public class PhysicalWindowCentralizedAggregatedSort {
         }
 
         String cleanDataStructure = "";
+        int dataset = 0;
         if(args.length == 2){
-            cleanDataStructure = args[1];
+            dataset = Integer.parseInt(args[1]);
+        } else if(args.length == 3) {
+            dataset = Integer.parseInt(args[1]);
+            cleanDataStructure = args[2];
         }
 
         PhysicalWindowCentralizedAggregatedSort centralizedSorting = new PhysicalWindowCentralizedAggregatedSort();
         Properties envProps = centralizedSorting.loadEnvProperties(args[0]);
         Properties streamProps = centralizedSorting.buildStreamsProperties(envProps);
-        Topology topology = centralizedSorting.buildTopology(envProps, cleanDataStructure);
+        Topology topology = centralizedSorting.buildTopology(envProps, cleanDataStructure, dataset);
         System.out.println(topology.describe());
 
         centralizedSorting.createTopics(envProps);

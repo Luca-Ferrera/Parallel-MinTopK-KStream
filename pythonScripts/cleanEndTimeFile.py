@@ -8,7 +8,7 @@ if sys.argv[2] == "-1":
         if lines[i].split()[2] != lines[i+1].split()[2] :
             printingLines.append(lines[i])
     printingLines.append(lines[len(lines) - 1])
-    with open(sys.argv[1], "w") as f:
+    with open(sys.argv[1][:-4], "w") as f:
         for line in printingLines:
             splittedLine = line.split()
             f.write(splittedLine[2] + "," + str(datetime.datetime.strptime(splittedLine[4], "%Y-%m-%dT%H:%M:%S.%fZ")) + "\n")

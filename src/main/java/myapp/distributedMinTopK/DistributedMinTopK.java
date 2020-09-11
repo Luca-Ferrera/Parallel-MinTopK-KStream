@@ -57,7 +57,6 @@ public class DistributedMinTopK {
 
 
         AtomicReference<Instant> start = new AtomicReference<>();
-        AtomicReference<Instant> end = new AtomicReference<>();
         // TopKMovies
         builder.<String,ScoredMovie>stream(scoredMovieTopic)
                 .map((key, value) ->{

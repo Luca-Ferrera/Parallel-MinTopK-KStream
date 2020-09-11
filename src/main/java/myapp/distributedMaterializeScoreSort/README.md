@@ -17,10 +17,20 @@ Run `CentralizedAggregatedSort`  with `"dmss.env"` as argument.
 output topic: `dmss-topk-rated-movie`
 
 ### Physical Window: Distributed sorting, centralized aggregation
-Run 3 instances of `PhysicalWindowDistributedMSS`.
+Run 3 instances of `PhysicalWindowDistributedMSS ENV_FILE DATASET INSTANCE`.
 
-Run `PhysicalWindowCentralizedAggregatedSort`.
+Run `PhysicalWindowCentralizedAggregatedSort ENV_FILE DATASET`.
 
 Run both files with `physicalWindowDisMSS.env` as argument.
 
 output topic: `pdmss-final-sorted-rated-movies`
+
+### Measurements 
+
+Run `cleanEndTimeFile.py PhysicalDisMaterializeSort/dataset0/500Krecords_1200_300_end_time_5ms.txt -1` to get`DisMinTopKN/500Krecords_1200_300_topKK_end_time_5ms.csv`
+
+Run `cleanStartTimeFile.py PhysicalDisMaterializeSort/dataset0/instance0_500Krecords_1200_start_time_5ms.txt LocalWindowSize LocalWindowHoppingSize` for each instance's file
+
+Run `distributedLatency.py instance0.csv instance1.csv instance2.csv endTime.csv` to get the final latency for each windows
+
+Run `plotLatency.py PhysicalDisMaterializeSort/dataset0/500Krecords_1200_300_5ms.csv` to plot the results
