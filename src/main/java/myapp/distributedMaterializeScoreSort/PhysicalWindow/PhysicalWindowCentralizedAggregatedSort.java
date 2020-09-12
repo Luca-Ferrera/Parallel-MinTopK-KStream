@@ -32,7 +32,7 @@ public class PhysicalWindowCentralizedAggregatedSort {
         return props;
     }
 
-    public Topology buildTopology(Properties envProps, String cleanDataStructure, int dataset) {
+    public Topology buildTopology(Properties envProps, String cleanDataStructure, int dataset, int k) {
         final StreamsBuilder builder = new StreamsBuilder();
         final String sortedTopKMovieTopic = envProps.getProperty("sorted.movies.topic.name");
         final String topKTopic = envProps.getProperty("final.sorted.movies.topic.name");
@@ -50,12 +50,12 @@ public class PhysicalWindowCentralizedAggregatedSort {
         builder.<Long, ScoredMovie>stream(sortedTopKMovieTopic)
                 .transform(new TransformerSupplier<Long,ScoredMovie,KeyValue<Long , ScoredMovie>>() {
                     public Transformer get() {
-                        return new CentralizedAggregatedSortTransformer(cleanDataStructure);
+                        return new CentralizedAggregatedSortTransformer(cleanDataStructure, k);
                     }
                 }, "windowed-movies-store")
                 .map((key, value) ->{
                     end.set(Instant.now());
-                    try(FileWriter fw = new FileWriter("PhysicalDisMaterializeSort/dataset" + dataset + "/500Krecords_1200_300_end_time_5ms.txt", true);
+                    try(FileWriter fw = new FileWriter("PhysicalDisMaterializeSort/dataset" + dataset + "/500Krecords_1200_300_" + k + "K_end_time_5ms.txt", true);
                         BufferedWriter bw = new BufferedWriter(fw);
                         PrintWriter out = new PrintWriter(bw))
                     {
@@ -119,17 +119,19 @@ public class PhysicalWindowCentralizedAggregatedSort {
 
         String cleanDataStructure = "";
         int dataset = 0;
-        if(args.length == 2){
-            dataset = Integer.parseInt(args[1]);
-        } else if(args.length == 3) {
-            dataset = Integer.parseInt(args[1]);
-            cleanDataStructure = args[2];
+        int k = 0;
+        if(args.length == 3){
+            k = Integer.parseInt(args[1]);
+            dataset = Integer.parseInt(args[2]);
+        } else if(args.length == 4) {
+            k = Integer.parseInt(args[1]);
+            dataset = Integer.parseInt(args[2]);
+            cleanDataStructure = args[3];
         }
-
         PhysicalWindowCentralizedAggregatedSort centralizedSorting = new PhysicalWindowCentralizedAggregatedSort();
         Properties envProps = centralizedSorting.loadEnvProperties(args[0]);
         Properties streamProps = centralizedSorting.buildStreamsProperties(envProps);
-        Topology topology = centralizedSorting.buildTopology(envProps, cleanDataStructure, dataset);
+        Topology topology = centralizedSorting.buildTopology(envProps, cleanDataStructure, dataset, k);
         System.out.println(topology.describe());
 
         centralizedSorting.createTopics(envProps);

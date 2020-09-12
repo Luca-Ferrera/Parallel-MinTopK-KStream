@@ -20,12 +20,14 @@ public class DistributedTopKTransformer implements Transformer<String, ScoredMov
     private final int LOCAL_SIZE = SIZE/NUM_INSTANCES;
     private final int LOCAL_HOPPING_SIZE = HOPPING_SIZE/NUM_INSTANCES;
     private final Boolean cleanDataStructure;
+    private final int k;
 
 
-    public DistributedTopKTransformer(String storeName1, String storeName2, String cleanDataStructure) {
+    public DistributedTopKTransformer(String storeName1, String storeName2, String cleanDataStructure, int k) {
         this.cleanDataStructure = cleanDataStructure.equals("clean");
         this.storeName1 = storeName1;
         this.storeName2 = storeName2;
+        this.k = k;
     }
 
     public void init(ProcessorContext context) {
@@ -58,7 +60,8 @@ public class DistributedTopKTransformer implements Transformer<String, ScoredMov
         if(recordCount >= LOCAL_SIZE && recordCount % LOCAL_HOPPING_SIZE == 1) {
             Comparator<ScoredMovie> compareByScore = Comparator.comparingDouble(ScoredMovie::getScore);
             Collections.sort(windowArray, compareByScore.reversed());
-            windowArray.forEach(elem -> {
+            List<ScoredMovie> subList = windowArray.subList(0,k);
+            subList.forEach(elem -> {
                 context.forward(newKey, elem);
             });
         }

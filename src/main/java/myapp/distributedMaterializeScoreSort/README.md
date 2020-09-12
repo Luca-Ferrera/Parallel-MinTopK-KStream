@@ -17,9 +17,9 @@ Run `CentralizedAggregatedSort`  with `"dmss.env"` as argument.
 output topic: `dmss-topk-rated-movie`
 
 ### Physical Window: Distributed sorting, centralized aggregation
-Run 3 instances of `PhysicalWindowDistributedMSS ENV_FILE DATASET INSTANCE`.
+Run 3 instances of `PhysicalWindowDistributedMSS ENV_FILE TOPK DATASET INSTANCE`.
 
-Run `PhysicalWindowCentralizedAggregatedSort ENV_FILE DATASET`.
+Run `PhysicalWindowCentralizedAggregatedSort ENV_FILE TOPK DATASET`.
 
 Run both files with `physicalWindowDisMSS.env` as argument.
 

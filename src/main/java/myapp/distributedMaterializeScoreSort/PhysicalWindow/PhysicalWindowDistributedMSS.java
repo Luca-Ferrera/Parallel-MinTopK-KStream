@@ -30,7 +30,7 @@ public class PhysicalWindowDistributedMSS {
 
         return props;
     }
-    public Topology buildTopology(Properties envProps, String cleanDataStructure, int dataset, int instance_number) {
+    public Topology buildTopology(Properties envProps, String cleanDataStructure, int k, int dataset, int instance_number) {
         final StreamsBuilder builder = new StreamsBuilder();
         final String scoredMovieTopic = envProps.getProperty("scored.movies.topic.name");
         final String sortedTopKMovieTopic = envProps.getProperty("sorted.movies.topic.name");
@@ -60,7 +60,7 @@ public class PhysicalWindowDistributedMSS {
                 .map((key, value) ->{
                     start.set(Instant.now());
                     try(FileWriter fw = new FileWriter("PhysicalDisMaterializeSort/dataset" + dataset + "/instance" +
-                            instance_number + "_500Krecords_1200_300_start_time_5ms.txt", true);
+                            instance_number + "_500Krecords_1200_300_" + k + "K_start_time_5ms.txt", true);
                         BufferedWriter bw = new BufferedWriter(fw);
                         PrintWriter out = new PrintWriter(bw))
                     {
@@ -73,7 +73,7 @@ public class PhysicalWindowDistributedMSS {
                 .transform(new TransformerSupplier<String,ScoredMovie,KeyValue<Long , ScoredMovie>>() {
                     public Transformer get() {
                         return new DistributedTopKTransformer( "windowed-movies-store",
-                                 "record-count-store", cleanDataStructure );
+                                 "record-count-store", cleanDataStructure, k );
                     }
                 }, "windowed-movies-store", "record-count-store")
                 .to(sortedTopKMovieTopic, Produced.with(Serdes.Long(), scoredMovieAvroSerde(envProps)));
@@ -132,13 +132,16 @@ public class PhysicalWindowDistributedMSS {
         String cleanDataStructure = "";
         int dataset = 0;
         int instance_number = 0;
-        if(args.length == 3){
-            dataset = Integer.parseInt(args[1]);
-            instance_number = Integer.parseInt(args[2]);
-        } else if(args.length == 4){
-            cleanDataStructure = args[3];
-            instance_number = Integer.parseInt(args[2]);
-            dataset = Integer.parseInt(args[1]);
+        int k = 0;
+        if(args.length == 4){
+            k = Integer.parseInt(args[1]);
+            dataset = Integer.parseInt(args[2]);
+            instance_number = Integer.parseInt(args[3]);
+        } else if(args.length == 5){
+            k = Integer.parseInt(args[1]);
+            dataset = Integer.parseInt(args[2]);
+            instance_number = Integer.parseInt(args[3]);
+            cleanDataStructure = args[4];
         }
         if(args.length == 2){
             cleanDataStructure = args[1];
@@ -147,7 +150,7 @@ public class PhysicalWindowDistributedMSS {
         PhysicalWindowDistributedMSS dmss = new PhysicalWindowDistributedMSS();
         Properties envProps = dmss.loadEnvProperties(args[0]);
         Properties streamProps = dmss.buildStreamsProperties(envProps);
-        Topology topology = dmss.buildTopology(envProps, cleanDataStructure, dataset, instance_number);
+        Topology topology = dmss.buildTopology(envProps, cleanDataStructure, k, dataset, instance_number);
         System.out.println(topology.describe());
 
         dmss.createTopics(envProps);
