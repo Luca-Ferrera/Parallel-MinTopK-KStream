@@ -93,3 +93,15 @@ How to create kafka connector:
         "transforms.AddNamespace.type" : "org.apache.kafka.connect.transforms.SetSchemaMetadata$Value",
         "transforms.AddNamespace.schema.name" : "myapp.avro.MovieIncome"} }' \
       http://$CONNECT_HOST:28083/connectors`
+
+Run DisMSSTOPK on AWS:
+nohup java -jar RatingsDriver.jar pdmss-scored-rated-movies 5 0 &
+nohup java -jar PhysicalWindowCentralizedAggregatedSort.jar "src/main/java/myapp/distributedMaterializeScoreSort/PhysicalWindow/physicalWindowDisMSS.env" 2 0 &
+nohup java -jar PhysicalWindowDistributedMSS.jar "src/main/java/myapp/distributedMaterializeScoreSort/PhysicalWindow/physicalWindowDisMSS.env" 2 0 0 &
+nohup java -jar PhysicalWindowDistributedMSS.jar "src/main/java/myapp/distributedMaterializeScoreSort/PhysicalWindow/physicalWindowDisMSS.env" 2 0 1 &
+nohup java -jar PhysicalWindowDistributedMSS.jar "src/main/java/myapp/distributedMaterializeScoreSort/PhysicalWindow/physicalWindowDisMSS.env" 2 0 2 &
+
+sudo mkfs.ext4 -E nodiscard /dev/nvme0n1
+sudo mount /dev/nvme0n1 /vol1
+
+maybe need to delete content of /vol1/docker-data

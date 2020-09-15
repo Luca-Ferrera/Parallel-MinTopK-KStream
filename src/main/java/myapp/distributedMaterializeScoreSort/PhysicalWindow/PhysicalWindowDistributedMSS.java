@@ -146,7 +146,6 @@ public class PhysicalWindowDistributedMSS {
         if(args.length == 2){
             cleanDataStructure = args[1];
         }
-        System.out.println(cleanDataStructure);
         PhysicalWindowDistributedMSS dmss = new PhysicalWindowDistributedMSS();
         Properties envProps = dmss.loadEnvProperties(args[0]);
         Properties streamProps = dmss.buildStreamsProperties(envProps);
