@@ -103,5 +103,7 @@ nohup java -jar PhysicalWindowDistributedMSS.jar "src/main/java/myapp/distribute
 
 sudo mkfs.ext4 -E nodiscard /dev/nvme0n1
 sudo mount /dev/nvme0n1 /vol1
+sudo mkdir /vol1/docker-data
+sudo service docker restart
 
 maybe need to delete content of /vol1/docker-data

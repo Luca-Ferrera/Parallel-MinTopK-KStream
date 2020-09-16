@@ -43,7 +43,7 @@ public class CentralizedAggregatedSortTransformer implements Transformer<Long, S
         this.windowedMoviesState.put(key, windowArray);
         ArrayList<ScoredMovie> oldList = this.windowedMoviesState.get(key - 1);
         //check if received all records from window with ID=key-1 (old window) -> forward all records
-        if(oldList != null){
+        if(oldList != null && oldList.size() == k * INSTANCE_NUMBER){
             Comparator<ScoredMovie> compareByScore = Comparator.comparingDouble(ScoredMovie::getScore);
             Collections.sort(oldList, compareByScore.reversed());
             // remove the list associated to windowID=key-1 because from now on it'll be useless
@@ -51,7 +51,7 @@ public class CentralizedAggregatedSortTransformer implements Transformer<Long, S
             // forward topK records for the windowID=key-1
             List<ScoredMovie> subList = oldList.subList(0,k);
             subList.forEach(elem -> {
-                this.context.forward(key, elem);
+                this.context.forward(key-1, elem);
             });
         }
         return null;
