@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.example</groupId>
-    <artifactId>kafka-stream-tutorial</artifactId>
+    <artifactId>kafka-topk-algorithms</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
