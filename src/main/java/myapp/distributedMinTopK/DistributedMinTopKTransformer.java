@@ -173,18 +173,9 @@ public class DistributedMinTopKTransformer implements Transformer<String, Scored
             return;
         }
         //add new record to superTopKList
-        MinTopKEntry newEntry;
-        //this handle the case of the first LOCAL_HOPPING_SIZE records in the application
-        //these records expires in LOCAL_SIZE / LOCAL_HOPPING_SIZE - 1 windows instead of LOCAL_SIZE / LOCAL_HOPPING_SIZE windows
-        List<PhysicalWindow> physicalWindowList = this.lowerBoundPointer.stream().filter(window -> window.getId() == 0).collect(Collectors.toList());
-        if(this.currentWindow.getId() == 0 && !physicalWindowList.isEmpty() && physicalWindowList.get(0).getActualRecords() <= LOCAL_HOPPING_SIZE){
-            newEntry = new MinTopKEntry(movie.getId(), movie.getScore(), 0L,
-                    (long) LOCAL_SIZE / LOCAL_HOPPING_SIZE - 1L);
-        }else {
-            //if newWindow is created I have already created the new entry for the superTopKList, otherwise create it
-            newEntry = topKEntry == null ? new MinTopKEntry(movie.getId(), movie.getScore(), this.currentWindow.getId(),
-                this.currentWindow.getId() + (long) LOCAL_SIZE / LOCAL_HOPPING_SIZE) : topKEntry;
-        }
+        MinTopKEntry newEntry = topKEntry == null ?
+                new MinTopKEntry(movie.getId(), movie.getScore(), this.currentWindow.getId(), this.currentWindow.getId() + (long) LOCAL_SIZE / LOCAL_HOPPING_SIZE)
+                : topKEntry;
 //        System.out.println("NEWENTRY " + newEntry);
         //insert newEntry in superTopKList
         insertNewEntry(newEntry);
