@@ -116,7 +116,7 @@ public class MinTopKTransformer implements Transformer<String, ScoredMovie, KeyV
                     // last window, create new window
 //                    System.out.println("Creating new window");
                     newEntry = new MinTopKEntry(value.getId(), value.getScore(),
-                            this.currentWindow.getId(), this.currentWindow.getId() + (long) SIZE / HOPPING_SIZE);
+                            this.currentWindow.getId(), this.currentWindow.getId() + (long) SIZE / HOPPING_SIZE - 1L);
                     this.createNewWindow(newEntry);
                 }
             }
@@ -170,19 +170,9 @@ public class MinTopKTransformer implements Transformer<String, ScoredMovie, KeyV
             return;
         }
         //add new record to superTopKList
-        MinTopKEntry newEntry;
-        //this handle the case of the first HOPPING_SIZE records in the application
-        //these records expires in SIZE / HOPPING_SIZE - 1 windows instead of SIZE / HOPPING_SIZE windows
-        List<PhysicalWindow> physicalWindowList = this.lowerBoundPointer.stream().filter(window -> window.getId() == 0).collect(Collectors.toList());
-        //TODO: check MinTopKN for newEntry creation: endingWindow may be incorrect
-        if(this.currentWindow.getId() == 0 && !physicalWindowList.isEmpty() && physicalWindowList.get(0).getActualRecords() <= HOPPING_SIZE){
-            newEntry = new MinTopKEntry(movie.getId(), movie.getScore(), 0L,
-                    (long) SIZE / HOPPING_SIZE - 1L);
-        }else {
-            //if newWindow is created I have already created the new entry for the superTopKList, otherwise create it
-            newEntry = topKEntry == null ? new MinTopKEntry(movie.getId(), movie.getScore(), this.currentWindow.getId(),
-                this.currentWindow.getId() + (long) SIZE / HOPPING_SIZE) : topKEntry;
-        }
+        MinTopKEntry newEntry = topKEntry == null ?
+                new MinTopKEntry(movie.getId(), movie.getScore(), this.currentWindow.getId(), this.currentWindow.getId() + (long) SIZE / HOPPING_SIZE - 1L)
+                : topKEntry;
 //        System.out.println("NEWENTRY " + newEntry);
         //insert newEntry in superTopKList
         insertNewEntry(newEntry);
