@@ -119,7 +119,7 @@ public class DistributedMinTopKTransformer implements Transformer<String, Scored
                     // last window, create new window
 //                    System.out.println("Creating new window");
                     newEntry = new MinTopKEntry(value.getId(), value.getScore(),
-                            this.currentWindow.getId(), this.currentWindow.getId() + (long) LOCAL_SIZE / LOCAL_HOPPING_SIZE);
+                            this.currentWindow.getId(), this.currentWindow.getId() + (long) LOCAL_SIZE / LOCAL_HOPPING_SIZE - 1L);
                     this.createNewWindow(newEntry);
                 }
             }
@@ -174,7 +174,7 @@ public class DistributedMinTopKTransformer implements Transformer<String, Scored
         }
         //add new record to superTopKList
         MinTopKEntry newEntry = topKEntry == null ?
-                new MinTopKEntry(movie.getId(), movie.getScore(), this.currentWindow.getId(), this.currentWindow.getId() + (long) LOCAL_SIZE / LOCAL_HOPPING_SIZE)
+                new MinTopKEntry(movie.getId(), movie.getScore(), this.currentWindow.getId(), this.currentWindow.getId() + (long) LOCAL_SIZE / LOCAL_HOPPING_SIZE - 1L)
                 : topKEntry;
 //        System.out.println("NEWENTRY " + newEntry);
         //insert newEntry in superTopKList
