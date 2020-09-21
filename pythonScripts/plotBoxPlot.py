@@ -12,7 +12,7 @@ for (topk,file) in zip(topKs, files):
     data = pd.concat([data, df])
 
 data.boxplot(by='topK')
-plt.title(sys.argv[1][:18])
+plt.title(sys.argv[4])
 plt.suptitle('')
 plt.xlabel('topK')
 plt.ylabel('latency')

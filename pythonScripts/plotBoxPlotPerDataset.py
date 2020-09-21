@@ -13,7 +13,7 @@ for (dataset,file) in zip(datasets, files):
     data = pd.concat([data, df])
 
 data.boxplot(by='dataset')
-plt.title(sys.argv[1][:18])
+plt.title(sys.argv[6])
 plt.suptitle('')
 plt.xlabel('dataset')
 plt.ylabel('latency')

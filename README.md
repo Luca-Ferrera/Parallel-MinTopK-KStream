@@ -153,8 +153,8 @@ Run `python3 measurements.py CentralizedMinTopK/dataset0/500Krecords_1200_300_2K
 ### Plot box plot 
 ##### Box plot per dataset with same topK
 
-Run `python3 plotBoxPlotPerDataset.py CentralizedMinTopK/dataset0/500Krecords_1200_300_2K_latency_5s.csv CentralizedMinTopK/dataset1/500Krecords_1200_300_2K_latency_5s.csv CentralizedMinTopK/dataset2/500Krecords_1200_300_2K_latency_5s.csv CentralizedMinTopK/dataset3/500Krecords_1200_300_2K_latency_5s.csv CentralizedMinTopK/dataset4/500Krecords_1200_300_2K_latency_5s.csv`
+Run `python3 plotBoxPlotPerDataset.py CentralizedMinTopK/dataset0/500Krecords_1200_300_2K_latency_5s.csv CentralizedMinTopK/dataset1/500Krecords_1200_300_2K_latency_5s.csv CentralizedMinTopK/dataset2/500Krecords_1200_300_2K_latency_5s.csv CentralizedMinTopK/dataset3/500Krecords_1200_300_2K_latency_5s.csv CentralizedMinTopK/dataset4/500Krecords_1200_300_2K_latency_5s.csv TITLE`
 
 ##### Box plot per topK
 
-Run `python3 plotBoxPlot.py CentralizedMinTopK/dataset0/500Krecords_1200_300_2K_average.csv CentralizedMinTopK/dataset0/500Krecords_1200_300_10K_average.csv CentralizedMinTopK/dataset0/500Krecords_1200_300_50K_average.csv`
+Run `python3 plotBoxPlot.py CentralizedMinTopK/dataset0/500Krecords_1200_300_2K_average.csv CentralizedMinTopK/dataset0/500Krecords_1200_300_10K_average.csv CentralizedMinTopK/dataset0/500Krecords_1200_300_50K_average.csv TITLE`
