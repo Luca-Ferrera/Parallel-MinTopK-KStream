@@ -109,3 +109,5 @@ sudo service docker restart
 maybe need to delete content of /vol1/docker-data
 
 min.score per ogni finestra
+re-run Distributed MinTopK with topk=50 expecially for dataset2
+re-run Distributed MSSTopK with topK=10 for dataset 3 & 4
