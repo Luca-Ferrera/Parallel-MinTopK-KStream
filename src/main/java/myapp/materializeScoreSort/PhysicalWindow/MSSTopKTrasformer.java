@@ -18,8 +18,8 @@ public class MSSTopKTrasformer implements Transformer<String, ScoredMovie, KeyVa
     private String storeName2;
     private KeyValueStore<Integer, Integer> countState;
     private ProcessorContext context;
-    private final int SIZE = 12;
-    private final int HOPPING_SIZE = 3;
+    private final int SIZE = 1200;
+    private final int HOPPING_SIZE = 300;
     private final int k;
 
     public MSSTopKTrasformer(String storeName1, String storeName2, String cleanDataStructure, int k) {

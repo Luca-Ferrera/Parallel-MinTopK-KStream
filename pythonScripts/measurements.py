@@ -7,7 +7,7 @@ topKs = [2, 10, 50]
 data = pd.DataFrame()
 
 for (topk,file) in zip(topKs, files):
-    df = pd.read_csv(file, skipinitialspace=True, usecols=['mean latency'])
+    df = pd.read_csv(file, skipinitialspace=True, usecols=['mean'])
     df['topK'] = topk
     data = pd.concat([data, df])
 

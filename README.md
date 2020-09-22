@@ -40,15 +40,15 @@ Run `src/main/java/myapp/RatingsDriverTest.java`, change the `INPUT_TOPIC` in th
 ## Measurements
 
 ### Centralized Benchmark
-Run `MaterializeScoreSort`
+Run `src/main/java/myapp/materializeScoreSort/PhysicalWindow/CentralizedMSSTopK.java` with `TOPK` and `DATASET` as arguments
 
-Run `RatingsDriver` with `scored-rated-movies`, `INPUT_THROUGHPUT` and `DATASET` as arguments.
+Run `RatingsDriver` with `msstopk-scored-rated-movies`, `INPUT_THROUGHPUT` and `DATASET` as arguments.
 
 Check when reading offset << writing offset
 
-Run `cleanLatencyFile.py MaterializeSort/latency_5ms.txt -1` to get the final `MaterializeSort/latency_5ms.csv`
+Run `cleanLatencyFile.py CentralizedMSSTopK/dataset/topKK_latency_5s.txt TOPK` to get the final `MaterializeSort/latency_5ms.csv`
 
-Run `averageLatency.py MaterializeSort/latency_5ms.txt` to get average Latency of the experiment.
+Run `averageLatency.py CentralizedMSSTopK/dataset/topKK_latency_5s.txt` to get average Latency of the experiment.
 
 ---
 
@@ -81,19 +81,19 @@ Run `averageLatency.py CentralizedMinTopKN/topKK_latency_5ms.txt` to get average
 ---
 
 ### Distributed Benchmark
-Run 3 instances of `src/main/java/myapp/distributedMaterializeScoreSort/PhysicalWindow/PhysicalWindowDistributedMSS`.
+Run 3 instances of `src/main/java/myapp/distributedMaterializeScoreSort/PhysicalWindow/PhysicalWindowDistributedMSS ENV_FILE TOPK DATASET #INSTANCE`.
 
-Run `src/main/java/myapp/distributedMaterializeScoreSort/PhysicalWindow/PhysicalWindowCentralizedAggregatedSort`.
+Run `src/main/java/myapp/distributedMaterializeScoreSort/PhysicalWindow/PhysicalWindowCentralizedAggregatedSort ENV_FILE TOPK DATASET`.
 
-Run both files with `src/main/java/myapp/distributedMaterializeScoreSort/PhysicalWindow/physicalWindowDisMSS.env` as argument.
+Run both files with `src/main/java/myapp/distributedMaterializeScoreSort/PhysicalWindow/physicalWindowDisMSS.env` as `ENV_FILE` argument.
 
 Run `RatingsDriver` with `pdmss-scored-rated-movies`, `INPUT_THROUGHPUT` and `DATASET` as arguments.
 
 Check when reading offset << writing offset
 
-Run `cleanLatencyFile.py DisMaterializeSort/latency_5ms.txt -1` to get the final `DisMaterializeSort/latency_5ms.csv`
+Run `cleanLatencyFile.py DisMaterializeSort/dataset/topKK_latency_5ms.txt -1` to get the final `DisMaterializeSort/latency_5ms.csv`
 
-Run `averageLatency.py DisMaterializeSort/latency_5ms.txt` to get average Latency of the experiment.
+Run `averageLatency.py DisMaterializeSort/dataset/topKK_latency_5ms.txt` to get average Latency of the experiment.
 
 ---
 
