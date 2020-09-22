@@ -70,7 +70,7 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
             //create first window
 //            System.out.println("EMPTY WINDOWS STORE");
             MinTopKEntry firstEntry = new MinTopKEntry(value.getId(), value.getScore(),
-                    0L, 0L);
+                    0L, SIZE / HOPPING_SIZE - 1L);
             this.superTopKNList.add(firstEntry);
             // new window with null as LBP since actualRecords < K+N
             PhysicalWindow  startingWindow = new PhysicalWindow(0L, SIZE, HOPPING_SIZE, 1, 1 ,null);
@@ -112,23 +112,12 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
                 }
                 else {
                     //TODO: calculate the new score using minScore
-                    MinTopKEntry entry;
-                    // first HOPPING_SIZE * (SIZE/HOPPING_SIZE) records are alive in less than SIZE/HOPPING_SIZE windows
-                    if(this.currentWindow.getActualRecords() < HOPPING_SIZE * (SIZE/HOPPING_SIZE)) {
-                        entry = new MinTopKEntry(
-                                value.getId(),
-                                value.getScore(),
-                                this.currentWindow.getId(),
-                                this.currentWindow.getId() + (this.currentWindow.getActualRecords()-1)/HOPPING_SIZE
-                        );
-                    } else {
-                        entry = new MinTopKEntry(
-                                value.getId(),
-                                value.getScore(),
-                                this.currentWindow.getId(),
-                                this.currentWindow.getId() + (long) SIZE / HOPPING_SIZE
-                        );
+                    if(window.getMinScore() > value.getScore()) {
+                        // Update MinScore for the window
+                        window.setMinScore(value.getScore());
+                        physicalWindowsStore.put(window.getId(), window);
                     }
+                    MinTopKEntry  entry = new MinTopKEntry(value.getId(), value.getScore(), this.currentWindow.getId(), this.currentWindow.getId() + (long) SIZE / HOPPING_SIZE - 1L);
                     //updateMTK(O i); Algo 1 line 6
                     this.updateMTK(entry);
                 }
@@ -159,9 +148,21 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
                     .findFirst().orElse(null);
             //update score
             if(entry != null) {
+                // update object is in MTKN
                 double newScore = entry.getScore() + 0.2 * update.getIncome();
                 entry.setScore(newScore);
                 changedObjects.add(entry);
+            }
+            else {
+                // update object is not in MTKN
+                // compute score using currentWindow's minScore and income
+                MinTopKEntry outOfMTKNEntry = new MinTopKEntry(
+                        update.getId(),
+                        this.currentWindow.getMinScore() + 0.2 * update.getIncome(),
+                        this.currentWindow.getId(),
+                        this.currentWindow.getId() + (long) SIZE / HOPPING_SIZE - 1L
+                );
+                changedObjects.add(outOfMTKNEntry);
             }
         });
         changedObjects.forEach(this::updateMTK);
@@ -257,10 +258,12 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
     }
 
     private void updateMTK(MinTopKEntry entry){
-//        System.out.println("ENTRY " + entry);
         //update minScore
-//        System.out.println("CHECK IF EXIST " + superTopKNList);
-        this.minScore = Math.min(entry.getScore(), this.minScore);
+        if(this.currentWindow.getMinScore() > entry.getScore()) {
+            // Update MinScore for the window
+            this.currentWindow.setMinScore(entry.getScore());
+            this.physicalWindowsStore.put(this.currentWindow.getId(), this.currentWindow);
+        }
         MinTopKEntry oldEntry = this.superTopKNList.stream()
                 .filter(elem -> elem.getId() == entry.getId() && elem.getScore() != entry.getScore())
                 .findFirst().orElse(null);
@@ -270,6 +273,7 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
             this.superTopKNList.remove(oldEntry);
             // decrease topkCounter of windows where oldEntry belongs
             this.decreaseTopK(oldEntry);
+            //TODO: modify entry's score using oldEntry score if new score depend on the old one! But is it so?
             //TODO: RefreshLBP(); Algo 3 line 7, see annotation in PDF, maybe no needed
         }
         this.insertToMTK(entry, oldEntry);
