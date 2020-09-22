@@ -1,29 +1,28 @@
-package myapp.distributedMaterializeScoreSort.PhysicalWindow;
+package myapp.materializeScoreSort.PhysicalWindow;
 
 import myapp.avro.ScoredMovie;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.Transformer;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.state.KeyValueStore;
+import org.apache.kafka.streams.state.ValueAndTimestamp;
 
 import java.util.*;
 
-public class DistributedTopKTransformer implements Transformer<String, ScoredMovie, KeyValue<Long,ScoredMovie>> {
+
+public class MSSTopKTrasformer implements Transformer<String, ScoredMovie, KeyValue<Long, ScoredMovie>> {
+
+    private final Boolean cleanDataStructure;
     private KeyValueStore<Long, ArrayList<ScoredMovie>> windowedMoviesState;
-    private KeyValueStore<Integer, Integer> countState;
     private String storeName1;
     private String storeName2;
+    private KeyValueStore<Integer, Integer> countState;
     private ProcessorContext context;
-    private final int SIZE = 1200;
-    private final int HOPPING_SIZE = 300;
-    private final int NUM_INSTANCES = 3;
-    private final int LOCAL_SIZE = SIZE/NUM_INSTANCES;
-    private final int LOCAL_HOPPING_SIZE = HOPPING_SIZE/NUM_INSTANCES;
-    private final Boolean cleanDataStructure;
+    private final int SIZE = 12;
+    private final int HOPPING_SIZE = 3;
     private final int k;
 
-
-    public DistributedTopKTransformer(String storeName1, String storeName2, String cleanDataStructure, int k) {
+    public MSSTopKTrasformer(String storeName1, String storeName2, String cleanDataStructure, int k) {
         this.cleanDataStructure = cleanDataStructure.equals("clean");
         this.storeName1 = storeName1;
         this.storeName2 = storeName2;
@@ -32,11 +31,11 @@ public class DistributedTopKTransformer implements Transformer<String, ScoredMov
 
     public void init(ProcessorContext context) {
         this.context = context;
-        this.windowedMoviesState = (KeyValueStore<Long, ArrayList<ScoredMovie>> ) context.getStateStore(this.storeName1);
+        this.windowedMoviesState = (KeyValueStore<Long, ArrayList<ScoredMovie>>) context.getStateStore(this.storeName1);
         this.countState = (KeyValueStore<Integer, Integer>) context.getStateStore(this.storeName2);
     }
 
-    public  KeyValue<Long,ScoredMovie> transform(String key, ScoredMovie value) {
+    public KeyValue<Long,ScoredMovie> transform(String key, ScoredMovie value) {
         if(this.cleanDataStructure){
             this.windowedMoviesState.all().forEachRemaining(elem -> windowedMoviesState.delete(elem.key));
             this.countState.delete(-1);
@@ -44,7 +43,7 @@ public class DistributedTopKTransformer implements Transformer<String, ScoredMov
             return null;
         }
         int recordCount = this.countState.all().hasNext() ? this.countState.get(-1) : 1;
-        long windowID = (recordCount - 1) / LOCAL_HOPPING_SIZE;
+        long windowID = (recordCount - 1) / HOPPING_SIZE;
         this.windowedMoviesState.putIfAbsent(windowID, new ArrayList<ScoredMovie>());
         LinkedList<Long> windowIDList = new LinkedList<>();
         this.windowedMoviesState.all().forEachRemaining((elem) -> windowIDList.add(elem.key));
@@ -52,13 +51,13 @@ public class DistributedTopKTransformer implements Transformer<String, ScoredMov
         ArrayList<ScoredMovie> windowArray;
         long windowIdToForward = windowIDList.getFirst();
         for(long id : windowIDList){
-            if(recordCount < LOCAL_SIZE || recordCount % LOCAL_HOPPING_SIZE != 1 || id != windowIdToForward ) {
+            if(recordCount < SIZE || recordCount % HOPPING_SIZE != 1 || id != windowIdToForward ){
                 windowArray = this.windowedMoviesState.get(id);
                 windowArray.add(value);
                 this.windowedMoviesState.put(id, windowArray);
             }
         }
-        if(recordCount >= LOCAL_SIZE && recordCount % LOCAL_HOPPING_SIZE == 1) {
+        if(recordCount >= SIZE && recordCount % HOPPING_SIZE == 1) {
             windowArray = this.windowedMoviesState.get(windowIdToForward);
             Comparator<ScoredMovie> compareByScore = Comparator.comparingDouble(ScoredMovie::getScore);
             Collections.sort(windowArray, compareByScore.reversed());
@@ -67,7 +66,7 @@ public class DistributedTopKTransformer implements Transformer<String, ScoredMov
                 context.forward(windowIdToForward, elem);
             });
         }
-        if(windowIDList.size() > LOCAL_SIZE / LOCAL_HOPPING_SIZE) {
+        if(windowIDList.size() > SIZE / HOPPING_SIZE) {
             //remove old window
             long item = windowIDList.removeFirst();
             this.windowedMoviesState.delete(item);
