@@ -101,8 +101,8 @@ nohup java -jar PhysicalWindowDistributedMSS.jar "src/main/java/myapp/distribute
 nohup java -jar PhysicalWindowDistributedMSS.jar "src/main/java/myapp/distributedMaterializeScoreSort/PhysicalWindow/physicalWindowDisMSS.env" 2 0 1 &
 nohup java -jar PhysicalWindowDistributedMSS.jar "src/main/java/myapp/distributedMaterializeScoreSort/PhysicalWindow/physicalWindowDisMSS.env" 2 0 2 &
 
-sudo mkfs.ext4 -E nodiscard /dev/nvme0n1
-sudo mount /dev/nvme0n1 /vol1
+sudo mkfs.ext4 -E nodiscard /dev/nvme1n1
+sudo mount /dev/nvme1n1 /vol1
 sudo mkdir /vol1/docker-data
 sudo service docker restart
 

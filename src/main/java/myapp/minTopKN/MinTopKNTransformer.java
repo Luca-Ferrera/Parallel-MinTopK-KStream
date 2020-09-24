@@ -423,7 +423,7 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
         LinkedList<MovieIncome> updates = new LinkedList<>();
         int noRecordsCount = 0;
         while (true) {
-            ConsumerRecords<String, MovieIncome> records = consumer.poll(Duration.ofMillis(10));
+            ConsumerRecords<String, MovieIncome> records = consumer.poll(Duration.ofMillis(1000));
             //TODO: is it useful?
             if (records.count() == 0) {
                 noRecordsCount++;
