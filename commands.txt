@@ -98,3 +98,8 @@ Perchè lo score deve dipendere dallo score vecchio? Non dipende solo dal rating
 
 Se non ho modifiche sul DB non avrò mai i dati degli incassi per un dato film, se mi arriva un record di quel film
 come faccio a calcolare lo score? uso solo il rating? oppure uso minScore come punto di partenza(ma in che modo)?
+
+Mi salvo tutti gli updates a fine window, durante la window successiva ho due casi:
+1) record in MTKN: uso income aggiornato che ho salvato a fine window precedente e il rating ricevuto in input per lo score
+2) record outside MTKN: se ho income fra gli aggiornamenti lo uso, altrimenti uso il minScore di questa window per
+    calcolare il nuovo score (insieme al rating in input?)
