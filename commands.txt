@@ -103,3 +103,8 @@ Mi salvo tutti gli updates a fine window, durante la window successiva ho due ca
 1) record in MTKN: uso income aggiornato che ho salvato a fine window precedente e il rating ricevuto in input per lo score
 2) record outside MTKN: se ho income fra gli aggiornamenti lo uso, altrimenti uso il minScore di questa window per
     calcolare il nuovo score (insieme al rating in input?)
+
+Aggiungere il campo rating a MinTopKEntry e usarlo per calcolare lo score con l'income
+
+Può essere che elimino un oggetto da MTKN perchè arriva un update, ma l'update lo fa uscire da MTKN quindi non lo inserisco?
+credo di sì, ma penso che andando a ridurre il topKcounter di ogni window in cui è presente poi sarà reinserito sempre
