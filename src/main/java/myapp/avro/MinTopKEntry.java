@@ -14,8 +14,8 @@ import org.apache.avro.message.SchemaStore;
 
 @org.apache.avro.specific.AvroGenerated
 public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  private static final long serialVersionUID = 1688514750498191424L;
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"MinTopKEntry\",\"namespace\":\"myapp.avro\",\"fields\":[{\"name\":\"id\",\"type\":\"long\"},{\"name\":\"score\",\"type\":\"double\"},{\"name\":\"startingWindow\",\"type\":\"long\"},{\"name\":\"endingWindow\",\"type\":\"long\"}]}");
+  private static final long serialVersionUID = 6260641922579196658L;
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"MinTopKEntry\",\"namespace\":\"myapp.avro\",\"fields\":[{\"name\":\"id\",\"type\":\"long\"},{\"name\":\"score\",\"type\":\"double\"},{\"name\":\"startingWindow\",\"type\":\"long\"},{\"name\":\"endingWindow\",\"type\":\"long\"},{\"name\":\"rating\",\"type\":\"double\"}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 
   private static SpecificData MODEL$ = new SpecificData();
@@ -75,6 +75,7 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
   @Deprecated public double score;
   @Deprecated public long startingWindow;
   @Deprecated public long endingWindow;
+  @Deprecated public double rating;
 
   /**
    * Default constructor.  Note that this does not initialize fields
@@ -89,12 +90,29 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
    * @param score The new value for score
    * @param startingWindow The new value for startingWindow
    * @param endingWindow The new value for endingWindow
+   * @param rating The new value for rating
+   */
+  public MinTopKEntry(java.lang.Long id, java.lang.Double score, java.lang.Long startingWindow, java.lang.Long endingWindow, java.lang.Double rating) {
+    this.id = id;
+    this.score = score;
+    this.startingWindow = startingWindow;
+    this.endingWindow = endingWindow;
+    this.rating = rating;
+  }
+
+  /**
+   * Old version MinTopKEntry constructor.
+   * @param id The new value for id
+   * @param score The new value for score
+   * @param startingWindow The new value for startingWindow
+   * @param endingWindow The new value for endingWindow
    */
   public MinTopKEntry(java.lang.Long id, java.lang.Double score, java.lang.Long startingWindow, java.lang.Long endingWindow) {
     this.id = id;
     this.score = score;
     this.startingWindow = startingWindow;
     this.endingWindow = endingWindow;
+    this.rating = 0;
   }
 
   public org.apache.avro.specific.SpecificData getSpecificData() { return MODEL$; }
@@ -106,6 +124,7 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
     case 1: return score;
     case 2: return startingWindow;
     case 3: return endingWindow;
+    case 4: return rating;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -118,6 +137,7 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
     case 1: score = (java.lang.Double)value$; break;
     case 2: startingWindow = (java.lang.Long)value$; break;
     case 3: endingWindow = (java.lang.Long)value$; break;
+    case 4: rating = (java.lang.Double)value$; break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -183,17 +203,19 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
       return false;
     }
     return
-        this.getId() == value.getId() &&
-        this.getScore() == value.getScore() &&
-        this.getStartingWindow() == value.getStartingWindow() &&
-        this.getEndingWindow() == value.getEndingWindow();
+            this.getId() == value.getId() &&
+                    this.getScore() == value.getScore() &&
+                    this.getStartingWindow() == value.getStartingWindow() &&
+                    this.getEndingWindow() == value.getEndingWindow() &&
+                    this.getRating() == value.getRating();
   }
 
   public boolean sameButIncreasedStartingWindow(MinTopKEntry value){
     return this.getId() == value.getId() &&
             this.getScore() == value.getScore() &&
             this.getStartingWindow() == value.getStartingWindow() + 1L &&
-            this.getEndingWindow() == value.getEndingWindow();
+            this.getEndingWindow() == value.getEndingWindow() &&
+            this.getRating() == value.getRating();
   }
 
   /**
@@ -211,6 +233,23 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
    */
   public void setEndingWindow(long value) {
     this.endingWindow = value;
+  }
+
+  /**
+   * Gets the value of the 'rating' field.
+   * @return The value of the 'rating' field.
+   */
+  public double getRating() {
+    return rating;
+  }
+
+
+  /**
+   * Sets the value of the 'rating' field.
+   * @param value the value to set.
+   */
+  public void setRating(double value) {
+    this.rating = value;
   }
 
   /**
@@ -258,6 +297,7 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
     private double score;
     private long startingWindow;
     private long endingWindow;
+    private double rating;
 
     /** Creates a new Builder */
     private Builder() {
@@ -286,6 +326,10 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
         this.endingWindow = data().deepCopy(fields()[3].schema(), other.endingWindow);
         fieldSetFlags()[3] = other.fieldSetFlags()[3];
       }
+      if (isValidValue(fields()[4], other.rating)) {
+        this.rating = data().deepCopy(fields()[4].schema(), other.rating);
+        fieldSetFlags()[4] = other.fieldSetFlags()[4];
+      }
     }
 
     /**
@@ -309,6 +353,10 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
       if (isValidValue(fields()[3], other.endingWindow)) {
         this.endingWindow = data().deepCopy(fields()[3].schema(), other.endingWindow);
         fieldSetFlags()[3] = true;
+      }
+      if (isValidValue(fields()[4], other.rating)) {
+        this.rating = data().deepCopy(fields()[4].schema(), other.rating);
+        fieldSetFlags()[4] = true;
       }
     }
 
@@ -468,6 +516,45 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
       return this;
     }
 
+    /**
+      * Gets the value of the 'rating' field.
+      * @return The value.
+      */
+    public double getRating() {
+      return rating;
+    }
+
+
+    /**
+      * Sets the value of the 'rating' field.
+      * @param value The value of 'rating'.
+      * @return This builder.
+      */
+    public myapp.avro.MinTopKEntry.Builder setRating(double value) {
+      validate(fields()[4], value);
+      this.rating = value;
+      fieldSetFlags()[4] = true;
+      return this;
+    }
+
+    /**
+      * Checks whether the 'rating' field has been set.
+      * @return True if the 'rating' field has been set, false otherwise.
+      */
+    public boolean hasRating() {
+      return fieldSetFlags()[4];
+    }
+
+
+    /**
+      * Clears the value of the 'rating' field.
+      * @return This builder.
+      */
+    public myapp.avro.MinTopKEntry.Builder clearRating() {
+      fieldSetFlags()[4] = false;
+      return this;
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public MinTopKEntry build() {
@@ -477,6 +564,7 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
         record.score = fieldSetFlags()[1] ? this.score : (java.lang.Double) defaultValue(fields()[1]);
         record.startingWindow = fieldSetFlags()[2] ? this.startingWindow : (java.lang.Long) defaultValue(fields()[2]);
         record.endingWindow = fieldSetFlags()[3] ? this.endingWindow : (java.lang.Long) defaultValue(fields()[3]);
+        record.rating = fieldSetFlags()[4] ? this.rating : (java.lang.Double) defaultValue(fields()[4]);
         return record;
       } catch (org.apache.avro.AvroMissingFieldException e) {
         throw e;
@@ -517,6 +605,8 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
 
     out.writeLong(this.endingWindow);
 
+    out.writeDouble(this.rating);
+
   }
 
   @Override public void customDecode(org.apache.avro.io.ResolvingDecoder in)
@@ -532,8 +622,10 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
 
       this.endingWindow = in.readLong();
 
+      this.rating = in.readDouble();
+
     } else {
-      for (int i = 0; i < 4; i++) {
+      for (int i = 0; i < 5; i++) {
         switch (fieldOrder[i].pos()) {
         case 0:
           this.id = in.readLong();
@@ -549,6 +641,10 @@ public class MinTopKEntry extends org.apache.avro.specific.SpecificRecordBase im
 
         case 3:
           this.endingWindow = in.readLong();
+          break;
+
+        case 4:
+          this.rating = in.readDouble();
           break;
 
         default:

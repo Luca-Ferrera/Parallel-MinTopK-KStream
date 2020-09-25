@@ -76,7 +76,7 @@ public class DistributedMinTopKNTransformer implements Transformer<String, Score
             //create first window
 //            System.out.println("EMPTY WINDOWS STORE");
             MinTopKEntry firstEntry = new MinTopKEntry(value.getId(), value.getScore(),
-                    0L, 0L);
+                    0L, 0L, value.getRating());
             this.superTopKNList.add(firstEntry);
             // new window with null as LBP since actualRecords < K+N
             PhysicalWindow  startingWindow = new PhysicalWindow(0L, LOCAL_SIZE, LOCAL_HOPPING_SIZE, 1, 1 ,null);
@@ -126,14 +126,16 @@ public class DistributedMinTopKNTransformer implements Transformer<String, Score
                                 value.getId(),
                                 value.getScore(),
                                 this.currentWindow.getId(),
-                                this.currentWindow.getId() + (this.currentWindow.getActualRecords()-1)/LOCAL_HOPPING_SIZE
+                                this.currentWindow.getId() + (this.currentWindow.getActualRecords()-1)/LOCAL_HOPPING_SIZE,
+                                value.getRating()
                         );
                     } else {
                         entry = new MinTopKEntry(
                                 value.getId(),
                                 value.getScore(),
                                 this.currentWindow.getId(),
-                                this.currentWindow.getId() + (long) LOCAL_SIZE / LOCAL_HOPPING_SIZE
+                                this.currentWindow.getId() + (long) LOCAL_SIZE / LOCAL_HOPPING_SIZE,
+                                value.getRating()
                         );
                     }
                     //updateMTK(O i); Algo 1 line 6

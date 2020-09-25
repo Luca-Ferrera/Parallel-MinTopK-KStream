@@ -105,7 +105,6 @@ Mi salvo tutti gli updates a fine window, durante la window successiva ho due ca
     calcolare il nuovo score (insieme al rating in input?)
 
 ho un update ma il film non è in MTKN, ho solo income, uso minScore (o min rating) per lo score nuovo
-minScore= minimo valore utile lato streaming (score totale con la componente distribuita pari a 0)
 
 Aggiungere il campo rating a MinTopKEntry e usarlo per calcolare lo score con l'income
 

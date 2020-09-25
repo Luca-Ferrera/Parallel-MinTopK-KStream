@@ -14,8 +14,8 @@ import org.apache.avro.message.SchemaStore;
 
 @org.apache.avro.specific.AvroGenerated
 public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  private static final long serialVersionUID = -6724422527900897771L;
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"PhysicalWindow\",\"namespace\":\"myapp.avro\",\"fields\":[{\"name\":\"id\",\"type\":\"long\"},{\"name\":\"size\",\"type\":\"int\"},{\"name\":\"hoppingSize\",\"type\":\"int\"},{\"name\":\"actualRecords\",\"type\":\"int\"},{\"name\":\"topKCounter\",\"type\":\"int\"},{\"name\":\"lowerBoundPointer\",\"type\":[\"null\",{\"type\":\"record\",\"name\":\"MinTopKEntry\",\"fields\":[{\"name\":\"id\",\"type\":\"long\"},{\"name\":\"score\",\"type\":\"double\"},{\"name\":\"startingWindow\",\"type\":\"long\"},{\"name\":\"endingWindow\",\"type\":\"long\"}]}]},{\"name\":\"minScore\",\"type\":[\"null\",\"double\"]}]}");
+  private static final long serialVersionUID = 7677828498656605728L;
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"PhysicalWindow\",\"namespace\":\"myapp.avro\",\"fields\":[{\"name\":\"id\",\"type\":\"long\"},{\"name\":\"size\",\"type\":\"int\"},{\"name\":\"hoppingSize\",\"type\":\"int\"},{\"name\":\"actualRecords\",\"type\":\"int\"},{\"name\":\"topKCounter\",\"type\":\"int\"},{\"name\":\"lowerBoundPointer\",\"type\":[\"null\",{\"type\":\"record\",\"name\":\"MinTopKEntry\",\"fields\":[{\"name\":\"id\",\"type\":\"long\"},{\"name\":\"score\",\"type\":\"double\"},{\"name\":\"startingWindow\",\"type\":\"long\"},{\"name\":\"endingWindow\",\"type\":\"long\"},{\"name\":\"rating\",\"type\":\"double\"}]}]},{\"name\":\"minRating\",\"type\":[\"null\",\"double\"]}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 
   private static SpecificData MODEL$ = new SpecificData();
@@ -77,7 +77,7 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
   @Deprecated public int actualRecords;
   @Deprecated public int topKCounter;
   @Deprecated public myapp.avro.MinTopKEntry lowerBoundPointer;
-  @Deprecated public java.lang.Double minScore;
+  @Deprecated public java.lang.Double minRating;
 
   /**
    * Default constructor.  Note that this does not initialize fields
@@ -94,26 +94,28 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
    * @param actualRecords The new value for actualRecords
    * @param topKCounter The new value for topKCounter
    * @param lowerBoundPointer The new value for lowerBoundPointer
-   * @param minScore The new value for minScore
-   */
-  public PhysicalWindow(java.lang.Long id, java.lang.Integer size, java.lang.Integer hoppingSize, java.lang.Integer actualRecords, java.lang.Integer topKCounter, myapp.avro.MinTopKEntry lowerBoundPointer, java.lang.Double minScore) {
-    this.id = id;
-    this.size = size;
-    this.hoppingSize = hoppingSize;
-    this.actualRecords = actualRecords;
-    this.topKCounter = topKCounter;
-    this.lowerBoundPointer = lowerBoundPointer;
-    this.minScore = minScore;
-  }
+   * @param minRating The new value for minScore
+   *    */
+
+  public PhysicalWindow(java.lang.Long id, java.lang.Integer size, java.lang.Integer hoppingSize, java.lang.Integer actualRecords, java.lang.Integer topKCounter, myapp.avro.MinTopKEntry lowerBoundPointer, java.lang.Double minRating) {
+   this.id = id;
+   this.size = size;
+   this.hoppingSize = hoppingSize;
+   this.actualRecords = actualRecords;
+   this.topKCounter = topKCounter;
+   this.lowerBoundPointer = lowerBoundPointer;
+   this.minRating = minRating;
+   }
+
 
   /**
-   * All-args minus minScore constructor.
-   * @param id The new value for id
-   * @param size The new value for size
-   * @param hoppingSize The new value for hoppingSize
-   * @param actualRecords The new value for actualRecords
-   * @param topKCounter The new value for topKCounter
-   * @param lowerBoundPointer The new value for lowerBoundPointer
+   *    * All-args minus minScore constructor.
+   *    * @param id The new value for id
+   *    * @param size The new value for size
+   *    * @param hoppingSize The new value for hoppingSize
+   *    * @param actualRecords The new value for actualRecords
+   *    * @param topKCounter The new value for topKCounter
+   *    * @param lowerBoundPointer The new value for lowerBoundPointerminRating The new value for minRating
    */
   public PhysicalWindow(java.lang.Long id, java.lang.Integer size, java.lang.Integer hoppingSize, java.lang.Integer actualRecords, java.lang.Integer topKCounter, myapp.avro.MinTopKEntry lowerBoundPointer) {
     this.id = id;
@@ -122,8 +124,9 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
     this.actualRecords = actualRecords;
     this.topKCounter = topKCounter;
     this.lowerBoundPointer = lowerBoundPointer;
-    this.minScore = null;
+    this.minRating = null;
   }
+
   public org.apache.avro.specific.SpecificData getSpecificData() { return MODEL$; }
   public org.apache.avro.Schema getSchema() { return SCHEMA$; }
   // Used by DatumWriter.  Applications should not call.
@@ -135,7 +138,7 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
     case 3: return actualRecords;
     case 4: return topKCounter;
     case 5: return lowerBoundPointer;
-    case 6: return minScore;
+    case 6: return minRating;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -150,7 +153,7 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
     case 3: actualRecords = (java.lang.Integer)value$; break;
     case 4: topKCounter = (java.lang.Integer)value$; break;
     case 5: lowerBoundPointer = (myapp.avro.MinTopKEntry)value$; break;
-    case 6: minScore = (java.lang.Double)value$; break;
+    case 6: minRating = (java.lang.Double)value$; break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -233,6 +236,7 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
     return topKCounter;
   }
 
+  public void increaseTopKCounter(int value){this.topKCounter += value;}
 
   /**
    * Sets the value of the 'topKCounter' field.
@@ -241,8 +245,6 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
   public void setTopKCounter(int value) {
     this.topKCounter = value;
   }
-
-  public void increaseTopKCounter(int value){this.topKCounter += value;}
 
   /**
    * Gets the value of the 'lowerBoundPointer' field.
@@ -262,20 +264,20 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
   }
 
   /**
-   * Gets the value of the 'minScore' field.
-   * @return The value of the 'minScore' field.
+   * Gets the value of the 'minRating' field.
+   * @return The value of the 'minRating' field.
    */
-  public java.lang.Double getMinScore() {
-    return minScore;
+  public java.lang.Double getMinRating() {
+    return minRating;
   }
 
 
   /**
-   * Sets the value of the 'minScore' field.
+   * Sets the value of the 'minRating' field.
    * @param value the value to set.
    */
-  public void setMinScore(java.lang.Double value) {
-    this.minScore = value;
+  public void setMinRating(java.lang.Double value) {
+    this.minRating = value;
   }
 
   /**
@@ -326,7 +328,7 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
     private int topKCounter;
     private myapp.avro.MinTopKEntry lowerBoundPointer;
     private myapp.avro.MinTopKEntry.Builder lowerBoundPointerBuilder;
-    private java.lang.Double minScore;
+    private java.lang.Double minRating;
 
     /** Creates a new Builder */
     private Builder() {
@@ -366,8 +368,8 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
       if (other.hasLowerBoundPointerBuilder()) {
         this.lowerBoundPointerBuilder = myapp.avro.MinTopKEntry.newBuilder(other.getLowerBoundPointerBuilder());
       }
-      if (isValidValue(fields()[6], other.minScore)) {
-        this.minScore = data().deepCopy(fields()[6].schema(), other.minScore);
+      if (isValidValue(fields()[6], other.minRating)) {
+        this.minRating = data().deepCopy(fields()[6].schema(), other.minRating);
         fieldSetFlags()[6] = other.fieldSetFlags()[6];
       }
     }
@@ -403,8 +405,8 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
         fieldSetFlags()[5] = true;
       }
       this.lowerBoundPointerBuilder = null;
-      if (isValidValue(fields()[6], other.minScore)) {
-        this.minScore = data().deepCopy(fields()[6].schema(), other.minScore);
+      if (isValidValue(fields()[6], other.minRating)) {
+        this.minRating = data().deepCopy(fields()[6].schema(), other.minRating);
         fieldSetFlags()[6] = true;
       }
     }
@@ -680,41 +682,41 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
     }
 
     /**
-      * Gets the value of the 'minScore' field.
+      * Gets the value of the 'minRating' field.
       * @return The value.
       */
-    public java.lang.Double getMinScore() {
-      return minScore;
+    public java.lang.Double getMinRating() {
+      return minRating;
     }
 
 
     /**
-      * Sets the value of the 'minScore' field.
-      * @param value The value of 'minScore'.
+      * Sets the value of the 'minRating' field.
+      * @param value The value of 'minRating'.
       * @return This builder.
       */
-    public myapp.avro.PhysicalWindow.Builder setMinScore(java.lang.Double value) {
+    public myapp.avro.PhysicalWindow.Builder setMinRating(java.lang.Double value) {
       validate(fields()[6], value);
-      this.minScore = value;
+      this.minRating = value;
       fieldSetFlags()[6] = true;
       return this;
     }
 
     /**
-      * Checks whether the 'minScore' field has been set.
-      * @return True if the 'minScore' field has been set, false otherwise.
+      * Checks whether the 'minRating' field has been set.
+      * @return True if the 'minRating' field has been set, false otherwise.
       */
-    public boolean hasMinScore() {
+    public boolean hasMinRating() {
       return fieldSetFlags()[6];
     }
 
 
     /**
-      * Clears the value of the 'minScore' field.
+      * Clears the value of the 'minRating' field.
       * @return This builder.
       */
-    public myapp.avro.PhysicalWindow.Builder clearMinScore() {
-      minScore = null;
+    public myapp.avro.PhysicalWindow.Builder clearMinRating() {
+      minRating = null;
       fieldSetFlags()[6] = false;
       return this;
     }
@@ -739,7 +741,7 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
         } else {
           record.lowerBoundPointer = fieldSetFlags()[5] ? this.lowerBoundPointer : (myapp.avro.MinTopKEntry) defaultValue(fields()[5]);
         }
-        record.minScore = fieldSetFlags()[6] ? this.minScore : (java.lang.Double) defaultValue(fields()[6]);
+        record.minRating = fieldSetFlags()[6] ? this.minRating : (java.lang.Double) defaultValue(fields()[6]);
         return record;
       } catch (org.apache.avro.AvroMissingFieldException e) {
         throw e;
@@ -790,12 +792,12 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
       this.lowerBoundPointer.customEncode(out);
     }
 
-    if (this.minScore == null) {
+    if (this.minRating == null) {
       out.writeIndex(0);
       out.writeNull();
     } else {
       out.writeIndex(1);
-      out.writeDouble(this.minScore);
+      out.writeDouble(this.minRating);
     }
 
   }
@@ -827,9 +829,9 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
 
       if (in.readIndex() != 1) {
         in.readNull();
-        this.minScore = null;
+        this.minRating = null;
       } else {
-        this.minScore = in.readDouble();
+        this.minRating = in.readDouble();
       }
 
     } else {
@@ -870,9 +872,9 @@ public class PhysicalWindow extends org.apache.avro.specific.SpecificRecordBase 
         case 6:
           if (in.readIndex() != 1) {
             in.readNull();
-            this.minScore = null;
+            this.minRating = null;
           } else {
-            this.minScore = in.readDouble();
+            this.minRating = in.readDouble();
           }
           break;
 

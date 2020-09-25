@@ -6,6 +6,7 @@
     {"name": "id", "type": "long"},
     {"name": "score", "type": "double"},
     {"name": "startingWindow", "type": "long"},
-    {"name": "endingWindow", "type": "long"}
+    {"name": "endingWindow", "type": "long"},
+    {"name": "rating", "type": "double"}
   ]
 }

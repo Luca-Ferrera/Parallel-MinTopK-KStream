@@ -32,7 +32,6 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
     private LinkedList<PhysicalWindow> lowerBoundPointer;
     private PhysicalWindow currentWindow;
     private PhysicalWindow lastWindow;
-    private double minScore;
     private String updatesTopic;
 
     public MinTopKNTransformer(int k, int n, String cleanDataStructure, String updatesTopic) {
@@ -65,15 +64,13 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
         setUpDataStructures();
         if(this.lowerBoundPointer.isEmpty()) {
             System.out.println("+++WINDOW ITERATOR EMPTY+++");
-            //initialize minScore as the score of the first record
-            this.minScore = value.getScore();
             //create first window
 //            System.out.println("EMPTY WINDOWS STORE");
             MinTopKEntry firstEntry = new MinTopKEntry(value.getId(), value.getScore(),
-                    0L, SIZE / HOPPING_SIZE - 1L);
+                    0L, SIZE / HOPPING_SIZE - 1L, value.getRating());
             this.superTopKNList.add(firstEntry);
             // new window with null as LBP since actualRecords < K+N
-            PhysicalWindow  startingWindow = new PhysicalWindow(0L, SIZE, HOPPING_SIZE, 1, 1 ,null);
+            PhysicalWindow  startingWindow = new PhysicalWindow(0L, SIZE, HOPPING_SIZE, 1, 1 ,null, value.getRating());
             physicalWindowsStore.put(startingWindow.getId(), startingWindow);
             physicalWindowsStore.put(-1L, startingWindow);
             physicalWindowsStore.put(-2L, startingWindow);
@@ -111,13 +108,14 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
                     iterator.remove();
                 }
                 else {
-                    //TODO: calculate the new score using minScore
-                    if(window.getMinScore() > value.getScore()) {
-                        // Update MinScore for the window
-                        window.setMinScore(value.getScore());
+                    //TODO: calculate the new score using minRating
+                    if(window.getMinRating() > value.getRating()) {
+                        // Update MinRating for the window
+                        window.setMinRating(value.getRating());
                         physicalWindowsStore.put(window.getId(), window);
                     }
-                    MinTopKEntry  entry = new MinTopKEntry(value.getId(), value.getScore(), this.currentWindow.getId(), this.currentWindow.getId() + (long) SIZE / HOPPING_SIZE - 1L);
+                    MinTopKEntry  entry = new MinTopKEntry(value.getId(), value.getScore(), this.currentWindow.getId(),
+                            this.currentWindow.getId() + (long) SIZE / HOPPING_SIZE - 1L, value.getRating());
                     //updateMTK(O i); Algo 1 line 6
                     this.updateMTK(entry);
                 }
@@ -148,23 +146,25 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
                     .findFirst().orElse(null);
             //update score
             if(entry != null) {
-                // update object is in MTKN
-                double newScore = entry.getScore() + 0.2 * update.getIncome();
+                // updated object is in MTKN
+                double newScore = entry.getRating() + 0.2 * update.getIncome();
                 entry.setScore(newScore);
                 changedObjects.add(entry);
             }
             else {
-                // update object is not in MTKN
-                // compute score using currentWindow's minScore and income
+                // updated object is not in MTKN
+                // compute score using currentWindow's minRating and income
                 MinTopKEntry outOfMTKNEntry = new MinTopKEntry(
                         update.getId(),
-                        this.currentWindow.getMinScore() + 0.2 * update.getIncome(),
+                        this.currentWindow.getMinRating() + 0.2 * update.getIncome(),
                         this.currentWindow.getId(),
-                        this.currentWindow.getId() + (long) SIZE / HOPPING_SIZE - 1L
+                        this.currentWindow.getId() + (long) SIZE / HOPPING_SIZE - 1L,
+                        this.currentWindow.getMinRating()
                 );
                 changedObjects.add(outOfMTKNEntry);
             }
         });
+        //TODO: maybe I can use different function for updateMTK here
         changedObjects.forEach(this::updateMTK);
     }
 
@@ -258,12 +258,13 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
     }
 
     private void updateMTK(MinTopKEntry entry){
-        //update minScore
-        if(this.currentWindow.getMinScore() > entry.getScore()) {
-            // Update MinScore for the window
-            this.currentWindow.setMinScore(entry.getScore());
+        //update minRating
+        if(this.currentWindow.getMinRating() > entry.getRating()) {
+            // Update minRating for the window
+            this.currentWindow.setMinRating(entry.getRating());
             this.physicalWindowsStore.put(this.currentWindow.getId(), this.currentWindow);
         }
+        // check if entry is already in MTKN
         MinTopKEntry oldEntry = this.superTopKNList.stream()
                 .filter(elem -> elem.getId() == entry.getId() && elem.getScore() != entry.getScore())
                 .findFirst().orElse(null);

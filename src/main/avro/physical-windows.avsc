@@ -9,6 +9,6 @@
     {"name": "actualRecords", "type": "int"},
     {"name": "topKCounter", "type": "int"},
     {"name": "lowerBoundPointer", "type": ["null", "MinTopKEntry"]},
-    {"name": "minScore", "type": ["null", "double"]}
+    {"name": "minRating", "type": ["null", "double"]}
   ]
 }
