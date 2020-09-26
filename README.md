@@ -110,7 +110,7 @@ Run `cleanEndTimeFile.py DisMinTopK/500Krecords_1200_300_topKK_end_time_5ms.txt 
 
 Run `cleanStartTimeFile.py DisMinTopK/dataset0/instance0_500Krecords_1200_300_2K_start_time_5ms.txt LocalWindowSize LocalWindowHoppingSize` for each instance's file
 
-Run `distributedLatency.py instance0.csv instance1.csv instance2.csv endTime.csv` to get the final latency for each windows
+Run `distributedLatency.py NUM_INSTANCES endTime.csv instance0.csv ...` to get the final latency for each windows
 
 ---
 
@@ -128,7 +128,7 @@ Run `cleanEndTimeFile.py DisMinTopKN/500Krecords_1200_300_topKK_end_time_5ms.txt
 
 Run `cleanStartTimeFile.py DisMinTopKN/dataset0/instance0_500Krecords_1200_300_2K_1N_start_time_5ms.txt LocalWindowSize LocalWindowHoppingSize` for each instance's file
 
-Run `distributedLatency.py instance0.csv instance1.csv instance2.csv endTime.csv` to get the final latency for each windows
+Run `distributedLatency.py NUM_INSTANCES endTime.csv instance0.csv ...` to get the final latency for each windows
 
 ---
 
