@@ -67,7 +67,7 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
             //create first window
 //            System.out.println("EMPTY WINDOWS STORE");
             MinTopKEntry firstEntry = new MinTopKEntry(value.getId(), value.getScore(),
-                    0L, SIZE / HOPPING_SIZE - 1L, value.getRating());
+                    0L, (long) Math.ceil((0.0 / HOPPING_SIZE) - 1), value.getRating());
             this.superTopKNList.add(firstEntry);
             // new window with null as LBP since actualRecords < K+N
             PhysicalWindow  startingWindow = new PhysicalWindow(0L, SIZE, HOPPING_SIZE, 1, 1 ,null, value.getRating());
@@ -115,7 +115,7 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
                         physicalWindowsStore.put(window.getId(), window);
                     }
                     MinTopKEntry  entry = new MinTopKEntry(value.getId(), value.getScore(), this.currentWindow.getId(),
-                            this.currentWindow.getId() + (long) SIZE / HOPPING_SIZE - 1L, value.getRating());
+                            this.currentWindow.getId() + (long) Math.ceil(((double)this.currentWindow.getActualRecords() / HOPPING_SIZE)-1), value.getRating());
                     //updateMTK(O i); Algo 1 line 6
                     this.updateMTK(entry);
                 }
@@ -158,7 +158,7 @@ public class MinTopKNTransformer implements Transformer<String, ScoredMovie, Key
                         update.getId(),
                         this.currentWindow.getMinRating() + 0.2 * update.getIncome(),
                         this.currentWindow.getId(),
-                        this.currentWindow.getId() + (long) SIZE / HOPPING_SIZE - 1L,
+                        this.currentWindow.getId() + (long) Math.ceil(((double)this.currentWindow.getActualRecords() / HOPPING_SIZE)-1),
                         this.currentWindow.getMinRating()
                 );
                 changedObjects.add(outOfMTKNEntry);
