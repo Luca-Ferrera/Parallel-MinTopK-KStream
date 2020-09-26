@@ -36,7 +36,7 @@ public class RatingsDriver {
 
         final Properties props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        props.put(ProducerConfig.PARTITIONER_CLASS_CONFIG, RoundRobinPartitioner.class);
+        props.put(ProducerConfig.PARTITIONER_CLASS_CONFIG, CustomRoundRobinPartitioner.class);
         props.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG,300000);
 
         final Map<String, String> serdeConfig = Collections.singletonMap(
@@ -57,7 +57,7 @@ public class RatingsDriver {
                     if(e != null) {
                         e.printStackTrace();
                     } else {
-                        System.out.println("The offset of the record " + i[0] + " we just sent is: " + metadata.offset());
+                        System.out.println("The offset of the record " + i[0] + " we just sent is: " + metadata.offset() + " and partition " + metadata.partition());
                     }
                 }
             });

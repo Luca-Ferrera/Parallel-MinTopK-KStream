@@ -16,7 +16,7 @@ public class DistributedTopKTransformer implements Transformer<String, ScoredMov
     private ProcessorContext context;
     private final int SIZE = 1200;
     private final int HOPPING_SIZE = 300;
-    private final int NUM_INSTANCES = 3;
+    private final int NUM_INSTANCES = 6;
     private final int LOCAL_SIZE = SIZE/NUM_INSTANCES;
     private final int LOCAL_HOPPING_SIZE = HOPPING_SIZE/NUM_INSTANCES;
     private final Boolean cleanDataStructure;
