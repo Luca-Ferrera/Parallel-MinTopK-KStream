@@ -1,3 +1,13 @@
+
+Latency window 0 : 867281000
+Latency window 0 : 886840000
+Latency window 1 : 856095000
+Latency window 1 : 865193000
+Latency window 2 : 841677000
+Latency window 2 : 841896000
+Latency window 3 : 854539000
+Latency window 3 : 854736000
+=======
 Latency window 0 : 81927000
 Latency window 0 : 105983000
 Latency window 1 : 78822000
