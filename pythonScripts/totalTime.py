@@ -7,7 +7,7 @@ with open(sys.argv[1], "r") as f:
 with open(sys.argv[2], "r") as f:
     endLine =f.readlines()[403]
 
-with open(sys.argv[2][:-18] + "_total_time_10ms.csv", "w") as f:
+with open(sys.argv[2][:-29] + "_total_time_10ms.csv", "w") as f:
     splittedLine1 = startLine.split(",")
     splittedLine2 = endLine.split(",")
     startTime = splittedLine1[1][:-1]

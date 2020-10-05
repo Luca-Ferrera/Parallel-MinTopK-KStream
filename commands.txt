@@ -95,19 +95,39 @@ How to create kafka connector:
       http://$CONNECT_HOST:28083/connectors`
 
 Run DisMSSTOPK on AWS:
-nohup java -jar RatingsDriver.jar pdmss-scored-rated-movies 5 0 &
+nohup java -jar RatingsDriver.jar pdmss-scored-rated-movies 10 0 &
 nohup java -jar PhysicalWindowCentralizedAggregatedSort.jar "src/main/java/myapp/distributedMaterializeScoreSort/PhysicalWindow/physicalWindowDisMSS.env" 2 0 &
 nohup java -jar PhysicalWindowDistributedMSS.jar "src/main/java/myapp/distributedMaterializeScoreSort/PhysicalWindow/physicalWindowDisMSS.env" 2 0 0 &
 nohup java -jar PhysicalWindowDistributedMSS.jar "src/main/java/myapp/distributedMaterializeScoreSort/PhysicalWindow/physicalWindowDisMSS.env" 2 0 1 &
 nohup java -jar PhysicalWindowDistributedMSS.jar "src/main/java/myapp/distributedMaterializeScoreSort/PhysicalWindow/physicalWindowDisMSS.env" 2 0 2 &
+nohup java -jar PhysicalWindowDistributedMSS.jar "src/main/java/myapp/distributedMaterializeScoreSort/PhysicalWindow/physicalWindowDisMSS.env" 2 0 3 &
+nohup java -jar PhysicalWindowDistributedMSS.jar "src/main/java/myapp/distributedMaterializeScoreSort/PhysicalWindow/physicalWindowDisMSS.env" 2 0 4 &
+nohup java -jar PhysicalWindowDistributedMSS.jar "src/main/java/myapp/distributedMaterializeScoreSort/PhysicalWindow/physicalWindowDisMSS.env" 2 0 5 &
 
 sudo mkfs.ext4 -E nodiscard /dev/nvme1n1
 sudo mount /dev/nvme1n1 /vol1
 sudo mkdir /vol1/docker-data
 sudo service docker restart
+sudo mkdir /vol1/rockdb
+sudo mkdir -p /vol1/zk-data
+sudo mkdir -p /vol1/zk-txn-logs
+sudo mkdir -p /vol1/kafka-data
 
 maybe need to delete content of /vol1/docker-data
 
 min.score per ogni finestra
 re-run Distributed MinTopK with topk=50 expecially for dataset2
 re-run Distributed MSSTopK with topK=10 for dataset 3 & 4
+
+Forse andrebbe rivista la misurazione della latency, prendere come tempo iniziale il primo record della finestra invece
+dell'ultimo.
+Forse si può misurare quanto tempo i 2 algoritmi impiegano a elaborare un tot numero di dati.
+Vedo una differenza nell'ingestione dei dati nel caso centralizzato e in quello distribuito.
+
+Ho provato finestre di dimensioni diverse (1200, 3600, 7200, 36000)
+36000 sono troppo grandi forse
+Ho provato diversi numeri di instanze (3,6,10)
+Ho diminuito l'input throughput da 200 records/sec a 100 records/sec
+
+Tempo totale esperimento
+Latenza nuova: ultimo topK in output - primo record finestra
