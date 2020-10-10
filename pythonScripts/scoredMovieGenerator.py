@@ -15,7 +15,7 @@ schema = avro.schema.Parse(open("src/main/avro/scored-movie.avsc", "rb").read())
 
 random.seed(int(sys.argv[2]))
 writer = DataFileWriter(open("scored-movie" + sys.argv[1] + ".avro", "wb"), DatumWriter(), schema)
-for i in range(250000):
+for i in range(100000):
     movie = choice(movies)
     rating = uniform(0,10)
     writer.append({"id": movie[0], "title": movie[1], "release_year": movie[2], "rating": rating, "score": score(rating, movie[2])})
