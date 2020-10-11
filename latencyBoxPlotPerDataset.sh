@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+vals=($(seq 0 1 ${1}))
+python3 pythonScripts/latencyBoxPlotPerDataset.py "measurements/DisMSSTopK/dataset${vals[0]}/100Krecords_3600_300_10K_6instances_latency.csv" "measurements/DisMSSTopK/dataset${vals[1]}/100Krecords_3600_300_10K_6instances_latency.csv" "measurements/DisMSSTopK/dataset${vals[2]}/100Krecords_3600_300_10K_6instances_latency.csv" "measurements/DisMSSTopK/dataset${vals[3]}/100Krecords_3600_300_10K_6instances_latency.csv" "measurements/DisMSSTopK/dataset${vals[4]}/100Krecords_3600_300_10K_6instances_latency.csv" "Distributed Materialize Score & TopK=10"
