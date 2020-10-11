@@ -29,6 +29,7 @@ public class CentralizedMSSTopK {
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, envProps.getProperty("bootstrap.servers"));
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
+        props.put(StreamsConfig.STATE_DIR_CONFIG, envProps.getProperty("state.dir"));
         props.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, envProps.getProperty("schema.registry.url"));
 
         return props;
@@ -63,6 +64,14 @@ public class CentralizedMSSTopK {
         )
                 .map((key, value) ->{
                     start.set(Instant.now());
+                    try(FileWriter fw = new FileWriter("measurements/CentralizedMSSTopK/dataset" + dataset + "/100Krecords_3600_300_" + k + "K_start_time.txt", true);
+                        BufferedWriter bw = new BufferedWriter(fw);
+                        PrintWriter out = new PrintWriter(bw))
+                    {
+                        out.println("Latency window " + key + " : " + start.get());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     return new KeyValue<>(key,value);
                 })
                 .transform(new TransformerSupplier<String,ScoredMovie,KeyValue<Long , ScoredMovie>>() {
@@ -73,11 +82,11 @@ public class CentralizedMSSTopK {
                 }, "windowed-movies-store", "record-count-store")
                 .map((key, value) -> {
                     end.set(Instant.now());
-                    try(FileWriter fw = new FileWriter("CentralizedMSSTopK/dataset" + dataset + "/500Krecords_1200_300_" + k + "K_latency_5s.txt", true);
+                    try(FileWriter fw = new FileWriter("measurements/CentralizedMSSTopK/dataset" + dataset + "/100Krecords_3600_300_" + k + "K_end_time.txt", true);
                         BufferedWriter bw = new BufferedWriter(fw);
                         PrintWriter out = new PrintWriter(bw))
                     {
-                        out.println("Latency window " + key + " : " + Duration.between(start.get(), end.get()).toNanos());
+                        out.println("Latency window " + key + " : " + end.get());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

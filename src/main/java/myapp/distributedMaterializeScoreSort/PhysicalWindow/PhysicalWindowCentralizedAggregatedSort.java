@@ -4,6 +4,7 @@ import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import myapp.ArrayListSerde;
 import myapp.avro.*;
+import myapp.distributedMinTopK.CentralizedTopKTransformer;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.serialization.Serdes;
@@ -27,6 +28,7 @@ public class PhysicalWindowCentralizedAggregatedSort {
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, envProps.getProperty("bootstrap.servers"));
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.Long().getClass());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
+        props.put(StreamsConfig.STATE_DIR_CONFIG, envProps.getProperty("state.dir"));
         props.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, envProps.getProperty("schema.registry.url"));
 
         return props;
@@ -50,12 +52,12 @@ public class PhysicalWindowCentralizedAggregatedSort {
         builder.<Long, ScoredMovie>stream(sortedTopKMovieTopic)
                 .transform(new TransformerSupplier<Long,ScoredMovie,KeyValue<Long , ScoredMovie>>() {
                     public Transformer get() {
-                        return new CentralizedAggregatedSortTransformer(cleanDataStructure, k);
+                        return new CentralizedTopKTransformer(k, cleanDataStructure);
                     }
                 }, "windowed-movies-store")
                 .map((key, value) ->{
                     end.set(Instant.now());
-                    try(FileWriter fw = new FileWriter("PhysicalDisMaterializeSort/dataset" + dataset + "/500Krecords_1200_300_" + k + "K_end_time_5ms.txt", true);
+                    try(FileWriter fw = new FileWriter("measurements/DisMSSTopK/dataset" + dataset + "/100Krecords_3600_300_" + k + "K_end_time_6instances.txt", true);
                         BufferedWriter bw = new BufferedWriter(fw);
                         PrintWriter out = new PrintWriter(bw))
                     {
