@@ -18,7 +18,7 @@ public class MSSTopKTrasformer implements Transformer<String, ScoredMovie, KeyVa
     private String storeName2;
     private KeyValueStore<Integer, Integer> countState;
     private ProcessorContext context;
-    private final int SIZE = 1200;
+    private final int SIZE = 3600;
     private final int HOPPING_SIZE = 300;
     private final int k;
 
@@ -56,6 +56,9 @@ public class MSSTopKTrasformer implements Transformer<String, ScoredMovie, KeyVa
                 windowArray.add(value);
                 this.windowedMoviesState.put(id, windowArray);
             }
+        }
+        if(recordCount%1000 == 0 ) {
+            System.out.println("+++ RECORD COUNT " + recordCount);
         }
         if(recordCount >= SIZE && recordCount % HOPPING_SIZE == 1) {
             windowArray = this.windowedMoviesState.get(windowIdToForward);
