@@ -1,0 +1,33 @@
+introduzione: la tesi in breve per preparare il lettore + struttura della tesi 5-6pp
+sota: kafka, streaming top-k, running example (top 2, 12 numeri, 3 finestre), m&s, minTopK, [minTopK+N] 12-15pp + [2-3pp]
+distributed streaming top-k 10-16
+   - problem setting: 2-4 pp
+        - motivazioni: casi reali in cui serve streaming top-k
+        - vale la pena di parallellizzare alg di streaming top-k utilizzando kafka? (Is it worth parallelizing top-k streaming algorithms using kafka?)
+   - proposed solution 8-12 + [2-3pp]
+     - progettare
+        - m&s distribuito (pseudo-codice + diagrammi a blocchi)
+        - minTopK distribuito (pseudo-codice + diagrammi a blocchi)
+        - minTopK+N distribuito (pseudo-codice + diagrammi a blocchi)
+     - set dell'esperimento per ricerca comparativa -> TODO
+experiments & results 14-20
+    - infrastruttura 1-2 pp + [1-2pp]
+    - design esperimento 3-4pp
+    - risultati 10-12pp + [3-5pp]
+  - findings 1-2pp
+conclusioni: la tesi in breve guardandosi in dietro + future works 3-4pp
+bibliografia: 30 citazioni 2pp
+
+
+MEMO: chiavi in minTopK+N nel distribuito di cui parlavo con Victor
+
+Domande:
+introduzion: cosa scrivere "per preparare il lettore"
+sota: posso utilizzare le definizioni sul paper di kafka "file:///home/lucaferrera/Scaricati/Sax2018_ReferenceWorkEntry_ApacheKafka.pdf"?
+distributed streaming top-k:
+    - minTopK posso usare lo pseudo codice del paper?
+    - devo spiegare passo passo l'algoritmo anche se è già spiegato nel paper che cito?
+experiments & results:
+    - infrastruttura: spiego di docker, del cluster kafka (consumer, producer, topic, partion, partition-strategy),
+                      script python per misurazioni, [kafka connect e DB]
+    - design esperimento: non è lo stesso di "set dell'esperimento per ricerca comparativa"?

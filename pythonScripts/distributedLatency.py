@@ -6,7 +6,7 @@ for i in range(int(sys.argv[1]) + 1):
         lines =f.readlines()[1:]
         totalLines.append(lines)
 
-with open(sys.argv[2][:-29] + "_" + sys.argv[1] +"instances_latency.csv", "w") as f:
+with open(sys.argv[2][:-24] + "_" + sys.argv[1] +"instances_latency.csv", "w") as f:
     f.write("window,latency\n")
     unpackedLines = zip(*totalLines)
     for (l1,l2,l3,l4,l5,l6,l7) in unpackedLines:
