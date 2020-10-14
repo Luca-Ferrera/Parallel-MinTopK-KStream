@@ -9,7 +9,7 @@ distributed streaming top-k 10-16
         - m&s distribuito (pseudo-codice + diagrammi a blocchi)
         - minTopK distribuito (pseudo-codice + diagrammi a blocchi)
         - minTopK+N distribuito (pseudo-codice + diagrammi a blocchi)
-     - set dell'esperimento per ricerca comparativa -> TODO
+     - set dell'esperimento per ricerca comparativa
 experiments & results 14-20
     - infrastruttura 1-2 pp + [1-2pp]
     - design esperimento 3-4pp
