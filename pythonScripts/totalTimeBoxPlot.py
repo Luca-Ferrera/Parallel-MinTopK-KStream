@@ -8,11 +8,11 @@ data = pd.DataFrame()
 
 for (algo,file) in zip(algos, files):
     df = pd.read_csv(file, skipinitialspace=True, usecols=['time'])
-    df['dataset'] = algo
+    df['algo'] = algo
     data = pd.concat([data, df])
 
-data.boxplot(by='dataset')
-plt.title(sys.argv[4])
+data.boxplot(by='algo')
+plt.title("Algorithms's total time comparison")
 plt.suptitle('')
 plt.xlabel('algorithm')
 plt.ylabel('total_time (s)')
