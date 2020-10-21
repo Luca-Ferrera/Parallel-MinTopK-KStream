@@ -2,8 +2,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import sys
 
-files = [sys.argv[1], sys.argv[2], sys.argv[3]]
-topks = [5, 10, 50]
+files = [sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5]]
+topks = [5, 10, 50, 100, 300]
 data = pd.DataFrame()
 
 for (topk,file) in zip(topks, files):
