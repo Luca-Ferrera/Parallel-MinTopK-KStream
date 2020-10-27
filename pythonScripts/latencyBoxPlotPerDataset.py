@@ -12,9 +12,9 @@ for (dataset,file) in zip(datasets, files):
     df['dataset'] = dataset
     data = pd.concat([data, df])
 
-data.boxplot(by='dataset')
-plt.title(sys.argv[6])
+data.boxplot(by='dataset', fontsize=12)
+plt.title(sys.argv[6], fontsize=12)
 plt.suptitle('')
-plt.xlabel('dataset')
-plt.ylabel('latency')
+plt.xlabel('dataset', fontsize=12)
+plt.ylabel('latency', fontsize=12)
 plt.show()

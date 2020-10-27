@@ -11,9 +11,9 @@ for (algo,file) in zip(algos, files):
     df['algo'] = algo
     data = pd.concat([data, df])
 
-data.boxplot(by='algo')
-plt.title("Algorithms's total time comparison")
+data.boxplot(by='algo', fontsize=12)
+plt.title("Algorithms's total time comparison", fontsize=12)
 plt.suptitle('')
-plt.xlabel('algorithm')
-plt.ylabel('total_time (s)')
+plt.xlabel('algorithm', fontsize=12)
+plt.ylabel('total_time (s)', fontsize=12)
 plt.show()
