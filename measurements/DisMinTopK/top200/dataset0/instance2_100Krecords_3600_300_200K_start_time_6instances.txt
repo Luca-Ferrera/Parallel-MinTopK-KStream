@@ -1,5 +1,3 @@
-Latency window null : 2020-10-26T17:08:26.994227Z
-Latency window null : 2020-10-26T17:10:32.437160Z
 Latency window null : 2020-10-26T17:15:38.208086Z
 Latency window null : 2020-10-26T17:15:38.282861Z
 Latency window null : 2020-10-26T17:15:38.294210Z
