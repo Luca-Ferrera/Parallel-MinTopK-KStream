@@ -61,8 +61,8 @@ public class DistributedMinTopK {
         builder.<String,ScoredMovie>stream(scoredMovieTopic)
                 .map((key, value) ->{
                     start.set(Instant.now());
-                    try(FileWriter fw = new FileWriter("DisMinTopK/dataset" + dataset + "/instance" +
-                            instance_number + "_500Krecords_1200_300_" + k + "K_start_time_5ms.txt", true);
+                    try(FileWriter fw = new FileWriter("measurements/DisMinTopK/top"+ k +"/dataset" + dataset + "/instance" +
+                            instance_number + "_100Krecords_3600_300_" + k + "K_start_time_6instances.txt", true);
                         BufferedWriter bw = new BufferedWriter(fw);
                         PrintWriter out = new PrintWriter(bw))
                     {
@@ -113,21 +113,21 @@ public class DistributedMinTopK {
         Map<String, Object> config = new HashMap<>();
         config.put("bootstrap.servers", envProps.getProperty("bootstrap.servers"));
         AdminClient client = AdminClient.create(config);
-        Map<String, String> topicConfig = new HashMap<>();
-        topicConfig.put("retention.ms", envProps.getProperty("retention.ms"));
-        topicConfig.put("retention.bytes", envProps.getProperty("retention.bytes"));
+//        Map<String, String> topicConfig = new HashMap<>();
+//        topicConfig.put("retention.ms", envProps.getProperty("retention.ms"));
+//        topicConfig.put("retention.bytes", envProps.getProperty("retention.bytes"));
 
         List<NewTopic> topics = new ArrayList<>();
 
         topics.add(new NewTopic(
                 envProps.getProperty("scored.movies.topic.name"),
                 Integer.parseInt(envProps.getProperty("scored.movies.topic.partitions")),
-                Short.parseShort(envProps.getProperty("scored.movies.topic.replication.factor"))).configs(topicConfig));
+                Short.parseShort(envProps.getProperty("scored.movies.topic.replication.factor"))));
 
         topics.add(new NewTopic(
                 envProps.getProperty("mintopk.movies.topic.name"),
                 Integer.parseInt(envProps.getProperty("mintopk.movies.topic.partitions")),
-                Short.parseShort(envProps.getProperty("mintopk.movies.topic.replication.factor"))).configs(topicConfig));
+                Short.parseShort(envProps.getProperty("mintopk.movies.topic.replication.factor"))));
 
         client.createTopics(topics);
         client.close();

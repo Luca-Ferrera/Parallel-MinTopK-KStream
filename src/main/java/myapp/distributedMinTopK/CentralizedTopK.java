@@ -58,7 +58,7 @@ public class CentralizedTopK {
                 }, "windowed-topk-store")
                 .map((key, value) ->{
                     end.set(Instant.now());
-                    try(FileWriter fw = new FileWriter(algorithm + "/dataset" + dataset + "/500Krecords_1200_300_" + k + "K_end_time_5ms.txt", true);
+                    try(FileWriter fw = new FileWriter("measurements/" + algorithm + "/top"+ k +"/dataset" + dataset + "/100Krecords_3600_300_" + k + "K_end_time_6instances.txt", true);
                         BufferedWriter bw = new BufferedWriter(fw);
                         PrintWriter out = new PrintWriter(bw))
                     {

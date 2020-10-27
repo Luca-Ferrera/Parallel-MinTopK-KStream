@@ -52,12 +52,12 @@ public class PhysicalWindowCentralizedAggregatedSort {
         builder.<Long, ScoredMovie>stream(sortedTopKMovieTopic)
                 .transform(new TransformerSupplier<Long,ScoredMovie,KeyValue<Long , ScoredMovie>>() {
                     public Transformer get() {
-                        return new CentralizedTopKTransformer(k, cleanDataStructure);
+                        return new CentralizedAggregatedSortTransformer(cleanDataStructure, k);
                     }
                 }, "windowed-movies-store")
                 .map((key, value) ->{
                     end.set(Instant.now());
-                    try(FileWriter fw = new FileWriter("measurements/DisMSSTopK/dataset" + dataset + "/100Krecords_3600_300_" + k + "K_end_time_6instances.txt", true);
+                    try(FileWriter fw = new FileWriter("measurements/DisMSSTopK/top"+ k +"/dataset" + dataset + "/100Krecords_3600_300_" + k + "K_end_time_6instances.txt", true);
                         BufferedWriter bw = new BufferedWriter(fw);
                         PrintWriter out = new PrintWriter(bw))
                     {

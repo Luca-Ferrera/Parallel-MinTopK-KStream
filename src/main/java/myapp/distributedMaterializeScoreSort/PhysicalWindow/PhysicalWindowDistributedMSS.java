@@ -59,7 +59,7 @@ public class PhysicalWindowDistributedMSS {
         )
                 .map((key, value) ->{
                     start.set(Instant.now());
-                    try(FileWriter fw = new FileWriter("measurements/DisMSSTopK/dataset" + dataset + "/instance" +
+                    try(FileWriter fw = new FileWriter("measurements/DisMSSTopK/top"+ k +"/dataset" + dataset + "/instance" +
                             instance_number + "_100Krecords_3600_300_" + k + "K_start_time_6instances.txt", true);
                         BufferedWriter bw = new BufferedWriter(fw);
                         PrintWriter out = new PrintWriter(bw))

@@ -16,7 +16,7 @@ public class CentralizedAggregatedSortTransformer implements Transformer<Long, S
     private final Boolean cleanDataStructure;
     private KeyValueStore<Long, ArrayList<ScoredMovie>> windowedMoviesState;
     private ProcessorContext context;
-    private int INSTANCE_NUMBER = 10;
+    private int INSTANCE_NUMBER = 6;
     private int k;
 
     public CentralizedAggregatedSortTransformer(String cleanDataStructure, int k) {
