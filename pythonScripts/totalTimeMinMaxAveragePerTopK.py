@@ -14,7 +14,8 @@ for (topk,file) in zip(topks, files):
     average = np.mean(df['time'])
     data = pd.concat([data, pd.DataFrame({"min":[min], "max":[max], "average":[average], "topk":topk})])
 
-plt.title(sys.argv[1].split("/")[1] + "'s total time comparison by top-k", fontsize=12)
+# plt.title(sys.argv[1].split("/")[1] + "'s total time comparison by top-k", fontsize=12)
+plt.title('')
 plt.suptitle('')
 plt.xlabel('Top-K', fontsize=12)
 plt.ylabel('Total_time (s)', fontsize=12)
@@ -25,7 +26,8 @@ plt.errorbar(x=range(len(files)),
              markersize=8,
              capsize=10,
              capthick=3)
-# plt.yscale("log")
-plt.xticks(range(len(files)),data["topk"])
+plt.yscale("log")
+plt.xticks(range(len(files)),data["topk"], fontsize=12)
+plt.yticks(fontsize=12)
 plt.grid(axis="both")
 plt.show()

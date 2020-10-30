@@ -12,9 +12,10 @@ for (topk,file) in zip(topks, files):
     data = pd.concat([data, df])
 
 data.boxplot(by='topk', fontsize=12)
-plt.title(sys.argv[1].split("/")[1] + "'s total time comparison by top-k", fontsize=12)
+# plt.title(sys.argv[1].split("/")[1] + "'s total time comparison by top-k", fontsize=12)
+plt.title('')
 plt.suptitle('')
 plt.xlabel('Top-K', fontsize=12)
 plt.ylabel('Total_time (s)', fontsize=12)
-# plt.xscale("log",base=10)
+plt.xscale("log",base=10)
 plt.show()

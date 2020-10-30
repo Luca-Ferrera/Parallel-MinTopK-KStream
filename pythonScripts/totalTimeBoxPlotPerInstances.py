@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import sys
 import seaborn as sns
 import numpy as np
-files = [sys.argv[1], sys.argv[2], sys.argv[3]]
-instances = [3, 6, 10]
+files = [sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]]
+instances = [1, 3, 6, 10]
 data = pd.DataFrame()
 
 for (instance,file) in zip(instances, files):
@@ -15,8 +15,8 @@ for (instance,file) in zip(instances, files):
 # data = pd.concat([data,pd.DataFrame(data=d)])
 # d = {'instance':[1,1,1,1,1], "time": None}
 # data = pd.concat([data,pd.DataFrame(data=d)])
-# d = {'instance':[2,2,2,2,2], "time": None}
-# data = pd.concat([data,pd.DataFrame(data=d)])
+d = {'instance':[2,2,2,2,2], "time": None}
+data = pd.concat([data,pd.DataFrame(data=d)])
 d = {'instance':[4,4,4,4,4], "time": None}
 data = pd.concat([data,pd.DataFrame(data=d)])
 d = {'instance':[5,5,5,5,5], "time": None}
@@ -28,7 +28,8 @@ data = pd.concat([data,pd.DataFrame(data=d)])
 d = {'instance':[9,9,9,9,9], "time": None}
 data = pd.concat([data,pd.DataFrame(data=d)])
 data.boxplot(by='instance', fontsize=12)
-plt.title(sys.argv[1].split("/")[1] + "'s total time comparison by number of instances", fontsize=12)
+# plt.title(sys.argv[1].split("/")[1] + "'s total time comparison by number of instances", fontsize=12)
+plt.title('')
 plt.suptitle('')
 plt.xlabel('Instances', fontsize=12)
 plt.ylabel('Total_time (s)', fontsize=12)
