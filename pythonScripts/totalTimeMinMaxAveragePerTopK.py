@@ -5,14 +5,14 @@ import numpy as np
 
 files = [sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7]]
 topks = [5, 10, 50, 100, 150, 200, 300]
-data = pd.DataFrame()
+data1 = pd.DataFrame()
 
 for (topk,file) in zip(topks, files):
     df = pd.read_csv(file, skipinitialspace=True, usecols=['time'])
     min = np.min(df['time'])
     max = np.max(df['time'])
     average = np.mean(df['time'])
-    data = pd.concat([data, pd.DataFrame({"min":[min], "max":[max], "average":[average], "topk":topk})])
+    data1 = pd.concat([data1, pd.DataFrame({"min":[min], "max":[max], "average":[average], "topk":topk})])
 
 # plt.title(sys.argv[1].split("/")[1] + "'s total time comparison by top-k", fontsize=12)
 plt.title('')
