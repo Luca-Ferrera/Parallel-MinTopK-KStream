@@ -64,7 +64,7 @@ public class CentralizedMSSTopK {
         )
                 .map((key, value) ->{
                     start.set(Instant.now());
-                    try(FileWriter fw = new FileWriter("measurements/CentralizedMSSTopK/dataset" + dataset + "/100Krecords_3600_300_" + k + "K_start_time.txt", true);
+                    try(FileWriter fw = new FileWriter("measurements/CentralizedMSSTopK/top"+ k +"/dataset" + dataset + "/100Krecords_3600_300_" + k + "K_start_time.txt", true);
                         BufferedWriter bw = new BufferedWriter(fw);
                         PrintWriter out = new PrintWriter(bw))
                     {

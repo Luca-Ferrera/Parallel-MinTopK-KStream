@@ -35,7 +35,7 @@ public class CentralizedMinTopK {
         final String scoredMovieTopic = envProps.getProperty("scored.movies.topic.name");
         final String minTopKRatedMovie = envProps.getProperty("mintopk.movies.topic.name");
 
-        // create intermediate-topK-movies store
+        // create super-topK-list store
         StoreBuilder storeBuilder = Stores.keyValueStoreBuilder(
                 Stores.persistentKeyValueStore("super-topk-list-store"),
                 Serdes.Integer(),
@@ -82,8 +82,6 @@ public class CentralizedMinTopK {
                     } catch (IOException e) {
                        e.printStackTrace();
                     }
-                    if(key % 500 == 0)
-                        System.out.println("key: " + key + " value: " + value);
                     return new KeyValue<>(key,value);
                 })
                 .to(minTopKRatedMovie, Produced.with(Serdes.Long(),minTopKEntryAvroSerde(envProps)));
