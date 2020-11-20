@@ -3,12 +3,13 @@ sota: kafka, streaming top-k, running example (top 2, 12 numeri, 3 finestre), m&
 distributed streaming top-k 10-16
    - problem setting: 2-4 pp
         - motivazioni: casi reali in cui serve streaming top-k
-        - vale la pena di parallellizzare alg di streaming top-k utilizzando kafka? (Is it worth parallelizing top-k streaming algorithms using kafka?)
+        - vale la pena di parallellizzare alg di streaming top-k utilizzando kafka? (Is it worth parallelizing top-k streaming algorithms in kafka?)
    - proposed solution 8-12 + [2-3pp]
      - progettare
         - m&s distribuito (pseudo-codice + diagrammi a blocchi)
         - minTopK distribuito (pseudo-codice + diagrammi a blocchi)
         - minTopK+N distribuito (pseudo-codice + diagrammi a blocchi)
+     - implementation experience
      - set dell'esperimento per ricerca comparativa
 experiments & results 14-20
     - infrastruttura 1-2 pp + [1-2pp]
@@ -22,12 +23,56 @@ bibliografia: 30 citazioni 2pp
 MEMO: chiavi in minTopK+N nel distribuito di cui parlavo con Victor
 
 Domande:
-introduzion: cosa scrivere "per preparare il lettore"
-sota: posso utilizzare le definizioni sul paper di kafka "file:///home/lucaferrera/Scaricati/Sax2018_ReferenceWorkEntry_ApacheKafka.pdf"?
 distributed streaming top-k:
-    - minTopK posso usare lo pseudo codice del paper?
-    - devo spiegare passo passo l'algoritmo anche se è già spiegato nel paper che cito?
+    - research question va bene?
+    - cosa rappresentare con i diagrammi a blocchi?
 experiments & results:
     - infrastruttura: spiego di docker, del cluster kafka (consumer, producer, topic, partion, partition-strategy),
                       script python per misurazioni, [kafka connect e DB]
-    - design esperimento: non è lo stesso di "set dell'esperimento per ricerca comparativa"?
+    - design: quando illustro i vari esperimenti, parlo già dei risultati che ci aspettiamo o ne parlo in "results" direttamente?
+
+Inserire tabelle con i risultati degli esperimenti oltre ai grafici?
+Cosa scrivere nel paragrafo "research question"? un semplice elenco di cosa vogliamo studiare o anche le motivazioni?
+
+new page per ogni lista DONE
+kakfa per ultimo in sota DONE
+intro su capitolo 3 DONE
+unire running example a streaming top-k DONE
+spostare exp setup in 4 DONE
+nuovo capitolo di impl exp con infrastructure DONE inserito in Distributed top-k in Kafka
+document structure as a list of chapters DONE
+sota images non affiancate : dividere subfloat in 2 pagine DONE
+aggiungere state store e KSQL in sota DONE
+query c-sparql trasformata in ksql dicendo che order by non esiste DONE
+tabelle con i risultatiDONE
+
+ASK:
+scuola e facoltà in inglese nel frontespizio?
+frontespizio in doppia lingua o solo inglese? solo inglese
+impaginazione: numero di pagina in basso o a dx?
+infrastructure: va bene java o meglio jvm per indicare il box contenente le app?
+
+table 2.1 troppo grande DONE
+table 5.1 in list table DONE
+research question elencale q1 q2 q3 DONE
+non andare a capo intro cap 4 DONE
+vspace a inizio capitolo per arrivare a metà pagina DONE
+Listing 4.1 cambia numerazione righe DONE
+immagine 4.3 in verticale DONE
+JVM invece di JAVA in infrastructure DONE
+cercare citazioni su dblp DONE
+topic images from KSQL paper DONE
+aggiungi query KSQL in sota: con aggregati e sliding window DONE
+3.1: aggiungere query doppia per usare topk e spiegare che quella scritta sarebbe meglio DONE
+results: tabelle e grafici vicini DONE
+sota add stream processing (vedi streams and tables paper) DONE
+
+ASK:
+ringraziamenti alla fine o inizio e in che lingua
+posso eliminare i server aws
+
+usare un elenco per la spiegazione delle 3 funzioni in 4.1.2 DONE
+Fig. 5.11 error bar sullo speed-up DONE
+k * num_instance = window_size ho costo uguale centralizzato e distribuito DONE
+page 37 footnote url troppo lungo DONE
+mettere i numeri di pagina in basso al centro (single side) DONE

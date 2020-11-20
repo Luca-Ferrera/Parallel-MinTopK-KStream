@@ -32,8 +32,8 @@ final['best_case_speed_up']= data1['max']/data2['min']
 
 plt.title('')
 plt.suptitle('')
-plt.xlabel('Top-K', fontsize=12)
-plt.ylabel('Total_time (s)', fontsize=12)
+plt.xlabel('Top-K', fontsize=20)
+plt.ylabel('Speed-up', fontsize=20)
 plt.errorbar(x=range(len(files1)),
              y=final['speed_up'],
              yerr=[final['speed_up'] - final['worst_case_speed_up'], final['best_case_speed_up'] - final['speed_up']],
@@ -42,7 +42,7 @@ plt.errorbar(x=range(len(files1)),
              capsize=10,
              capthick=3)
 # plt.yscale('log')
-plt.xticks(range(len(files1)),final.index, fontsize=12)
-plt.yticks(fontsize=12)
+plt.xticks(range(len(files1)),final.index, fontsize=20)
+plt.yticks(fontsize=20)
 plt.grid(axis='both')
 plt.show()
