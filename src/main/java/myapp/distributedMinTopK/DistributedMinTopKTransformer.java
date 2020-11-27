@@ -157,6 +157,7 @@ public class DistributedMinTopKTransformer implements Transformer<String, Scored
         MinTopKEntry newEntry = topKEntry == null ?
                 new MinTopKEntry(movie.getId(), movie.getScore(), this.currentWindow.getId(), (long) Math.ceil(((double)this.currentWindow.getActualRecords() / HOPPING_SIZE)-1))
                 : topKEntry;
+
         //insert newEntry in superTopKList
         insertNewEntry(newEntry);
         for(PhysicalWindow window: this.lowerBoundPointer){
