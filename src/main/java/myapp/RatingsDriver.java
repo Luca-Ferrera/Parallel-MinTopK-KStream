@@ -15,8 +15,8 @@ public class RatingsDriver {
     public static void main(final String [] args) throws Exception {
         final String bootstrapServers = "localhost:29092";
         final String schemaRegistryUrl = "http://localhost:8081";
-        final String INPUT_TOPIC = args.length > 0 ? args[0] : "centralized-mintopk-scored-rated-movies";
-        final Long INPUT_THROUGHPUT = args.length > 1 ? Long.parseLong(args[1]) : 5L;
+        final String INPUT_TOPIC = args.length > 0 ? args[0] : "centralized-mintopkn-scored-rated-movies";
+        final long INPUT_THROUGHPUT = args.length > 1 ? Long.parseLong(args[1]) : 5L;
         final int dataset = args.length > 2 ? Integer.parseInt(args[2]) : 0;
         System.out.println("Connecting to Kafka cluster via bootstrap servers " + bootstrapServers);
         System.out.println("Connecting to Confluent schema registry at " + schemaRegistryUrl);
@@ -36,7 +36,8 @@ public class RatingsDriver {
 
         final Properties props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        props.put(ProducerConfig.PARTITIONER_CLASS_CONFIG, RoundRobinPartitioner.class);
+        props.put(ProducerConfig.PARTITIONER_CLASS_CONFIG, CustomRoundRobinPartitioner.class);
+        props.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG,300000);
 
         final Map<String, String> serdeConfig = Collections.singletonMap(
                 AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
@@ -56,7 +57,7 @@ public class RatingsDriver {
                     if(e != null) {
                         e.printStackTrace();
                     } else {
-                        System.out.println("The offset of the record " + i[0] + " we just sent is: " + metadata.offset());
+                        System.out.println("The offset of the record " + i[0] + " we just sent is: " + metadata.offset() + " and partition " + metadata.partition());
                     }
                 }
             });

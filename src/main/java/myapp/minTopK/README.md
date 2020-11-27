@@ -18,7 +18,7 @@ Run `RatingsDriver` with `centralized-mintopk-scored-rated-movies`, `INPUT_THROU
 
 ## Output
  
-output topic: `mintopk-movies`
+output topic: `centralized-mintopk-movies`
 
 output format: 
 ```

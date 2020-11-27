@@ -35,7 +35,7 @@ public class CentralizedMinTopK {
         final String scoredMovieTopic = envProps.getProperty("scored.movies.topic.name");
         final String minTopKRatedMovie = envProps.getProperty("mintopk.movies.topic.name");
 
-        // create intermediate-topK-movies store
+        // create super-topK-list store
         StoreBuilder storeBuilder = Stores.keyValueStoreBuilder(
                 Stores.persistentKeyValueStore("super-topk-list-store"),
                 Serdes.Integer(),
@@ -57,6 +57,14 @@ public class CentralizedMinTopK {
         builder.<String,ScoredMovie>stream(scoredMovieTopic)
                 .map((key, value) ->{
                     start.set(Instant.now());
+                    try(FileWriter fw = new FileWriter("measurements/CentralizedMinTopK/dataset" + dataset + "/100Krecords_3600_300_" + k + "K_start_time.txt", true);
+                        BufferedWriter bw = new BufferedWriter(fw);
+                        PrintWriter out = new PrintWriter(bw))
+                    {
+                        out.println("Latency window " + key + " : " + start.get());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     return new KeyValue<>(key,value);
                 })
                 .transform(new TransformerSupplier<String,ScoredMovie,KeyValue<Long , MinTopKEntry>>() {
@@ -66,16 +74,14 @@ public class CentralizedMinTopK {
                 }, "windows-store", "super-topk-list-store")
                 .map((key, value) ->{
                     end.set(Instant.now());
-                    try(FileWriter fw = new FileWriter("CentralizedMinTopK/dataset" + dataset + "/500Krecords_1200_300_" + k + "K_latency_5s.txt", true);
+                    try(FileWriter fw = new FileWriter("measurements/CentralizedMinTopK/dataset" + dataset + "/100Krecords_3600_300_" + k + "K_end_time.txt", true);
                         BufferedWriter bw = new BufferedWriter(fw);
                         PrintWriter out = new PrintWriter(bw))
                     {
-                        out.println("Latency window " + key + " : " + Duration.between(start.get(), end.get()).toNanos());
+                        out.println("Latency window " + key + " : " + end.get());
                     } catch (IOException e) {
                        e.printStackTrace();
                     }
-                    if(key % 500 == 0)
-                        System.out.println("key: " + key + " value: " + value);
                     return new KeyValue<>(key,value);
                 })
                 .to(minTopKRatedMovie, Produced.with(Serdes.Long(),minTopKEntryAvroSerde(envProps)));

@@ -33,7 +33,7 @@ public class CentralizedTopK {
 
         return props;
     }
-    public Topology buildTopology(Properties envProps, String cleanDataStructure, int k, int dataset) {
+    public Topology buildTopology(Properties envProps, String cleanDataStructure, int k, int dataset, String algorithm) {
         final StreamsBuilder builder = new StreamsBuilder();
         final String minTopKRatedMovie = envProps.getProperty("mintopk.movies.topic.name");
         final String windowedTopKTopic = envProps.getProperty("windowed.mintopk.topic.name");
@@ -58,7 +58,7 @@ public class CentralizedTopK {
                 }, "windowed-topk-store")
                 .map((key, value) ->{
                     end.set(Instant.now());
-                    try(FileWriter fw = new FileWriter("DisMinTopK/dataset" + dataset + "/500Krecords_1200_300_" + k + "K_end_time_5ms.txt", true);
+                    try(FileWriter fw = new FileWriter("measurements/" + algorithm + "/top"+ k +"/dataset" + dataset + "/100Krecords_3600_300_" + k + "K_end_time_6instances.txt", true);
                         BufferedWriter bw = new BufferedWriter(fw);
                         PrintWriter out = new PrintWriter(bw))
                     {
@@ -125,14 +125,16 @@ public class CentralizedTopK {
             throw new IllegalArgumentException("This program takes one argument: the path to an environment configuration file.");
         }
 
-        String cleanDataStructure = "";
+        String cleanDataStructure = "", algorithm = "";
         int k = 0;
         int dataset = 0;
-        if(args.length == 3){
+        if(args.length == 4){
             k = Integer.parseInt(args[1]);
             dataset = Integer.parseInt(args[2]);
-        } else if(args.length == 4){
-            cleanDataStructure = args[3];
+            algorithm = args[3];
+        } else if(args.length == 5){
+            cleanDataStructure = args[4];
+            algorithm = args[3];
             dataset = Integer.parseInt(args[2]);
             k = Integer.parseInt(args[1]);
         }
@@ -140,7 +142,7 @@ public class CentralizedTopK {
         CentralizedTopK centralizedTopK = new CentralizedTopK();
         Properties envProps = centralizedTopK.loadEnvProperties(args[0]);
         Properties streamProps = centralizedTopK.buildStreamsProperties(envProps);
-        Topology topology = centralizedTopK.buildTopology(envProps, cleanDataStructure, k, dataset);
+        Topology topology = centralizedTopK.buildTopology(envProps, cleanDataStructure, k, dataset, algorithm);
         System.out.println(topology.describe());
 
         centralizedTopK.createTopics(envProps);

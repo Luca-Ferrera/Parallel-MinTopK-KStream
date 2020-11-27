@@ -1,0 +1,11 @@
+{
+  "namespace": "myapp.avro",
+  "type": "record",
+  "name": "MovieIncome",
+  "fields": [
+    {"name": "id", "type": "long"},
+    {"name": "title", "type": "string"},
+    {"name": "income", "type": "double"},
+    {"name": "modified", "type":"long","logicalType":"timestamp-millis"}
+  ]
+}

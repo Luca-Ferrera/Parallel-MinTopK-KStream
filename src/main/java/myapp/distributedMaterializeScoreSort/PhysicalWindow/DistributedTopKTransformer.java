@@ -14,18 +14,20 @@ public class DistributedTopKTransformer implements Transformer<String, ScoredMov
     private String storeName1;
     private String storeName2;
     private ProcessorContext context;
-    private final int SIZE = 1200;
+    private final int SIZE = 3600;
     private final int HOPPING_SIZE = 300;
-    private final int NUM_INSTANCES = 3;
+    private final int NUM_INSTANCES = 6;
     private final int LOCAL_SIZE = SIZE/NUM_INSTANCES;
     private final int LOCAL_HOPPING_SIZE = HOPPING_SIZE/NUM_INSTANCES;
     private final Boolean cleanDataStructure;
+    private final int k;
 
 
-    public DistributedTopKTransformer(String storeName1, String storeName2, String cleanDataStructure) {
+    public DistributedTopKTransformer(String storeName1, String storeName2, String cleanDataStructure, int k) {
         this.cleanDataStructure = cleanDataStructure.equals("clean");
         this.storeName1 = storeName1;
         this.storeName2 = storeName2;
+        this.k = k;
     }
 
     public void init(ProcessorContext context) {
@@ -48,18 +50,21 @@ public class DistributedTopKTransformer implements Transformer<String, ScoredMov
         this.windowedMoviesState.all().forEachRemaining((elem) -> windowIDList.add(elem.key));
 
         ArrayList<ScoredMovie> windowArray;
+        long windowIdToForward = windowIDList.getFirst();
         for(long id : windowIDList){
-            windowArray = this.windowedMoviesState.get(id);
-            windowArray.add(value);
-            this.windowedMoviesState.put(id, windowArray);
+            if(recordCount < LOCAL_SIZE || recordCount % LOCAL_HOPPING_SIZE != 1 || id != windowIdToForward ) {
+                windowArray = this.windowedMoviesState.get(id);
+                windowArray.add(value);
+                this.windowedMoviesState.put(id, windowArray);
+            }
         }
-        long newKey = windowIDList.getFirst();
-        windowArray = this.windowedMoviesState.get(newKey);
         if(recordCount >= LOCAL_SIZE && recordCount % LOCAL_HOPPING_SIZE == 1) {
+            windowArray = this.windowedMoviesState.get(windowIdToForward);
             Comparator<ScoredMovie> compareByScore = Comparator.comparingDouble(ScoredMovie::getScore);
             Collections.sort(windowArray, compareByScore.reversed());
-            windowArray.forEach(elem -> {
-                context.forward(newKey, elem);
+            List<ScoredMovie> subList = windowArray.subList(0,k);
+            subList.forEach(elem -> {
+                context.forward(windowIdToForward, elem);
             });
         }
         if(windowIDList.size() > LOCAL_SIZE / LOCAL_HOPPING_SIZE) {

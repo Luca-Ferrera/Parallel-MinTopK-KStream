@@ -12,10 +12,11 @@ import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.state.StoreBuilder;
 import org.apache.kafka.streams.state.Stores;
 
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class PhysicalWindowDistributedMSS {
     public Properties buildStreamsProperties(Properties envProps) {
@@ -25,11 +26,11 @@ public class PhysicalWindowDistributedMSS {
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, envProps.getProperty("bootstrap.servers"));
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
+        props.put(StreamsConfig.STATE_DIR_CONFIG, envProps.getProperty("state.dir"));
         props.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, envProps.getProperty("schema.registry.url"));
-
         return props;
     }
-    public Topology buildTopology(Properties envProps, String cleanDataStructure) {
+    public Topology buildTopology(Properties envProps, String cleanDataStructure, int k, int dataset, int instance_number) {
         final StreamsBuilder builder = new StreamsBuilder();
         final String scoredMovieTopic = envProps.getProperty("scored.movies.topic.name");
         final String sortedTopKMovieTopic = envProps.getProperty("sorted.movies.topic.name");
@@ -50,19 +51,29 @@ public class PhysicalWindowDistributedMSS {
         // register store
         builder.addStateStore(storeBuilder);
 
+        AtomicReference<Instant> start = new AtomicReference<>();
         // TopKMovies
         builder.<String,ScoredMovie>stream(
                 scoredMovieTopic
 //                Materialized.<String, ScoredMovie, KeyValueStore<Bytes, byte[]>>as("scored-movies")
         )
-//                .toStream()
                 .map((key, value) ->{
+                    start.set(Instant.now());
+                    try(FileWriter fw = new FileWriter("measurements/DisMSSTopK/top"+ k +"/dataset" + dataset + "/instance" +
+                            instance_number + "_100Krecords_3600_300_" + k + "K_start_time_6instances.txt", true);
+                        BufferedWriter bw = new BufferedWriter(fw);
+                        PrintWriter out = new PrintWriter(bw))
+                    {
+                        out.println("Latency window " + key + " : " + start.get());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     return new KeyValue<>(key,value);
                 })
                 .transform(new TransformerSupplier<String,ScoredMovie,KeyValue<Long , ScoredMovie>>() {
                     public Transformer get() {
                         return new DistributedTopKTransformer( "windowed-movies-store",
-                                 "record-count-store", cleanDataStructure );
+                                 "record-count-store", cleanDataStructure, k );
                     }
                 }, "windowed-movies-store", "record-count-store")
                 .to(sortedTopKMovieTopic, Produced.with(Serdes.Long(), scoredMovieAvroSerde(envProps)));
@@ -119,14 +130,26 @@ public class PhysicalWindowDistributedMSS {
             throw new IllegalArgumentException("This program takes one argument: the path to an environment configuration file.");
         }
         String cleanDataStructure = "";
+        int dataset = 0;
+        int instance_number = 0;
+        int k = 0;
+        if(args.length == 4){
+            k = Integer.parseInt(args[1]);
+            dataset = Integer.parseInt(args[2]);
+            instance_number = Integer.parseInt(args[3]);
+        } else if(args.length == 5){
+            k = Integer.parseInt(args[1]);
+            dataset = Integer.parseInt(args[2]);
+            instance_number = Integer.parseInt(args[3]);
+            cleanDataStructure = args[4];
+        }
         if(args.length == 2){
             cleanDataStructure = args[1];
         }
-        System.out.println(cleanDataStructure);
         PhysicalWindowDistributedMSS dmss = new PhysicalWindowDistributedMSS();
         Properties envProps = dmss.loadEnvProperties(args[0]);
         Properties streamProps = dmss.buildStreamsProperties(envProps);
-        Topology topology = dmss.buildTopology(envProps, cleanDataStructure);
+        Topology topology = dmss.buildTopology(envProps, cleanDataStructure, k, dataset, instance_number);
         System.out.println(topology.describe());
 
         dmss.createTopics(envProps);

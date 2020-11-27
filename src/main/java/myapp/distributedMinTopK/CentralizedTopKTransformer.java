@@ -17,7 +17,7 @@ public class CentralizedTopKTransformer implements Transformer<Long, MinTopKEntr
     private final int k;
     private KeyValueStore<Long, ArrayList<MinTopKEntry>> windowedTopKState;
     private ProcessorContext context;
-    private int INSTANCE_NUMBER = 3;
+    private int INSTANCE_NUMBER = 6;
 
     public CentralizedTopKTransformer(int k, String cleanDataStructure) {
         this.cleanDataStructure = cleanDataStructure.equals("clean");

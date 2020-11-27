@@ -4,6 +4,7 @@ import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import myapp.ArrayListSerde;
 import myapp.avro.*;
+import myapp.distributedMinTopK.CentralizedTopKTransformer;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.serialization.Serdes;
@@ -27,12 +28,13 @@ public class PhysicalWindowCentralizedAggregatedSort {
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, envProps.getProperty("bootstrap.servers"));
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.Long().getClass());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
+        props.put(StreamsConfig.STATE_DIR_CONFIG, envProps.getProperty("state.dir"));
         props.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, envProps.getProperty("schema.registry.url"));
 
         return props;
     }
 
-    public Topology buildTopology(Properties envProps, String cleanDataStructure) {
+    public Topology buildTopology(Properties envProps, String cleanDataStructure, int dataset, int k) {
         final StreamsBuilder builder = new StreamsBuilder();
         final String sortedTopKMovieTopic = envProps.getProperty("sorted.movies.topic.name");
         final String topKTopic = envProps.getProperty("final.sorted.movies.topic.name");
@@ -46,25 +48,20 @@ public class PhysicalWindowCentralizedAggregatedSort {
         builder.addStateStore(storeBuilder);
 
         // SortedMovie
-        AtomicReference<Instant> start = new AtomicReference<>();
         AtomicReference<Instant> end = new AtomicReference<>();
         builder.<Long, ScoredMovie>stream(sortedTopKMovieTopic)
-                .map((key, value) ->{
-                    start.set(Instant.now());
-                    return new KeyValue<>(key,value);
-                })
                 .transform(new TransformerSupplier<Long,ScoredMovie,KeyValue<Long , ScoredMovie>>() {
                     public Transformer get() {
-                        return new CentralizedAggregatedSortTransformer(cleanDataStructure);
+                        return new CentralizedAggregatedSortTransformer(cleanDataStructure, k);
                     }
                 }, "windowed-movies-store")
                 .map((key, value) ->{
                     end.set(Instant.now());
-                    try(FileWriter fw = new FileWriter("DisMaterializeSort/500Krecords_1200_300_latency_10ms.txt", true);
+                    try(FileWriter fw = new FileWriter("measurements/DisMSSTopK/top"+ k +"/dataset" + dataset + "/100Krecords_3600_300_" + k + "K_end_time_6instances.txt", true);
                         BufferedWriter bw = new BufferedWriter(fw);
                         PrintWriter out = new PrintWriter(bw))
                     {
-                        out.println("Latency window " + key + " : " + Duration.between(start.get(), end.get()).toNanos());
+                        out.println("Latency window " + key + " : " + end.get());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -123,14 +120,20 @@ public class PhysicalWindowCentralizedAggregatedSort {
         }
 
         String cleanDataStructure = "";
-        if(args.length == 2){
-            cleanDataStructure = args[1];
+        int dataset = 0;
+        int k = 0;
+        if(args.length == 3){
+            k = Integer.parseInt(args[1]);
+            dataset = Integer.parseInt(args[2]);
+        } else if(args.length == 4) {
+            k = Integer.parseInt(args[1]);
+            dataset = Integer.parseInt(args[2]);
+            cleanDataStructure = args[3];
         }
-
         PhysicalWindowCentralizedAggregatedSort centralizedSorting = new PhysicalWindowCentralizedAggregatedSort();
         Properties envProps = centralizedSorting.loadEnvProperties(args[0]);
         Properties streamProps = centralizedSorting.buildStreamsProperties(envProps);
-        Topology topology = centralizedSorting.buildTopology(envProps, cleanDataStructure);
+        Topology topology = centralizedSorting.buildTopology(envProps, cleanDataStructure, dataset, k);
         System.out.println(topology.describe());
 
         centralizedSorting.createTopics(envProps);

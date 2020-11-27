@@ -39,13 +39,13 @@ public class DistributedMinTopK {
         final String scoredMovieTopic = envProps.getProperty("scored.movies.topic.name");
         final String minTopKRatedMovie = envProps.getProperty("mintopk.movies.topic.name");
 
-        // create intermediate-topK-movies store
-        StoreBuilder storeBuilder = Stores.keyValueStoreBuilder(
+        // create super-topK-list store
+        StoreBuilder superTopkStoreBuilder = Stores.keyValueStoreBuilder(
                 Stores.persistentKeyValueStore("super-topk-list-store"),
                 Serdes.Integer(),
                 minTopKEntryAvroSerde(envProps));
         // register store
-        builder.addStateStore(storeBuilder);
+        builder.addStateStore(superTopkStoreBuilder);
 
         // create windows store
         StoreBuilder windowsStoreBuilder = Stores.keyValueStoreBuilder(
@@ -57,13 +57,12 @@ public class DistributedMinTopK {
 
 
         AtomicReference<Instant> start = new AtomicReference<>();
-        AtomicReference<Instant> end = new AtomicReference<>();
         // TopKMovies
         builder.<String,ScoredMovie>stream(scoredMovieTopic)
                 .map((key, value) ->{
                     start.set(Instant.now());
-                    try(FileWriter fw = new FileWriter("DisMinTopK/dataset" + dataset + "/instance" +
-                            instance_number + "_500Krecords_1200_300_" + k + "K_start_time_5ms.txt", true);
+                    try(FileWriter fw = new FileWriter("measurements/DisMinTopK/top"+ k +"/dataset" + dataset + "/instance" +
+                            instance_number + "_100Krecords_3600_300_" + k + "K_start_time_6instances.txt", true);
                         BufferedWriter bw = new BufferedWriter(fw);
                         PrintWriter out = new PrintWriter(bw))
                     {
@@ -78,11 +77,6 @@ public class DistributedMinTopK {
                         return new DistributedMinTopKTransformer(k, cleanDataStructure);
                     }
                 }, "windows-store", "super-topk-list-store")
-                .map((key, value) ->{
-                    if(key % 500 == 0)
-                        System.out.println("key: " + key + " value: " + value);
-                    return new KeyValue<>(key,value);
-                })
                 .to(minTopKRatedMovie, Produced.with(Serdes.Long(),minTopKEntryAvroSerde(envProps)));
 
         return builder.build();
@@ -114,21 +108,18 @@ public class DistributedMinTopK {
         Map<String, Object> config = new HashMap<>();
         config.put("bootstrap.servers", envProps.getProperty("bootstrap.servers"));
         AdminClient client = AdminClient.create(config);
-        Map<String, String> topicConfig = new HashMap<>();
-        topicConfig.put("retention.ms", envProps.getProperty("retention.ms"));
-        topicConfig.put("retention.bytes", envProps.getProperty("retention.bytes"));
 
         List<NewTopic> topics = new ArrayList<>();
 
         topics.add(new NewTopic(
                 envProps.getProperty("scored.movies.topic.name"),
                 Integer.parseInt(envProps.getProperty("scored.movies.topic.partitions")),
-                Short.parseShort(envProps.getProperty("scored.movies.topic.replication.factor"))).configs(topicConfig));
+                Short.parseShort(envProps.getProperty("scored.movies.topic.replication.factor"))));
 
         topics.add(new NewTopic(
                 envProps.getProperty("mintopk.movies.topic.name"),
                 Integer.parseInt(envProps.getProperty("mintopk.movies.topic.partitions")),
-                Short.parseShort(envProps.getProperty("mintopk.movies.topic.replication.factor"))).configs(topicConfig));
+                Short.parseShort(envProps.getProperty("mintopk.movies.topic.replication.factor"))));
 
         client.createTopics(topics);
         client.close();
