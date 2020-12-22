@@ -1,4 +1,4 @@
-# Repository for my Master Thesis 
+# Repository for my Master Thesis at Politecnico di Milano
 ## "A comparative study on parallelization of streaming top-k algorithms in Kafka"
 
 ## How to try it!
