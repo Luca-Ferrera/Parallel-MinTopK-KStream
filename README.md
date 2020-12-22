@@ -1,34 +1,6 @@
-# Master thesis on AquaTopK using Kafka stream
+# Repository for my Master Thesis 
+## "A comparative study on parallelization of streaming top-k algorithms in Kafka"
 
-## Examples of Data
-
-### Movies
-```
-{"id": 294, "title": "Die Hard", "release_year": 1988}
-{"id": 354, "title": "Tree of Life", "release_year": 2011}
-{"id": 782, "title": "A Walk in the Clouds", "release_year": 1995}
-{"id": 128, "title": "The Big Lebowski", "release_year": 1998}
-{"id": 100, "title": "Spiderman", "release_year": 2002}
-{"id": 120, "title": "Pirates of The Caribbean", "release_year": 2003}
-{"id": 140, "title": "La Grande Bellezza", "release_year": 2013}
-```
-
-### Ratings
-```
-{"id": 294, "rating": 8.2}
-{"id": 294, "rating": 8.5}
-{"id": 354, "rating": 9.9}
-{"id": 354, "rating": 9.7}
-{"id": 782, "rating": 7.8}
-{"id": 782, "rating": 7.7}
-{"id": 128, "rating": 8.7}
-{"id": 128, "rating": 8.4}
-{"id": 780, "rating": 2.1}
-{"id": 100, "rating": 6.3}
-{"id": 120, "rating": 7.2}
-{"id": 140, "rating": 4.5}
-{"id": 120, "rating": 8.9}
-```
 ## How to try it!
 
 Run `docker-compose up -d` to build and run the images
@@ -82,7 +54,7 @@ Run `averageLatency.py CentralizedMinTopKN/topKK_latency_5ms.txt` to get average
 
 ---
 
-### Distributed Benchmark
+### Parallel Benchmark
 Load input data running `RatingsDriver` with `pdmss-scored-rated-movies-dataset${DATASET}`, `INPUT_THROUGHPUT` and `DATASET` as arguments.
 
 Then:
@@ -95,7 +67,7 @@ Run both files with `src/main/java/myapp/distributedMaterializeScoreSort/Physica
 
 ---
 
-### Distributed MinTopK
+### Parallel MinTopK
 Run `RatingsDriver` with `dis-mintopk-scored-rated-movies-dataset${DATASET}`, `INPUT_THROUGHPUT` and `DATASET` as arguments.
 
 Then:
@@ -107,8 +79,7 @@ Run `src/main/java/myapp/distributedMinTopK/CentralizedTopK.java ENV_FILE TOPK D
 Run both files with `src/main/java/myapp/distributedMinTopK/disMinTopK.env` as first argument.
 
 ---
-
-### Distributed MinTopK+N
+### WIP: Parallel MinTopK+N
 
 Run 3 instances of `src/main/java/myapp/distributedMinTopKN/DistributedMinTopKN.java ENV_FILE TOPK TOPN DATASET #INSTANCE`.
 
@@ -119,7 +90,7 @@ Run both files with `src/main/java/myapp/distributedMinTopKN/disMinTopKN.env` as
 Run `RatingsDriver` with `dis-mintopkn-scored-rated-movies`, `INPUT_THROUGHPUT` and `DATASET` as arguments.
 
 ---
-#### Distributed measurements
+#### Parallel measurements
 Run `./measurements.sh NUM_INSTANCES DATASET ALGO TOPK` to clean measurent files and compute distributed latency and total_time 
 ALGO parameter can be one betweem `DisMSSTopK` and `DisMinTopK` \
 (For NUM_INSTANCES != 6 need to modify python script `distributedLatency.py`)
